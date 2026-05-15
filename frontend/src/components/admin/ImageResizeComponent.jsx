@@ -1,6 +1,6 @@
-import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
-import { useState, useRef, useEffect } from 'react';
-import { Maximize2, Minimize2, Move, X, Check, Settings } from 'lucide-react';
+import { NodeViewWrapper } from '@tiptap/react';
+import { useState, useRef } from 'react';
+import { Maximize2, Minimize2, X, Check, Settings } from 'lucide-react';
 
 export default function ImageResizeComponent(props) {
   const { node, updateAttributes, editor } = props;

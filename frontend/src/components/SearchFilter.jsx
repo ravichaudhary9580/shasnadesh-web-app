@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const CATEGORIES = ["All", "hindi", "english", "news", "culture", "technology", "lifestyle"];
 const SORT_OPTIONS = [
