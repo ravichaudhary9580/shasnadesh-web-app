@@ -3,10 +3,27 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="theme-color" content="#e8920a" />
     <meta name="description" content="Shasnadesh - A beautiful bilingual Hindi & English blog" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="Shasnadesh" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Shasnadesh" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#e8920a" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    
+    <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="%PUBLIC_URL%/logo192.png" />
+    
+    <!-- Manifest -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
     <!-- Google Fonts -->
@@ -22,5 +39,40 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    
+    <!-- PWA Installation Prompt Script -->
+    <script>
+      // Handle PWA installation
+      let deferredPrompt;
+      
+      window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later
+        deferredPrompt = e;
+        // Update UI to notify the user they can add to home screen
+        console.log('PWA installation available');
+        
+        // You can show an install button here
+        // const installButton = document.createElement('button');
+        // installButton.textContent = 'Install App';
+        // installButton.addEventListener('click', () => {
+        //   deferredPrompt.prompt();
+        //   deferredPrompt.userChoice.then((choiceResult) => {
+        //     if (choiceResult.outcome === 'accepted') {
+        //       console.log('User accepted the install prompt');
+        //     } else {
+        //       console.log('User dismissed the install prompt');
+        //     }
+        //     deferredPrompt = null;
+        //   });
+        // });
+        // document.body.appendChild(installButton);
+      });
+      
+      window.addEventListener('appinstalled', (evt) => {
+        console.log('PWA was installed');
+      });
+    </script>
   </body>
 </html>

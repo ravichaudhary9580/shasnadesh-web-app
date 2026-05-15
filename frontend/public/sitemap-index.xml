@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    
+    <!-- Main sitemap -->
+    <sitemap>
+        <loc>https://shasnadeshupdates.vercel.app/sitemap.xml</loc>
+        <lastmod>2025-01-01</lastmod>
+    </sitemap>
+    
+    <!-- Blog posts sitemap -->
+    <sitemap>
+        <loc>https://shasnadeshupdates.vercel.app/sitemap-blogs.xml</loc>
+        <lastmod>2025-01-01</lastmod>
+    </sitemap>
+    
+</sitemapindex>

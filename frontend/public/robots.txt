@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /login
+
+# Sitemaps
+Sitemap: https://shasnadeshupdates.vercel.app/sitemap-index.xml
+Sitemap: https://shasnadeshupdates.vercel.app/sitemap.xml
+Sitemap: https://shasnadeshupdates.vercel.app/sitemap-blogs.xml

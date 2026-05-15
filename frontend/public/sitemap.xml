@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+    
+    <!-- Home Page -->
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+    
+    <!-- Login Page -->
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/login</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+    
+    <!-- Admin Pages (lower priority) -->
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/admin</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.3</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/admin/blogs</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.3</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/admin/analytics</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.3</priority>
+    </url>
+    
+    <!-- Static Pages -->
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/about</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/contact</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/privacy</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.5</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/terms</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.5</priority>
+    </url>
+    
+    <!-- Category Pages -->
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/?category=government</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/?category=education</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/?category=health</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/?category=finance</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.vercel.app/?category=technology</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <!-- Blog posts will be dynamically generated -->
+    <!-- See sitemap-generator.js for dynamic blog URLs -->
+    
+</urlset>
