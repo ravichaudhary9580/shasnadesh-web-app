@@ -1,6 +1,5 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
@@ -24,7 +23,6 @@ import {
   Code2,
   Link as LinkIcon,
   Image as ImageIcon,
-  Video,
   AlignLeft,
   AlignCenter,
   AlignRight,
@@ -33,7 +31,6 @@ import {
   ListOrdered,
   Quote,
   Minus,
-  Highlighter,
   Type,
   Upload,
   X,
