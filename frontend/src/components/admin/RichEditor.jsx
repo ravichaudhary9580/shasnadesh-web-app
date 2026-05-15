@@ -135,7 +135,7 @@ function TB({ onClick, active, title, children, className = "" }) {
       type="button"
       onMouseDown={(e) => { e.preventDefault(); onClick?.(); }}
       title={title}
-      className={`p-1.5 rounded-md text-sm transition-all select-none ${
+      className={`p-1 sm:p-1.5 rounded-md text-sm transition-all select-none ${
         active
           ? "bg-saffron-100 text-saffron-700"
           : "text-ink-600 hover:bg-ink-100 hover:text-ink-900"
@@ -575,9 +575,9 @@ export default function RichEditor({ content, onChange }) {
         />
       )}
 
-      <div className="border border-ink-200 rounded-xl overflow-hidden bg-white tiptap-editor shadow-sm">
-        {/* ── TOOLBAR (sticky, Google Docs style) ── */}
-        <div className="border-b border-ink-100 bg-white/95 backdrop-blur-sm px-2 py-1.5 flex flex-wrap items-center gap-0.5 sticky top-0 z-20 shadow-sm">
+      <div className="border border-ink-200 rounded-xl bg-white tiptap-editor shadow-sm relative">
+        {/* ── TOOLBAR (sticky within editor container) ── */}
+        <div className="border-b border-ink-100 bg-white/95 backdrop-blur-sm px-1.5 sm:px-2 py-1 flex flex-wrap items-center gap-0.5 sticky top-0 z-10 shadow-sm overflow-x-auto scrollbar-hide">
 
           {/* History */}
           <TB onClick={() => editor.chain().focus().undo().run()} title="Undo (Ctrl+Z)">

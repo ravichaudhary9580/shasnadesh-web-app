@@ -42,15 +42,15 @@ function StatCard({ icon: Icon, label, value, color }) {
   const s = styles[color] || styles.saffron;
 
   return (
-    <div className="card p-6 flex items-start gap-4 group hover:shadow-lg transition-all duration-300">
+    <div className="card p-4 sm:p-6 flex items-start gap-3 sm:gap-4 group hover:shadow-lg transition-all duration-300">
       <div
-        className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${s.bg} ${s.border} ${s.icon} group-hover:scale-110 transition-transform duration-300`}
+        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center border ${s.bg} ${s.border} ${s.icon} group-hover:scale-110 transition-transform duration-300`}
       >
-        <Icon size={22} strokeWidth={1.8} />
+        <Icon size={20} strokeWidth={1.8} />
       </div>
       <div>
-        <p className="font-ui text-sm text-ink-400">{label}</p>
-        <p className="font-display text-3xl font-bold text-ink-900 mt-0.5 tabular-nums">
+        <p className="font-ui text-xs sm:text-sm text-ink-400">{label}</p>
+        <p className="font-display text-2xl sm:text-3xl font-bold text-ink-900 mt-0.5 tabular-nums">
           {value?.toLocaleString() ?? "—"}
         </p>
       </div>
@@ -100,7 +100,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6 max-w-5xl animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 max-w-5xl animate-fade-in px-2 sm:px-0">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-ink-900">Dashboard</h1>
@@ -113,13 +113,13 @@ export default function Dashboard() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="card p-6 h-28 animate-pulse bg-ink-50" />
+            <div key={i} className="card p-4 sm:p-6 h-24 sm:h-28 animate-pulse bg-ink-50" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard icon={Eye} label="Total Visits" value={overview?.totalVisits} color="blue" />
           <StatCard icon={FileText} label="Total Blogs" value={overview?.totalBlogs} color="saffron" />
           <StatCard icon={CheckCircle2} label="Published" value={overview?.published} color="green" />
@@ -159,22 +159,22 @@ export default function Dashboard() {
       </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         {quickActions.map(({ to, icon: Icon, label, desc, color, bg }) => (
           <Link
             key={to}
             to={to}
-            className="card p-5 hover:border-saffron-200 transition-all duration-200 group"
+            className="card p-4 sm:p-5 hover:border-saffron-200 transition-all duration-200 group"
           >
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${bg}`}
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center mb-2 sm:mb-3 transition-colors ${bg}`}
             >
-              <Icon size={20} className={color} strokeWidth={1.8} />
+              <Icon size={18} className={color} strokeWidth={1.8} />
             </div>
-            <p className="font-ui font-semibold text-ink-800 group-hover:text-saffron-600 transition-colors flex items-center gap-1">
+            <p className="font-ui font-semibold text-ink-800 group-hover:text-saffron-600 transition-colors flex items-center gap-1 text-sm sm:text-base">
               {label}
               <ArrowRight
-                size={14}
+                size={12}
                 className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
               />
             </p>

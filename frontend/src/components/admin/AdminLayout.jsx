@@ -161,27 +161,27 @@ export default function AdminLayout() {
         }`}
       >
         {/* Top bar */}
-        <header className="h-14 bg-white border-b border-ink-100 flex items-center px-4 lg:px-6 gap-4">
+        <header className="h-12 sm:h-14 bg-white border-b border-ink-100 flex items-center px-3 sm:px-4 lg:px-6 gap-3 sm:gap-4">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-ink-100 transition-colors text-ink-600"
+            className="lg:hidden p-1.5 sm:p-2 rounded-lg hover:bg-ink-100 transition-colors text-ink-600"
           >
-            <Menu size={20} />
+            <Menu size={18} className="sm:size-20" />
           </button>
           <div className="flex-1" />
           <a
             href="/"
             target="_blank"
             rel="noreferrer"
-            className="font-ui text-sm text-ink-500 hover:text-saffron-600 transition-colors flex items-center gap-1.5"
+            className="font-ui text-xs sm:text-sm text-ink-500 hover:text-saffron-600 transition-colors flex items-center gap-1 sm:gap-1.5"
           >
             View Site
-            <ExternalLink size={14} />
+            <ExternalLink size={12} className="sm:size-14" />
           </a>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6">
+        <main className="flex-1 p-3 sm:p-4 md:p-6">
           <Outlet />
         </main>
       </div>

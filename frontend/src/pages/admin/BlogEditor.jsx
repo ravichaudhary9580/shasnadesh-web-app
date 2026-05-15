@@ -258,11 +258,11 @@ export default function BlogEditor() {
             {isEditing ? "Update your post" : "Write and publish a new post"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setHindiMode(!hindiMode)}
-            className={`px-3 py-2 rounded-lg font-ui text-sm font-medium transition-all ${
+            className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all ${
               hindiMode ? "bg-saffron-100 text-saffron-700" : "bg-ink-100 text-ink-600 hover:bg-ink-200"
             }`}
             title="Toggle Hindi/English mode"
@@ -272,46 +272,46 @@ export default function BlogEditor() {
           <button
             onClick={() => handleSave("draft")}
             disabled={saving}
-            className="btn-ghost border border-ink-200 disabled:opacity-50 gap-2"
+            className="btn-ghost border border-ink-200 disabled:opacity-50 gap-1.5 text-xs sm:text-sm"
           >
-            {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
             Save Draft
           </button>
           <button
             onClick={() => handleSave("published")}
             disabled={saving}
-            className="btn-primary disabled:opacity-50"
+            className="btn-primary disabled:opacity-50 text-xs sm:text-sm"
           >
-            {saving ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
             {isEditing ? "Update" : "Publish"}
           </button>
         </div>
       </div>
 
       {/* Title input */}
-      <div className="card p-4">
+      <div className="card p-3 sm:p-4">
         <input
           type="text"
           placeholder={hindiMode ? "ब्लॉग का शीर्षक यहां लिखें…" : "Blog Title..."}
           value={form.title}
           onChange={(e) => set("title", e.target.value)}
-          className="w-full font-display text-2xl md:text-3xl font-bold text-ink-900 bg-transparent outline-none placeholder:text-ink-200 border-none"
+          className="w-full font-display text-xl sm:text-2xl md:text-3xl font-bold text-ink-900 bg-transparent outline-none placeholder:text-ink-200 border-none"
           lang={hindiMode ? "hi" : "en"}
           style={hindiMode ? { fontFamily: "'Noto Sans Devanagari', 'Poppins', sans-serif" } : {}}
         />
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-ink-100 rounded-xl p-1 w-fit">
+      <div className="flex flex-wrap gap-1 bg-ink-100 rounded-xl p-1 w-full sm:w-fit">
         {TABS.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-ui text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all flex-1 sm:flex-initial ${
               activeTab === id ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-700"
             }`}
           >
-            <Icon size={15} strokeWidth={activeTab === id ? 2.5 : 2} />
+            <Icon size={14} strokeWidth={activeTab === id ? 2.5 : 2} />
             {label}
           </button>
         ))}
