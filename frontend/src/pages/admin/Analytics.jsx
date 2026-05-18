@@ -38,40 +38,40 @@ export default function Analytics() {
 
   const statItems = [
     { label: "Total Visits", value: overview?.totalVisits, icon: "👁" },
-    { label: "Total Blogs", value: overview?.totalBlogs, icon: "📝" },
-    { label: "Published", value: overview?.published, icon: "✅" },
-    { label: "Total Views", value: overview?.totalViews, icon: "📊" },
+    { label: "Total Blogs",  value: overview?.totalBlogs,  icon: "📝" },
+    { label: "Published",    value: overview?.published,   icon: "✅" },
+    { label: "Total Views",  value: overview?.totalViews,  icon: "📊" },
   ];
 
   return (
-    <div className="max-w-5xl space-y-4 sm:space-y-6 animate-fade-in px-2 sm:px-0">
+    <div className="w-full max-w-full space-y-4 sm:space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Analytics</h1>
+        <h1 className="font-display text-xl sm:text-2xl font-bold text-ink-900">Analytics</h1>
         <p className="font-ui text-sm text-ink-400 mt-0.5">Traffic and content performance</p>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      {/* Stats — 2×2 on mobile, 4-in-a-row on md+ */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {statItems.map((s) => (
-          <div key={s.label} className="card p-3 sm:p-4 text-center">
+          <div key={s.label} className="card p-3 sm:p-4 text-center min-w-0">
             <p className="text-xl sm:text-2xl mb-1">{s.icon}</p>
-            <p className="font-display text-xl sm:text-2xl font-bold text-ink-900">
+            <p className="font-display text-xl sm:text-2xl font-bold text-ink-900 tabular-nums">
               {loading ? "—" : (s.value ?? 0).toLocaleString()}
             </p>
-            <p className="font-ui text-xs text-ink-400 mt-0.5">{s.label}</p>
+            <p className="font-ui text-xs text-ink-400 mt-0.5 truncate">{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Charts row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
-        {/* Daily visits — takes 2 cols */}
+      {/* Charts row — stacked on mobile, 3-col on lg */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Daily visits — 2 cols on lg */}
         <div className="lg:col-span-2">
           <ChartCard title="Daily Visits (Last 30 Days)" loading={loading}>
             {daily.length === 0 ? (
-              <p className="font-ui text-sm text-ink-400 text-center py-8 sm:py-12">No data yet</p>
+              <p className="font-ui text-sm text-ink-400 text-center py-10">No data yet</p>
             ) : (
-              <ResponsiveContainer width="100%" height={180} className="text-xs sm:text-sm">
+              <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={daily} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0d5c3" />
                   <XAxis dataKey="date" tick={{ fontFamily: "'DM Sans'", fontSize: 10 }} stroke="#a89070" />
@@ -87,13 +87,19 @@ export default function Analytics() {
         {/* Device split */}
         <ChartCard title="Device Split" loading={loading}>
           {devices.length === 0 ? (
-            <p className="font-ui text-sm text-ink-400 text-center py-8 sm:py-12">No data yet</p>
+            <p className="font-ui text-sm text-ink-400 text-center py-10">No data yet</p>
           ) : (
-            <ResponsiveContainer width="100%" height={180} className="text-xs sm:text-sm">
+            <ResponsiveContainer width="100%" height={180}>
               <PieChart>
-                <Pie data={devices} cx="50%" cy="50%" innerRadius={40} outerRadius={60}
-                  paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false} style={{ fontFamily: "'DM Sans'", fontSize: 10 }}>
+                <Pie
+                  data={devices}
+                  cx="50%" cy="50%"
+                  innerRadius={40} outerRadius={60}
+                  paddingAngle={3} dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
+                  style={{ fontFamily: "'DM Sans'", fontSize: 10 }}
+                >
                   {devices.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip contentStyle={{ fontFamily: "'DM Sans'", fontSize: 11, borderRadius: 6 }} />
@@ -103,19 +109,21 @@ export default function Analytics() {
         </ChartCard>
       </div>
 
-      {/* Popular posts chart */}
+      {/* Most viewed posts */}
       <ChartCard title="Most Viewed Posts" loading={loading}>
         {popular.length === 0 ? (
-          <p className="font-ui text-sm text-ink-400 text-center py-8 sm:py-12">No data yet</p>
+          <p className="font-ui text-sm text-ink-400 text-center py-10">No data yet</p>
         ) : (
-          <ResponsiveContainer width="100%" height={180} className="text-xs sm:text-sm">
+          <ResponsiveContainer width="100%" height={180}>
             <BarChart data={popular} layout="vertical" margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0d5c3" horizontal={false} />
               <XAxis type="number" tick={{ fontFamily: "'DM Sans'", fontSize: 10 }} stroke="#a89070" />
-              <YAxis dataKey="title" type="category" width={120}
+              <YAxis
+                dataKey="title" type="category" width={110}
                 tick={{ fontFamily: "'DM Sans'", fontSize: 10, fill: "#574432" }}
-                tickFormatter={(v) => v.length > 20 ? v.slice(0, 20) + "…" : v}
-                stroke="#a89070" />
+                tickFormatter={(v) => v.length > 18 ? v.slice(0, 18) + "…" : v}
+                stroke="#a89070"
+              />
               <Tooltip contentStyle={{ fontFamily: "'DM Sans'", fontSize: 11, borderRadius: 6 }} />
               <Bar dataKey="views" fill="#e8920a" radius={[0, 4, 4, 0]} />
             </BarChart>
