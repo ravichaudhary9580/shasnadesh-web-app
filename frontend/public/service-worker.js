@@ -1,113 +1,147 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'shasnadesh-v1';
-const urlsToCache = [
+
+const CACHE_NAME = 'shasnadesh-v2';
+const OFFLINE_URL = '/offline.html';
+
+const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/favicon.ico',
   '/offline.html',
-  '/robots.txt'
+  '/logo192.png',
+  '/logo512.png',
+  '/robots.txt',
 ];
 
-// Check if we're in development mode
-const isDevelopment = self.location.hostname.includes('localhost') || 
-                      self.location.hostname.includes('127.0.0.1');
-
-// Install event - cache essential files
+// ── Install ──────────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
-  // Skip caching in development
-  if (isDevelopment) {
-    console.log('Skipping cache in development');
-    return self.skipWaiting();
-  }
-  
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(STATIC_ASSETS))
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate event - clean up old caches
+// ── Activate ─────────────────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches
+      .keys()
+      .then((cacheNames) =>
+        Promise.all(
+          cacheNames
+            .filter((name) => name !== CACHE_NAME)
+            .map((name) => caches.delete(name))
+        )
+      )
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch event - network-first strategy for development, cache-first for production
+// ── Fetch ─────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
+  // Only handle GET requests
   if (event.request.method !== 'GET') return;
-  
-  // Skip chrome-extension requests
-  if (event.request.url.includes('chrome-extension')) return;
-  
-  // Skip webpack dev server requests in development
-  if (event.request.url.includes('localhost') || event.request.url.includes('127.0.0.1')) {
+
+  // Skip chrome-extension and non-http requests
+  if (!event.request.url.startsWith('http')) return;
+
+  const url = new URL(event.request.url);
+
+  // ── 1. API requests → always network, never cache ──────────────────────────
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(event.request).catch(
+        () => new Response(JSON.stringify({ error: 'You are offline' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+    );
     return;
   }
-  
-  // For API requests, always go to network
-  if (event.request.url.includes('/api/')) {
-    event.respondWith(fetch(event.request));
+
+  // ── 2. Google Fonts → cache-first ─────────────────────────────────────────
+  if (
+    url.hostname === 'fonts.googleapis.com' ||
+    url.hostname === 'fonts.gstatic.com'
+  ) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) =>
+        cache.match(event.request).then(
+          (cached) =>
+            cached ||
+            fetch(event.request).then((response) => {
+              cache.put(event.request, response.clone());
+              return response;
+            })
+        )
+      )
+    );
     return;
   }
-  
+
+  // ── 3. S3 images → cache-first, long lived ────────────────────────────────
+  if (url.hostname.includes('amazonaws.com')) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) =>
+        cache.match(event.request).then(
+          (cached) =>
+            cached ||
+            fetch(event.request).then((response) => {
+              if (response.ok) cache.put(event.request, response.clone());
+              return response;
+            })
+        )
+      )
+    );
+    return;
+  }
+
+  // ── 4. Navigation requests (HTML pages) → network-first ───────────────────
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Cache successful navigation responses
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) =>
+              cache.put(event.request, clone)
+            );
+          }
+          return response;
+        })
+        .catch(() =>
+          caches
+            .match(event.request)
+            .then((cached) => cached || caches.match(OFFLINE_URL))
+        )
+    );
+    return;
+  }
+
+  // ── 5. Static assets (JS, CSS, images) → network-first, fallback cache ────
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        // For development, always fetch from network
-        const networkFetch = fetch(event.request)
-          .then((response) => {
-            // Don't cache in development
-            if (!event.request.url.includes('localhost') && !event.request.url.includes('127.0.0.1')) {
-              // Check if we received a valid response
-              if (response && response.status === 200 && response.type === 'basic') {
-                // Clone the response
-                const responseToCache = response.clone();
-                
-                // Cache the new response
-                caches.open(CACHE_NAME)
-                  .then((cache) => {
-                    cache.put(event.request, responseToCache);
-                  });
-              }
-            }
-            return response;
-          })
-          .catch(() => {
-            // If network fails and we have a cached response, use it
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            
-            // If both cache and network fail, return offline page for navigation requests
-            if (event.request.mode === 'navigate') {
-              return caches.match('/offline.html');
-            }
-            
-            // For other requests, return error
-            return new Response('Network error happened', {
-              status: 408,
-              headers: { 'Content-Type': 'text/plain' },
-            });
-          });
-        
-        // Return cached response immediately if available, otherwise wait for network
-        return cachedResponse || networkFetch;
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) =>
+            cache.put(event.request, clone)
+          );
+        }
+        return response;
       })
+      .catch(
+        () =>
+          caches.match(event.request) ||
+          new Response('Asset not available offline', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' },
+          })
+      )
   );
 });

@@ -25,8 +25,8 @@ const navItems = [
 export default function AdminLayout() {
   const { admin, logoutAdmin } = useAuth();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile
-  const [collapsed, setCollapsed] = useState(false); // desktop
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = () => {
     logoutAdmin();
@@ -83,13 +83,8 @@ export default function AdminLayout() {
           >
             {({ isActive }) => (
               <>
-                <Icon
-                  size={18}
-                  strokeWidth={isActive ? 2.5 : 2}
-                  className="flex-shrink-0"
-                />
+                <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className="flex-shrink-0" />
                 {(!collapsed || isMobile) && <span>{label}</span>}
-                {/* Tooltip when collapsed */}
                 {collapsed && !isMobile && (
                   <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-ink-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
                     {label}
@@ -136,7 +131,9 @@ export default function AdminLayout() {
   const sidebarWidth = collapsed ? "w-[68px]" : "w-64";
 
   return (
-    <div className="min-h-screen bg-ink-100 flex">
+    // ── FIX 1: overflow-x-hidden on root prevents any child from causing page-level scroll
+    <div className="min-h-screen bg-ink-100 flex overflow-x-hidden">
+
       {/* Desktop sidebar */}
       <aside
         className={`hidden lg:flex ${sidebarWidth} bg-ink-950 flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 overflow-hidden`}
@@ -154,9 +151,9 @@ export default function AdminLayout() {
         </div>
       )}
 
-      {/* Main content */}
+      {/* ── FIX 2: min-w-0 + w-full ensures this column never exceeds viewport */}
       <div
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
+        className={`flex-1 flex flex-col min-h-screen min-w-0 w-full transition-all duration-300 ${
           collapsed ? "lg:ml-[68px]" : "lg:ml-64"
         }`}
       >
@@ -166,7 +163,7 @@ export default function AdminLayout() {
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-1.5 sm:p-2 rounded-lg hover:bg-ink-100 transition-colors text-ink-600"
           >
-            <Menu size={18} className="sm:size-20" />
+            <Menu size={20} />
           </button>
           <div className="flex-1" />
           <a
@@ -176,12 +173,12 @@ export default function AdminLayout() {
             className="font-ui text-xs sm:text-sm text-ink-500 hover:text-saffron-600 transition-colors flex items-center gap-1 sm:gap-1.5"
           >
             View Site
-            <ExternalLink size={12} className="sm:size-14" />
+            <ExternalLink size={13} />
           </a>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 p-3 sm:p-4 md:p-6">
+        {/* ── FIX 3: overflow-x-hidden + w-full on main so page content can't overflow */}
+        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden w-full">
           <Outlet />
         </main>
       </div>
