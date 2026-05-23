@@ -23,6 +23,9 @@
     color: #26201a;
   }
 
+  /* Visited links — site-wide: muted grey, clearly read but de-emphasised */
+  a:visited { color: #8a7055; }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: #f2ede4; }
@@ -55,6 +58,15 @@
     @apply inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-ui font-medium;
   }
 
+  /* Blog card — title fades to muted ink after visiting */
+  .blog-card-link:visited .blog-card-title {
+    color: #a89070; /* ink-400 — lighter than default ink-900, clearly read */
+  }
+  /* Featured card title on visited — slightly lighter for dark overlay */
+  .blog-card-link:visited .blog-card-title-featured {
+    color: #c8b99a; /* ink-300 — readable against the dark gradient */
+  }
+
   .prose-blog {
     @apply font-body text-ink-800 leading-relaxed;
   }
@@ -71,6 +83,7 @@
   .prose-blog ul { @apply list-disc list-inside mb-4 space-y-1; }
   .prose-blog ol { @apply list-decimal list-inside mb-4 space-y-1; }
   .prose-blog a { @apply text-saffron-600 underline underline-offset-2 hover:text-saffron-500; }
+  .prose-blog a:visited { color: #8a7055; }
   .prose-blog blockquote {
     @apply border-l-4 border-saffron-400 pl-4 italic text-ink-600 my-6;
   }
