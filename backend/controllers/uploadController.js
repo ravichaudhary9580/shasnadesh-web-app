@@ -1,5 +1,5 @@
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('crypto')
 const path = require('path')
 
 const s3 = new S3Client({
@@ -15,7 +15,7 @@ exports.uploadFile = async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' })
 
     const ext = path.extname(req.file.originalname)
-    const key = `uploads/${uuidv4()}${ext}`
+    const key = `uploads/${randomUUID()}${ext}`
 
     await s3.send(new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
