@@ -268,9 +268,29 @@ export default function Home() {
       <footer className="border-t border-ink-100 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-center">
-            <div className="text-center">
+            <div className="text-center space-y-1">
               <p className="font-hindi text-ink-400 text-sm">सत्यमेव जयते · Satyameva Jayate</p>
-              <p className="font-ui text-xs text-ink-300 mt-1">© 2025 Shasnadesh</p>
+              <p className="font-ui text-xs text-ink-300">© 2025 Shasnadesh</p>
+              <p className="font-ui text-xs text-ink-300">
+                Designed by{" "}
+                <a 
+                  href="https://bharatwebservices.live/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-saffron-500 font-medium hover:text-saffron-600 transition-colors"
+                >
+                  dev
+                </a>
+                .
+                <a 
+                  href="https://ravichaudhary9580.github.io/Portfolio-New/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-saffron-500 font-medium hover:text-saffron-600 transition-colors"
+                >
+                  ravi
+                </a>
+              </p>
             </div>
           </div>
         </div>

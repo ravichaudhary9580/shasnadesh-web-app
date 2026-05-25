@@ -1,6 +1,5 @@
-import { useState } from "react";
-
-const CATEGORIES = ["All", "hindi", "english", "news", "culture", "technology", "lifestyle"];
+import { useState, useEffect } from "react";
+import { getCategories } from "../services/api";
 
 export default function SearchFilter({
   onSearch,
@@ -8,10 +7,17 @@ export default function SearchFilter({
   initialCategory = "All",
   hideSearch = false,
 }) {
-  const [search,         setSearch]         = useState("");
+  const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState(initialCategory);
+  const [categories, setCategories] = useState(["All"]);
 
-  const handleSearch   = (e) => { setSearch(e.target.value); onSearch?.(e.target.value); };
+  useEffect(() => {
+    getCategories()
+      .then(({ data }) => setCategories(["All", ...data]))
+      .catch(() => setCategories(["All", "hindi", "english", "news", "culture", "technology", "lifestyle", "opinion"]));
+  }, []);
+
+  const handleSearch = (e) => { setSearch(e.target.value); onSearch?.(e.target.value); };
   const handleCategory = (cat) => { setActiveCategory(cat); onCategory?.(cat === "All" ? "" : cat); };
 
   return (
@@ -34,7 +40,7 @@ export default function SearchFilter({
       {/* Category pills — horizontal scroll on mobile, wrap on desktop */}
       <div className="overflow-x-auto scrollbar-hide">
         <div className="flex items-center gap-2 w-max sm:w-auto sm:flex-wrap">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => handleCategory(cat)}
@@ -44,7 +50,7 @@ export default function SearchFilter({
                   : "bg-ink-100 text-ink-600 hover:bg-ink-200"
               }`}
             >
-              {cat === "hindi" ? "हिंदी" : cat === "All" ? "All" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+              {cat === "hindi" ? "हिंदी" : cat === "english" ? "English" : cat === "All" ? "All" : cat.charAt(0).toUpperCase() + cat.slice(1)}
             </button>
           ))}
         </div>

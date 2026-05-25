@@ -30,6 +30,7 @@ export const getMe = () => api.get("/auth/me");
 // --- Public Blogs ---
 export const getBlogs = (params) => api.get("/blogs", { params });
 export const getBlog = (slug) => api.get(`/blogs/${slug}`);
+export const getCategories = () => api.get("/blogs/categories/list");
 
 // --- Admin Blogs ---
 export const adminGetBlogs = (params) => api.get("/admin/blogs", { params });

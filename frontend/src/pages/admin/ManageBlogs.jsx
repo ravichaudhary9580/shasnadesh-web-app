@@ -1,16 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { adminGetBlogs, deleteBlog, toggleStatus } from "../../services/api";
+import { adminGetBlogs, deleteBlog, toggleStatus, getCategories } from "../../services/api";
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 
-const CATEGORIES = ["hindi", "english", "news", "culture", "technology", "lifestyle"];
+const CATEGORIES = ["hindi", "english", "news", "culture", "technology", "lifestyle", "opinion"];
 
 export default function ManageBlogs() {
   const [blogs, setBlogs] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [categories, setCategories] = useState(CATEGORIES);
   const limit = 15;
 
   const [page, setPage] = useState(() => {
@@ -36,6 +37,12 @@ export default function ManageBlogs() {
   }, [search, statusFilter, categoryFilter, page]);
 
   useEffect(() => { fetchBlogs(); }, [fetchBlogs]);
+
+  useEffect(() => {
+    getCategories()
+      .then(({ data }) => setCategories(data))
+      .catch(() => setCategories(CATEGORIES));
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -102,7 +109,7 @@ export default function ManageBlogs() {
           className="input text-sm w-full sm:w-36 flex-shrink-0"
         >
           <option value="">All Categories</option>
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <option key={cat} value={cat}>
               {cat === "hindi" ? "हिंदी" : cat.charAt(0).toUpperCase() + cat.slice(1)}
             </option>

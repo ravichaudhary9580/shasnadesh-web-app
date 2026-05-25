@@ -129,14 +129,25 @@ exports.toggleStatus = async (req, res) => {
 // Admin - get all including drafts
 exports.adminGetBlogs = async (req, res) => {
   try {
-    const { search, status, sort = '-createdAt', page = 1, limit = 20 } = req.query
+    const { search, status, category, sort = '-createdAt', page = 1, limit = 20 } = req.query
     const query = {}
     if (search) query.title = { $regex: search, $options: 'i' }
     if (status) query.status = status
+    if (category) query.category = category
     const total = await Blog.countDocuments(query)
     const blogs = await Blog.find(query).sort(sort)
       .skip((page - 1) * limit).limit(Number(limit))
     res.json({ blogs, total })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// Get all unique categories
+exports.getCategories = async (req, res) => {
+  try {
+    const categories = await Blog.distinct('category', { status: 'published', category: { $ne: null, $ne: '' } })
+    res.json(categories.sort())
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

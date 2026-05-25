@@ -342,15 +342,32 @@ export default function BlogEditor() {
       {activeTab === "meta" && (
         <div className="card p-6 space-y-5 animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Field label="Category">
-              <select value={form.category} onChange={(e) => set("category", e.target.value)} className="input">
-                <option value="">Select category</option>
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c.charAt(0).toUpperCase() + c.slice(1)}
-                  </option>
-                ))}
-              </select>
+            <Field label="Category" hint="Select from list or type custom category">
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={form.category}
+                  onChange={(e) => set("category", e.target.value)}
+                  placeholder="Type custom category or select below"
+                  className="input"
+                />
+                <div className="flex flex-wrap gap-1.5">
+                  {CATEGORIES.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => set("category", c)}
+                      className={`px-2.5 py-1 rounded-lg font-ui text-xs font-medium transition-all ${
+                        form.category === c
+                          ? "bg-saffron-500 text-white shadow-sm"
+                          : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+                      }`}
+                    >
+                      {c === "hindi" ? "हिंदी" : c.charAt(0).toUpperCase() + c.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </Field>
             <Field label="Status">
               <select value={form.status} onChange={(e) => set("status", e.target.value)} className="input">
