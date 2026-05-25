@@ -74,7 +74,7 @@ export default function Navbar({ onSearch }) {
 
           {/* Site name */}
           <span className="flex-1 font-display text-base sm:text-lg font-bold text-ink-900 leading-none truncate">
-            Shasnadesh.com
+            Shasnadeshupdates.com
           </span>
 
           {/* Desktop search — no X button */}
@@ -145,7 +145,7 @@ export default function Navbar({ onSearch }) {
                 <span className="w-8 h-8 rounded-full bg-saffron-500 flex items-center justify-center text-white font-display font-bold text-sm">
                   श
                 </span>
-                <span className="font-display text-base font-bold text-ink-900">Shasnadesh</span>
+                <span className="font-display text-base font-bold text-ink-900">Shasnadeshupdates.com</span>
               </div>
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -163,7 +163,7 @@ export default function Navbar({ onSearch }) {
                   key={idx}
                   to={item.to}
                   onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 font-hindi text-sm text-ink-700 hover:bg-saffron-50 hover:text-saffron-700 border-b border-ink-50 last:border-0 transition-colors"
+                  className="flex items-center gap-3 px-5 py-3.5 font-hindi text-sm text-ink-700 hover:bg-saffron-300 hover:text-black border-b border-ink-50 last:border-0 transition-colors"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-saffron-400 flex-shrink-0" />
                   {item.label}

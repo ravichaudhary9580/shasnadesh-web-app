@@ -13,7 +13,13 @@ exports.getBlogs = async (req, res) => {
     } = req.query
 
     const query = { status }
-    if (search) query.title = { $regex: search, $options: 'i' }
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { excerpt: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+      ]
+    }
     if (category) query.category = category
     if (tag) query.tags = tag
     
