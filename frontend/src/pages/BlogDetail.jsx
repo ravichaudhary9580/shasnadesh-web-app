@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { getBlog, trackVisit } from "../services/api";
 import Navbar from "../components/Navbar";
 import { formatDistanceToNow } from "date-fns";
@@ -66,6 +66,7 @@ function PdfViewer({ pdf }) {
 export default function BlogDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [shared, setShared] = useState(false);
@@ -251,28 +252,23 @@ export default function BlogDetail() {
 
         {/* Back */}
         <div className="mt-14 pt-8 border-t border-ink-100">
-          <Link to="/" className="btn-ghost">← Back to all posts</Link>
+          <button
+            onClick={() => navigate(location.state?.from || "/")}
+            className="btn-ghost"
+          >
+            ← Back to all posts
+          </button>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-ink-100 py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-center md:text-left">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
               <p className="font-hindi text-ink-400 text-sm">सत्यमेव जयते · Satyameva Jayate</p>
               <p className="font-ui text-xs text-ink-300 mt-1">© 2025 Shasnadesh</p>
             </div>
-            <a
-              href="/login"
-              className="font-ui text-xs text-ink-400 hover:text-saffron-600 transition-colors flex items-center gap-1"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              Admin Login
-            </a>
           </div>
         </div>
       </footer>

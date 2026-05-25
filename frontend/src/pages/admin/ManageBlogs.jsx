@@ -1,22 +1,31 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { adminGetBlogs, deleteBlog, toggleStatus } from "../../services/api";
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
+
+const CATEGORIES = ["hindi", "english", "news", "culture", "technology", "lifestyle"];
 
 export default function ManageBlogs() {
   const [blogs, setBlogs] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
   const limit = 15;
+
+  const [page, setPage] = useState(() => {
+    const p = parseInt(searchParams.get("page")) || 1;
+    return p > 0 ? p : 1;
+  });
+
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
+  const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "");
 
   const fetchBlogs = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await adminGetBlogs({ search, status: statusFilter, page, limit });
+      const { data } = await adminGetBlogs({ search, status: statusFilter, category: categoryFilter, page, limit });
       setBlogs(data.blogs);
       setTotal(data.total);
     } catch {
@@ -24,9 +33,18 @@ export default function ManageBlogs() {
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter, page]);
+  }, [search, statusFilter, categoryFilter, page]);
 
   useEffect(() => { fetchBlogs(); }, [fetchBlogs]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (statusFilter) params.set("status", statusFilter);
+    if (categoryFilter) params.set("category", categoryFilter);
+    if (page > 1) params.set("page", page);
+    setSearchParams(params, { replace: true });
+  }, [search, statusFilter, categoryFilter, page, setSearchParams]);
 
   const handleDelete = async (id, title) => {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
@@ -77,7 +95,20 @@ export default function ManageBlogs() {
             className="input pl-9 text-sm w-full"
           />
         </div>
-        {/* Status filter — fixed width on mobile too */}
+        {/* Category filter */}
+        <select
+          value={categoryFilter}
+          onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
+          className="input text-sm w-full sm:w-36 flex-shrink-0"
+        >
+          <option value="">All Categories</option>
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat === "hindi" ? "हिंदी" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </option>
+          ))}
+        </select>
+        {/* Status filter */}
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
@@ -186,24 +217,95 @@ export default function ManageBlogs() {
 
       {/* Pagination */}
       {pages > 1 && (
-        <div className="flex justify-center items-center gap-2 flex-wrap">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="btn-ghost disabled:opacity-40 text-sm"
-          >
-            ← Prev
-          </button>
-          <span className="font-ui text-sm text-ink-500">
-            Page {page} of {pages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(pages, p + 1))}
-            disabled={page === pages}
-            className="btn-ghost disabled:opacity-40 text-sm"
-          >
-            Next →
-          </button>
+        <div className="mt-8 space-y-4">
+          <div className="flex justify-center items-center gap-1.5 flex-wrap">
+            {/* Prev */}
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-2 rounded-lg font-ui text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            >
+              ←
+            </button>
+
+            {/* Page numbers with ellipsis */}
+            {(() => {
+              const buttons = [];
+              const delta = 1;
+              const range = [];
+
+              for (let i = 1; i <= pages; i++) {
+                if (
+                  i === 1 ||
+                  i === pages ||
+                  (i >= page - delta && i <= page + delta)
+                ) {
+                  range.push(i);
+                }
+              }
+
+              let prev = null;
+              range.forEach((i) => {
+                if (prev && i - prev > 1) {
+                  buttons.push(
+                    <span key={`ellipsis-${i}`} className="w-9 h-9 flex items-center justify-center font-ui text-sm text-ink-400">
+                      …
+                    </span>
+                  );
+                }
+                buttons.push(
+                  <button
+                    key={i}
+                    onClick={() => setPage(i)}
+                    className={`w-9 h-9 rounded-lg font-ui text-sm font-medium transition-all ${
+                      page === i
+                        ? "bg-saffron-500 text-white shadow-sm"
+                        : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+                    }`}
+                  >
+                    {i}
+                  </button>
+                );
+                prev = i;
+              });
+
+              return buttons;
+            })()}
+
+            {/* Next */}
+            <button
+              onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              disabled={page === pages}
+              className="px-3 py-2 rounded-lg font-ui text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            >
+              →
+            </button>
+          </div>
+
+          {/* Go to page input */}
+          <div className="flex justify-center items-center gap-2">
+            <label htmlFor="goto-page" className="font-ui text-sm text-ink-500">
+              Go to page:
+            </label>
+            <input
+              id="goto-page"
+              type="number"
+              min="1"
+              max={pages}
+              placeholder={page}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const val = parseInt(e.target.value);
+                  if (val >= 1 && val <= pages) {
+                    setPage(val);
+                    e.target.value = '';
+                  }
+                }
+              }}
+              className="w-16 px-2 py-1.5 text-sm text-center border border-ink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent"
+            />
+            <span className="font-ui text-xs text-ink-400">of {pages}</span>
+          </div>
         </div>
       )}
     </div>

@@ -10,7 +10,8 @@ import Highlight from "@tiptap/extension-highlight";
 import Youtube from "@tiptap/extension-youtube";
 import { uploadFile } from "../../services/api";
 import toast from "react-hot-toast";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ImageResize } from "./ImageResizeExtension";
 import {
   Undo2,
@@ -102,29 +103,70 @@ function isImageUrl(url) {
   return /\.(jpg|jpeg|png|gif|webp|svg|avif)(\?|$)/i.test(url);
 }
 
-/* ─── Dropdown wrapper ─────────────────────────────────────────────── */
+/* ─── Dropdown wrapper with Portal ─────────────────────────────────── */
 function ToolbarDropdown({ trigger, children, width = "w-44" }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const triggerRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
 
-  useCallback(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [])();
+  useEffect(() => {
+    if (open && triggerRef.current) {
+      const updatePosition = () => {
+        const rect = triggerRef.current.getBoundingClientRect();
+        setPosition({
+          top: rect.bottom + 4,
+          left: rect.left
+        });
+      };
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [open]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        triggerRef.current && !triggerRef.current.contains(e.target) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [open]);
 
   return (
-    <div ref={ref} className="relative">
-      <div onClick={() => setOpen((v) => !v)}>{trigger}</div>
-      {open && (
+    <>
+      <div ref={triggerRef} onClick={() => setOpen((v) => !v)}>
+        {trigger}
+      </div>
+      {open && createPortal(
         <div
-          className={`absolute top-full left-0 mt-1 ${width} bg-white border border-ink-100 rounded-xl shadow-xl z-50 overflow-hidden py-1`}
+          ref={dropdownRef}
+          className={`${width} bg-white border border-ink-100 rounded-xl shadow-xl overflow-hidden py-1 max-h-[300px] overflow-y-auto`}
+          style={{
+            position: 'fixed',
+            top: `${position.top}px`,
+            left: `${position.left}px`,
+            zIndex: 9999
+          }}
           onClick={() => setOpen(false)}
         >
           {children}
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 }
 

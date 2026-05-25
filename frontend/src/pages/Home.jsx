@@ -24,16 +24,20 @@ const YEAR_OPTIONS = getYearOptions();
 export default function Home() {
   const [blogs,   setBlogs]   = useState([]);
   const [total,   setTotal]   = useState(0);
-  const [page,    setPage]    = useState(1);
   const [pages,   setPages]   = useState(1);
   const [loading, setLoading] = useState(true);
-  const [searchParams]        = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [page, setPage] = useState(() => {
+    const p = parseInt(searchParams.get("page")) || 1;
+    return p > 0 ? p : 1;
+  });
 
   const [filters, setFilters] = useState({
     search:   searchParams.get("search")   || "",
     category: searchParams.get("category") || "",
-    sort:     "-createdAt",
-    year:     "",
+    sort:     searchParams.get("sort")     || "-createdAt",
+    year:     searchParams.get("year")     || "",
   });
 
   const fetchBlogs = useCallback(async (f, p) => {
@@ -51,6 +55,16 @@ export default function Home() {
   }, []);
 
   useEffect(() => { fetchBlogs(filters, page); }, [filters, page, fetchBlogs]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.search) params.set("search", filters.search);
+    if (filters.category) params.set("category", filters.category);
+    if (filters.sort !== "-createdAt") params.set("sort", filters.sort);
+    if (filters.year) params.set("year", filters.year);
+    if (page > 1) params.set("page", page);
+    setSearchParams(params, { replace: true });
+  }, [filters, page, setSearchParams]);
 
   const updateFilter = (key, val) => {
     setPage(1);
@@ -155,34 +169,95 @@ export default function Home() {
 
             {/* Pagination */}
             {pages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-12 flex-wrap">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="btn-ghost disabled:opacity-40"
-                >
-                  ← Prev
-                </button>
-                {[...Array(pages)].map((_, i) => (
+              <div className="mt-12 space-y-4">
+                <div className="flex justify-center items-center gap-1.5 flex-wrap">
+                  {/* Prev */}
                   <button
-                    key={i}
-                    onClick={() => setPage(i + 1)}
-                    className={`w-9 h-9 rounded-lg font-ui text-sm font-medium transition-all ${
-                      page === i + 1
-                        ? "bg-saffron-500 text-white"
-                        : "bg-ink-100 text-ink-600 hover:bg-ink-200"
-                    }`}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-3 py-2 rounded-lg font-ui text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
-                    {i + 1}
+                    ←
                   </button>
-                ))}
-                <button
-                  onClick={() => setPage((p) => Math.min(pages, p + 1))}
-                  disabled={page === pages}
-                  className="btn-ghost disabled:opacity-40"
-                >
-                  Next →
-                </button>
+
+                  {/* Page numbers with ellipsis */}
+                  {(() => {
+                    const buttons = [];
+                    const delta = 1; // pages around current
+                    const range = [];
+
+                    for (let i = 1; i <= pages; i++) {
+                      if (
+                        i === 1 ||
+                        i === pages ||
+                        (i >= page - delta && i <= page + delta)
+                      ) {
+                        range.push(i);
+                      }
+                    }
+
+                    let prev = null;
+                    range.forEach((i) => {
+                      if (prev && i - prev > 1) {
+                        buttons.push(
+                          <span key={`ellipsis-${i}`} className="w-9 h-9 flex items-center justify-center font-ui text-sm text-ink-400">
+                            …
+                          </span>
+                        );
+                      }
+                      buttons.push(
+                        <button
+                          key={i}
+                          onClick={() => setPage(i)}
+                          className={`w-9 h-9 rounded-lg font-ui text-sm font-medium transition-all ${
+                            page === i
+                              ? "bg-saffron-500 text-white shadow-sm"
+                              : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+                          }`}
+                        >
+                          {i}
+                        </button>
+                      );
+                      prev = i;
+                    });
+
+                    return buttons;
+                  })()}
+
+                  {/* Next */}
+                  <button
+                    onClick={() => setPage((p) => Math.min(pages, p + 1))}
+                    disabled={page === pages}
+                    className="px-3 py-2 rounded-lg font-ui text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  >
+                    →
+                  </button>
+                </div>
+
+                {/* Go to page input */}
+                <div className="flex justify-center items-center gap-2">
+                  <label htmlFor="goto-page" className="font-ui text-sm text-ink-500">
+                    Go to page:
+                  </label>
+                  <input
+                    id="goto-page"
+                    type="number"
+                    min="1"
+                    max={pages}
+                    placeholder={page}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const val = parseInt(e.target.value);
+                        if (val >= 1 && val <= pages) {
+                          setPage(val);
+                          e.target.value = '';
+                        }
+                      }
+                    }}
+                    className="w-16 px-2 py-1.5 text-sm text-center border border-ink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent"
+                  />
+                  <span className="font-ui text-xs text-ink-400">of {pages}</span>
+                </div>
               </div>
             )}
           </>
@@ -192,21 +267,11 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-ink-100 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-center md:text-left">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
               <p className="font-hindi text-ink-400 text-sm">सत्यमेव जयते · Satyameva Jayate</p>
               <p className="font-ui text-xs text-ink-300 mt-1">© 2025 Shasnadesh</p>
             </div>
-            <a
-              href="/login"
-              className="font-ui text-xs text-ink-400 hover:text-saffron-600 transition-colors flex items-center gap-1"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              Admin Login
-            </a>
           </div>
         </div>
       </footer>

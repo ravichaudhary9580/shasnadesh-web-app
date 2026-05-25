@@ -1,15 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "../utils/imageUtils";
 
 export default function BlogCard({ blog, featured = false }) {
   const timeAgo = formatDistanceToNow(new Date(blog.createdAt), { addSuffix: true });
+  const location = useLocation();
 
   if (featured) {
     return (
       // blog-card-link → lets CSS target :visited children
       <Link
         to={`/blog/${blog.slug}`}
+        state={{ from: location.pathname + location.search }}
         className="blog-card-link group block relative overflow-hidden rounded-3xl aspect-[21/9] max-h-[350px] bg-ink-200"
       >
         {blog.thumbnail ? (
@@ -52,6 +54,7 @@ export default function BlogCard({ blog, featured = false }) {
     // blog-card-link → lets CSS target :visited children
     <Link
       to={`/blog/${blog.slug}`}
+      state={{ from: location.pathname + location.search }}
       className="blog-card-link group card flex flex-col overflow-hidden"
     >
       {/* Thumbnail */}
