@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { adminGetBlogs, deleteBlog, toggleStatus, getCategories } from "../../services/api";
 import { formatDistanceToNow } from "date-fns";
@@ -12,6 +12,7 @@ export default function ManageBlogs() {
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState(CATEGORIES);
+  const lastPageBeforeSearch = useRef(1);
   const limit = 15;
 
   const [page, setPage] = useState(() => {
@@ -98,7 +99,20 @@ export default function ManageBlogs() {
             type="text"
             placeholder="Search blogs..."
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val && !search) {
+                // Starting a search - save current page
+                lastPageBeforeSearch.current = page;
+              } else if (!val && search) {
+                // Clearing search - restore previous page
+                setPage(lastPageBeforeSearch.current);
+                setSearch(val);
+                return;
+              }
+              setSearch(val);
+              setPage(1);
+            }}
             className="input pl-9 text-sm w-full"
           />
         </div>
@@ -225,12 +239,12 @@ export default function ManageBlogs() {
       {/* Pagination */}
       {pages > 1 && (
         <div className="mt-8 space-y-4">
-          <div className="flex justify-center items-center gap-1.5 flex-wrap">
+          <div className="flex justify-center items-center gap-1 flex-wrap">
             {/* Prev */}
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-2 rounded-lg font-ui text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="px-2 py-1.5 rounded-lg font-ui text-xs font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               ←
             </button>
@@ -255,7 +269,7 @@ export default function ManageBlogs() {
               range.forEach((i) => {
                 if (prev && i - prev > 1) {
                   buttons.push(
-                    <span key={`ellipsis-${i}`} className="w-9 h-9 flex items-center justify-center font-ui text-sm text-ink-400">
+                    <span key={`ellipsis-${i}`} className="w-7 h-7 flex items-center justify-center font-ui text-xs text-ink-400">
                       …
                     </span>
                   );
@@ -264,7 +278,7 @@ export default function ManageBlogs() {
                   <button
                     key={i}
                     onClick={() => setPage(i)}
-                    className={`w-9 h-9 rounded-lg font-ui text-sm font-medium transition-all ${
+                    className={`w-7 h-7 rounded-lg font-ui text-xs font-medium transition-all ${
                       page === i
                         ? "bg-saffron-500 text-white shadow-sm"
                         : "bg-ink-100 text-ink-600 hover:bg-ink-200"
@@ -283,7 +297,7 @@ export default function ManageBlogs() {
             <button
               onClick={() => setPage((p) => Math.min(pages, p + 1))}
               disabled={page === pages}
-              className="px-3 py-2 rounded-lg font-ui text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="px-2 py-1.5 rounded-lg font-ui text-xs font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               →
             </button>
@@ -291,7 +305,7 @@ export default function ManageBlogs() {
 
           {/* Go to page input */}
           <div className="flex justify-center items-center gap-2">
-            <label htmlFor="goto-page" className="font-ui text-sm text-ink-500">
+            <label htmlFor="goto-page" className="font-ui text-xs text-ink-500">
               Go to page:
             </label>
             <input
@@ -309,7 +323,7 @@ export default function ManageBlogs() {
                   }
                 }
               }}
-              className="w-16 px-2 py-1.5 text-sm text-center border border-ink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent"
+              className="w-14 px-2 py-1 text-xs text-center border border-ink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent"
             />
             <span className="font-ui text-xs text-ink-400">of {pages}</span>
           </div>

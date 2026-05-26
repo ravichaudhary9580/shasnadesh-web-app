@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BlogCard from "../components/BlogCard";
@@ -27,6 +27,7 @@ export default function Home() {
   const [pages,   setPages]   = useState(1);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
+  const lastPageBeforeSearch = useRef(1);
 
   const [page, setPage] = useState(() => {
     const p = parseInt(searchParams.get("page")) || 1;
@@ -56,19 +57,58 @@ export default function Home() {
 
   useEffect(() => { fetchBlogs(filters, page); }, [filters, page, fetchBlogs]);
 
+  // Sync page and filters with URL params when they change (e.g., logo click)
+  useEffect(() => {
+    const urlPage = parseInt(searchParams.get("page")) || 1;
+    const urlSearch = searchParams.get("search") || "";
+    const urlCategory = searchParams.get("category") || "";
+    const urlSort = searchParams.get("sort") || "-createdAt";
+    const urlYear = searchParams.get("year") || "";
+
+    if (urlPage !== page) setPage(urlPage);
+    if (urlSearch !== filters.search || urlCategory !== filters.category || 
+        urlSort !== filters.sort || urlYear !== filters.year) {
+      setFilters({
+        search: urlSearch,
+        category: urlCategory,
+        sort: urlSort,
+        year: urlYear,
+      });
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const params = new URLSearchParams();
+    const currentParams = searchParams.toString();
+    
     if (filters.search) params.set("search", filters.search);
     if (filters.category) params.set("category", filters.category);
     if (filters.sort !== "-createdAt") params.set("sort", filters.sort);
     if (filters.year) params.set("year", filters.year);
     if (page > 1) params.set("page", page);
-    setSearchParams(params, { replace: true });
-  }, [filters, page, setSearchParams]);
+    
+    // Only update if params actually changed to avoid loops
+    if (params.toString() !== currentParams) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [filters, page]);
 
   const updateFilter = (key, val) => {
-    setPage(1);
-    setFilters((prev) => ({ ...prev, [key]: val }));
+    if (key === "search") {
+      if (val && !filters.search) {
+        // Starting a search - save current page
+        lastPageBeforeSearch.current = page;
+        setPage(1);
+      } else if (!val && filters.search) {
+        // Clearing search - restore previous page
+        setPage(lastPageBeforeSearch.current);
+      }
+      setFilters((prev) => ({ ...prev, [key]: val }));
+    } else if (filters[key] !== val) {
+      // Other filter changed - reset to page 1
+      setPage(1);
+      setFilters((prev) => ({ ...prev, [key]: val }));
+    }
   };
 
   const featured = blogs[0];
@@ -170,12 +210,12 @@ export default function Home() {
             {/* Pagination */}
             {pages > 1 && (
               <div className="mt-12 space-y-4">
-                <div className="flex justify-center items-center gap-1.5 flex-wrap">
+                <div className="flex justify-center items-center gap-1 flex-wrap">
                   {/* Prev */}
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="px-3 py-2 rounded-lg font-ui text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="px-2 py-1.5 rounded-lg font-ui text-xs font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
                     ←
                   </button>
@@ -200,7 +240,7 @@ export default function Home() {
                     range.forEach((i) => {
                       if (prev && i - prev > 1) {
                         buttons.push(
-                          <span key={`ellipsis-${i}`} className="w-9 h-9 flex items-center justify-center font-ui text-sm text-ink-400">
+                          <span key={`ellipsis-${i}`} className="w-7 h-7 flex items-center justify-center font-ui text-xs text-ink-400">
                             …
                           </span>
                         );
@@ -209,7 +249,7 @@ export default function Home() {
                         <button
                           key={i}
                           onClick={() => setPage(i)}
-                          className={`w-9 h-9 rounded-lg font-ui text-sm font-medium transition-all ${
+                          className={`w-7 h-7 rounded-lg font-ui text-xs font-medium transition-all ${
                             page === i
                               ? "bg-saffron-500 text-white shadow-sm"
                               : "bg-ink-100 text-ink-600 hover:bg-ink-200"
@@ -228,7 +268,7 @@ export default function Home() {
                   <button
                     onClick={() => setPage((p) => Math.min(pages, p + 1))}
                     disabled={page === pages}
-                    className="px-3 py-2 rounded-lg font-ui text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="px-2 py-1.5 rounded-lg font-ui text-xs font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
                     →
                   </button>
@@ -236,7 +276,7 @@ export default function Home() {
 
                 {/* Go to page input */}
                 <div className="flex justify-center items-center gap-2">
-                  <label htmlFor="goto-page" className="font-ui text-sm text-ink-500">
+                  <label htmlFor="goto-page" className="font-ui text-xs text-ink-500">
                     Go to page:
                   </label>
                   <input
@@ -254,7 +294,7 @@ export default function Home() {
                         }
                       }
                     }}
-                    className="w-16 px-2 py-1.5 text-sm text-center border border-ink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent"
+                    className="w-14 px-2 py-1 text-xs text-center border border-ink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent"
                   />
                   <span className="font-ui text-xs text-ink-400">of {pages}</span>
                 </div>
