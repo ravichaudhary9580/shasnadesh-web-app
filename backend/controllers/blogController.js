@@ -1,6 +1,7 @@
 const Blog = require('../models/Blog')
 const Analytics = require('../models/Analytics')
 const slugify = require('../utils/slugify')
+const { sendNotification } = require('./pushController')
 
 // Public
 exports.getBlogs = async (req, res) => {
@@ -71,6 +72,16 @@ exports.createBlog = async (req, res) => {
     }
 
     const blog = await Blog.create({ ...req.body, slug })
+    
+    // Send push notification if blog is published
+    if (blog.status === 'published') {
+      sendNotification(
+        'नया ब्लॉग पोस्ट',
+        blog.title,
+        `/blog/${blog.slug}`
+      ).catch(err => console.error('Push notification failed:', err))
+    }
+    
     res.status(201).json(blog)
   } catch (error) {
     res.status(500).json({ message: error.message })

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { X, Download } from 'lucide-react';
+import { X, Download, Bell } from 'lucide-react';
+import { requestNotificationPermission, subscribeToPush, checkSubscriptionStatus } from '../services/pushNotification';
 
 const PWAInstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [notificationEnabled, setNotificationEnabled] = useState(false);
 
   useEffect(() => {
     // Check if running in standalone mode
@@ -16,6 +18,9 @@ const PWAInstallPrompt = () => {
     // Check if iOS
     const userAgent = window.navigator.userAgent.toLowerCase();
     setIsIOS(/iphone|ipad|ipod/.test(userAgent));
+
+    // Check notification subscription status
+    checkSubscriptionStatus().then(setNotificationEnabled);
 
     // Handle beforeinstallprompt event
     const handleBeforeInstallPrompt = (e) => {
@@ -29,6 +34,8 @@ const PWAInstallPrompt = () => {
       console.log('PWA was installed');
       setShowPrompt(false);
       setDeferredPrompt(null);
+      // Auto-enable notifications after install
+      handleEnableNotifications();
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -59,6 +66,14 @@ const PWAInstallPrompt = () => {
     
     setDeferredPrompt(null);
     setShowPrompt(false);
+  };
+
+  const handleEnableNotifications = async () => {
+    const granted = await requestNotificationPermission();
+    if (granted) {
+      const subscribed = await subscribeToPush();
+      setNotificationEnabled(subscribed);
+    }
   };
 
   const handleDismiss = () => {
@@ -127,6 +142,15 @@ const PWAInstallPrompt = () => {
         )}
 
         <div className="mt-3 pt-3 border-t border-ink-100">
+          {!notificationEnabled && (
+            <button
+              onClick={handleEnableNotifications}
+              className="w-full mb-2 bg-green-50 hover:bg-green-100 text-green-700 font-ui font-medium py-2 px-4 rounded-md text-xs transition-colors flex items-center justify-center gap-2"
+            >
+              <Bell size={12} />
+              Enable Blog Notifications
+            </button>
+          )}
           <p className="text-xs text-ink-400">
             Installed apps work offline and load faster
           </p>

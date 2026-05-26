@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-// import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
 
 import Home from "./pages/Home";
 import BlogDetail from "./pages/BlogDetail";

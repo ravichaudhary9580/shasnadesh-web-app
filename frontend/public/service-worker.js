@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'shasnadesh-v2';
+const CACHE_NAME = 'shasnadesh-v3';
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
@@ -143,5 +143,38 @@ self.addEventListener('fetch', (event) => {
             headers: { 'Content-Type': 'text/plain' },
           })
       )
+  );
+});
+
+// ── Push Notification ────────────────────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'नया ब्लॉग पोस्ट';
+  const options = {
+    body: data.body || 'नया ब्लॉग उपलब्ध है',
+    icon: '/logo192.png',
+    badge: '/logo192.png',
+    data: { url: data.url || '/' },
+    vibrate: [200, 100, 200],
+    tag: 'blog-notification'
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data.url || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if (client.url === url && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow(url);
+        }
+      })
   );
 });

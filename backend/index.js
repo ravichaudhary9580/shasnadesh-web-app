@@ -23,6 +23,7 @@ app.use('/api/blogs', require('./routes/blogs'))
 app.use('/api/admin', require('./routes/admin'))
 app.use('/api/analytics', require('./routes/analytics'))
 app.use('/api/sitemap', require('./routes/sitemap'))
+app.use('/api/push', require('./routes/push'))
 
 app.get('/', (req, res) => res.json({ message: 'Shasnadesh API running' }))
 
