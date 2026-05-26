@@ -38,6 +38,7 @@ export const createBlog = (data) => api.post("/admin/blogs", data);
 export const updateBlog = (id, data) => api.put(`/admin/blogs/${id}`, data);
 export const deleteBlog = (id) => api.delete(`/admin/blogs/${id}`);
 export const toggleStatus = (id) => api.patch(`/admin/blogs/${id}/status`);
+export const toggleFeatured = (id) => api.patch(`/admin/blogs/${id}/featured`);
 
 // --- Upload ---
 export const uploadFile = (file) => {

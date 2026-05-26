@@ -12,6 +12,7 @@ const blogSchema = new mongoose.Schema({
     enum: ['draft', 'published'],
     default: 'draft'
   },
+  featured: { type: Boolean, default: false },
   thumbnail: { type: String },
   images: [String],
   pdfs: [{ title: String, url: String }],

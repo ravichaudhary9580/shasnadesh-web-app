@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { adminGetBlogs, deleteBlog, toggleStatus, getCategories } from "../../services/api";
+import { adminGetBlogs, deleteBlog, toggleStatus, toggleFeatured, getCategories } from "../../services/api";
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 
@@ -72,6 +72,16 @@ export default function ManageBlogs() {
       fetchBlogs();
     } catch {
       toast.error("Failed to update status");
+    }
+  };
+
+  const handleToggleFeatured = async (id) => {
+    try {
+      const { data } = await toggleFeatured(id);
+      toast.success(`Blog ${data.featured ? "marked as featured" : "unmarked as featured"}`);
+      fetchBlogs();
+    } catch {
+      toast.error("Failed to update featured status");
     }
   };
 
@@ -190,6 +200,11 @@ export default function ManageBlogs() {
                       }`}>
                         {blog.status}
                       </span>
+                      {blog.featured && (
+                        <span className="badge bg-yellow-100 text-yellow-700 text-xs">
+                          ⭐ Featured
+                        </span>
+                      )}
                       {blog.category && (
                         <span className="badge bg-saffron-100 text-saffron-700 text-xs">
                           {blog.category}
@@ -206,7 +221,17 @@ export default function ManageBlogs() {
                 {/* Action buttons — always on their own row, right-aligned */}
                 {/* ── FIX: moved actions to a separate full-width row so they never
                           get pushed offscreen or cause overflow on narrow phones */}
-                <div className="flex items-center gap-1.5 mt-2.5 justify-end">
+                <div className="flex items-center gap-1.5 mt-2.5 justify-end flex-wrap">
+                  <button
+                    onClick={() => handleToggleFeatured(blog._id)}
+                    className={`px-3 py-1.5 rounded-lg font-ui text-xs font-medium transition-all ${
+                      blog.featured
+                        ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+                        : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+                    }`}
+                  >
+                    {blog.featured ? "⭐ Featured" : "Mark Featured"}
+                  </button>
                   <button
                     onClick={() => handleToggle(blog._id)}
                     className={`px-3 py-1.5 rounded-lg font-ui text-xs font-medium transition-all ${

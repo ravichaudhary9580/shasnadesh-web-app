@@ -6,7 +6,7 @@ const slugify = require('../utils/slugify')
 exports.getBlogs = async (req, res) => {
   try {
     const {
-      search, category, tag, year,
+      search, category, tag, year, featured,
       status = 'published',
       sort = '-createdAt',
       page = 1, limit = 12
@@ -22,6 +22,7 @@ exports.getBlogs = async (req, res) => {
     }
     if (category) query.category = category
     if (tag) query.tags = tag
+    if (featured === 'true') query.featured = true
     
     // Year filter
     if (year) {
@@ -125,6 +126,18 @@ exports.toggleStatus = async (req, res) => {
     const blog = await Blog.findById(req.params.id)
     if (!blog) return res.status(404).json({ message: 'Blog not found' })
     blog.status = blog.status === 'published' ? 'draft' : 'published'
+    await blog.save()
+    res.json(blog)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+exports.toggleFeatured = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id)
+    if (!blog) return res.status(404).json({ message: 'Blog not found' })
+    blog.featured = !blog.featured
     await blog.save()
     res.json(blog)
   } catch (error) {

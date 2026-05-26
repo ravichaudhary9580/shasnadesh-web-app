@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BlogCard from "../components/BlogCard";
 import SearchFilter from "../components/SearchFilter";
+import FeaturedSlideshow from "../components/FeaturedSlideshow";
 import { getBlogs } from "../services/api";
 import { Newspaper } from "lucide-react";
 
@@ -23,6 +24,7 @@ const YEAR_OPTIONS = getYearOptions();
 
 export default function Home() {
   const [blogs,   setBlogs]   = useState([]);
+  const [featuredBlogs, setFeaturedBlogs] = useState([]);
   const [total,   setTotal]   = useState(0);
   const [pages,   setPages]   = useState(1);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,18 @@ export default function Home() {
     }
   }, []);
 
+  const fetchFeaturedBlogs = useCallback(async () => {
+    try {
+      const { data } = await getBlogs({ featured: 'true', limit: 10 });
+      setFeaturedBlogs(data.blogs);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   useEffect(() => { fetchBlogs(filters, page); }, [filters, page, fetchBlogs]);
+
+  useEffect(() => { fetchFeaturedBlogs(); }, [fetchFeaturedBlogs]);
 
   // Sync page and filters with URL params when they change (e.g., logo click)
   useEffect(() => {
@@ -75,6 +88,7 @@ export default function Home() {
         year: urlYear,
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   useEffect(() => {
@@ -91,7 +105,7 @@ export default function Home() {
     if (params.toString() !== currentParams) {
       setSearchParams(params, { replace: true });
     }
-  }, [filters, page]);
+  }, [filters, page, searchParams, setSearchParams]);
 
   const updateFilter = (key, val) => {
     if (key === "search") {
@@ -110,9 +124,6 @@ export default function Home() {
       setFilters((prev) => ({ ...prev, [key]: val }));
     }
   };
-
-  const featured = blogs[0];
-  const rest     = blogs.slice(1);
 
   return (
     <div className="min-h-screen bg-white">
@@ -153,18 +164,9 @@ export default function Home() {
           </div>
         ) : (
           <>
-            {/* Featured — centered */}
-            {featured && !filters.search && (
-              <div className="mb-10 animate-fade-in flex flex-col items-center">
-                <div className="flex items-center justify-center gap-2 mb-4 w-full">
-                  <div className="h-px flex-1 max-w-[60px] bg-gradient-to-r from-transparent to-saffron-400" />
-                  <p className="font-hindi text-sm font-medium text-saffron-600 whitespace-nowrap">फीचर्ड आदेश</p>
-                  <div className="h-px flex-1 max-w-[60px] bg-gradient-to-l from-transparent to-saffron-400" />
-                </div>
-                <div className="w-full max-w-2xl">
-                  <BlogCard blog={featured} featured />
-                </div>
-              </div>
+            {/* Featured Slideshow */}
+            {!filters.search && !filters.category && featuredBlogs.length > 0 && (
+              <FeaturedSlideshow blogs={featuredBlogs} />
             )}
 
             {/* ── Result count row + year & sort dropdowns ── */}
@@ -196,7 +198,7 @@ export default function Home() {
 
             {/* Blog grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(filters.search ? blogs : rest).map((blog, i) => (
+              {blogs.map((blog, i) => (
                 <div
                   key={blog._id}
                   className="animate-slide-up"
