@@ -49,7 +49,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
-        {/* <PWAInstallPrompt /> */}
+        <PWAInstallPrompt /> 
         <Toaster
           position="top-right"
           toastOptions={{
