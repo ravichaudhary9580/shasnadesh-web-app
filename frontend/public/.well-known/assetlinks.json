@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.shasnadeshupdates.twa",
+        "sha256_cert_fingerprints": ["05:EB:E9:DA:42:90:3A:30:A4:0B:80:B2:1F:03:67:1F:88:EF:4B:B2:D9:32:4C:EA:70:02:20:3B:D4:5C:8A:A3"]
+      }
+}]

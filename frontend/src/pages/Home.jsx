@@ -312,7 +312,7 @@ export default function Home() {
           <div className="flex items-center justify-center">
             <div className="text-center space-y-1">
               <p className="font-hindi text-ink-400 text-sm">सत्यमेव जयते · Satyameva Jayate</p>
-              <p className="font-ui text-xs text-ink-300">© 2025 Shasnadesh</p>
+              <p className="font-ui text-xs text-ink-300">© 2025 Shasnadeshupdates.com</p>
               <p className="font-ui text-xs text-ink-300">
                 Designed by{" "}
                 <a 

@@ -11,6 +11,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import BlogEditor from "./pages/admin/BlogEditor";
 import ManageBlogs from "./pages/admin/ManageBlogs";
 import Analytics from "./pages/admin/Analytics";
+import Settings from "./pages/admin/Settings";
 import AdminLayout from "./components/admin/AdminLayout";
 
 function ProtectedRoute({ children }) {
@@ -38,6 +39,7 @@ function AppRoutes() {
         <Route path="blogs/new" element={<BlogEditor />} />
         <Route path="blogs/edit/:id" element={<BlogEditor />} />
         <Route path="analytics" element={<Analytics />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

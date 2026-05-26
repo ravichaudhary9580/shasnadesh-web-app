@@ -7,6 +7,7 @@ import {
   FileText,
   PenSquare,
   BarChart3,
+  Settings as SettingsIcon,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -20,6 +21,7 @@ const navItems = [
   { to: "/admin/blogs", label: "Manage Blogs", icon: FileText },
   { to: "/admin/blogs/new", label: "New Blog", icon: PenSquare },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/admin/settings", label: "Settings", icon: SettingsIcon },
 ];
 
 export default function AdminLayout() {
@@ -47,7 +49,7 @@ export default function AdminLayout() {
         </div>
         {(!collapsed || isMobile) && (
           <div className="overflow-hidden">
-            <p className="font-display font-bold text-white text-sm leading-none">Shasnadesh</p>
+            <p className="font-display font-bold text-white text-sm leading-none">Shasnadeshupdates.com</p>
             <p className="font-ui text-xs text-ink-400 mt-0.5">Admin Panel</p>
           </div>
         )}

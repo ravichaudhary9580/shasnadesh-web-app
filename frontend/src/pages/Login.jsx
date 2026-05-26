@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { login } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
@@ -9,6 +10,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   if (admin) return <Navigate to="/admin" replace />;
 
@@ -59,14 +61,24 @@ export default function Login() {
             </div>
             <div>
               <label className="block font-ui text-sm font-medium text-ink-600 mb-1.5">Password</label>
-              <input
-                type="password"
-                required
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="••••••••"
-                className="input"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="••••••••"
+                  className="input pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             <button type="submit" disabled={loading}
               className="btn-primary w-full justify-center mt-2 py-3 text-base disabled:opacity-60 disabled:cursor-not-allowed">

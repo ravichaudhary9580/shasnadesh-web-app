@@ -32,3 +32,33 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   res.json(req.admin)
 }
+
+exports.updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current and new password are required' })
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' })
+    }
+
+    const admin = await Admin.findById(req.admin.id)
+    
+    // Verify current password
+    const isMatch = await admin.matchPassword(currentPassword)
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect' })
+    }
+
+    // Update password
+    admin.password = newPassword
+    await admin.save()
+
+    res.json({ message: 'Password updated successfully' })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}

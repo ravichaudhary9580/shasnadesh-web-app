@@ -26,6 +26,7 @@ api.interceptors.response.use(
 // --- Auth ---
 export const login = (data) => api.post("/auth/login", data);
 export const getMe = () => api.get("/auth/me");
+export const updatePassword = (data) => api.put("/auth/update-password", data);
 
 // --- Public Blogs ---
 export const getBlogs = (params) => api.get("/blogs", { params });

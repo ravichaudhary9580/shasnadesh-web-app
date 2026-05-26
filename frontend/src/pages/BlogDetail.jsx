@@ -267,7 +267,7 @@ export default function BlogDetail() {
           <div className="flex items-center justify-center">
             <div className="text-center">
               <p className="font-hindi text-ink-400 text-sm">सत्यमेव जयते · Satyameva Jayate</p>
-              <p className="font-ui text-xs text-ink-300 mt-1">© 2025 Shasnadesh</p>
+              <p className="font-ui text-xs text-ink-300 mt-1">© 2025 Shasnadeshupdates.com</p>
             </div>
           </div>
         </div>

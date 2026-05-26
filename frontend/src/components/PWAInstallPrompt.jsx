@@ -91,10 +91,10 @@ const PWAInstallPrompt = () => {
             </div>
             <div>
               <h3 className="font-ui font-semibold text-ink-900 text-sm">
-                Install Shasnadeshupdates.com
+                Download Shasnadeshupdates.com
               </h3>
               <p className="text-xs text-ink-500">
-                Install app for better experience
+                Download app for better experience
               </p>
             </div>
           </div>
