@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'shasnadesh-v3';
+const CACHE_NAME = 'shasnadesh-v4';
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
@@ -154,15 +154,26 @@ self.addEventListener('push', (event) => {
     body: data.body || 'नया ब्लॉग उपलब्ध है',
     icon: '/logo192.png',
     badge: '/logo192.png',
+    image: data.image, // Large thumbnail image
     data: { url: data.url || '/' },
     vibrate: [200, 100, 200],
-    tag: 'blog-notification'
+    tag: 'blog-notification',
+    requireInteraction: false,
+    actions: [
+      { action: 'open', title: 'पढ़ें', icon: '/logo192.png' },
+      { action: 'close', title: 'बंद करें' }
+    ]
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  
+  if (event.action === 'close') {
+    return;
+  }
+  
   const url = event.notification.data.url || '/';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })

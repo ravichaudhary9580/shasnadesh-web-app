@@ -78,7 +78,8 @@ exports.createBlog = async (req, res) => {
       sendNotification(
         'नया ब्लॉग पोस्ट',
         blog.title,
-        `/blog/${blog.slug}`
+        `/blog/${blog.slug}`,
+        blog.thumbnail || '/logo512.png' // Use blog thumbnail or fallback to logo
       ).catch(err => console.error('Push notification failed:', err))
     }
     

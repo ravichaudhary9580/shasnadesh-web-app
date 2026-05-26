@@ -37,10 +37,10 @@ exports.unsubscribe = async (req, res) => {
   }
 }
 
-exports.sendNotification = async (title, body, url) => {
+exports.sendNotification = async (title, body, url, image) => {
   try {
     const subscriptions = await PushSubscription.find()
-    const payload = JSON.stringify({ title, body, url })
+    const payload = JSON.stringify({ title, body, url, image })
     
     const results = await Promise.allSettled(
       subscriptions.map(sub =>
