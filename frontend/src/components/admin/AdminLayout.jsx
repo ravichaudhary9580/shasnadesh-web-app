@@ -18,8 +18,8 @@ import {
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/admin/blogs", label: "Manage Blogs", icon: FileText },
-  { to: "/admin/blogs/new", label: "New Blog", icon: PenSquare },
+  { to: "/admin/blogs", label: "Manage Posts", icon: FileText },
+  { to: "/admin/blogs/new", label: "New Post", icon: PenSquare },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon },
 ];

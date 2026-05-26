@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award, LayoutGrid, FileText, } from "lucide-react";
 
 const NAV_ITEMS = [
-  { label: "होम",                    to: "/" },
-  { label: "उत्तर प्रदेश शासनादेश", to: "/?category=up-government" },
-  { label: "शिक्षा विभाग",           to: "/?category=education" },
-  { label: "वैकेंस अलर्ट",           to: "/?category=vacancy" },
-  { label: "छात्रवृत्ति",            to: "/?category=scholarship" },
-  { label: "अन्य",                   to: "/?category=other" },
+  { label: "होम",                    to: "/",                          icon: HomeIcon },
+  { label: "उत्तर प्रदेश शासनादेश", to: "/?category=up-government", icon: Landmark },
+  { label: "शिक्षा विभाग",           to: "/?category=education",     icon: BookOpen },
+  { label: "वैकेंस अलर्ट",           to: "/?category=vacancy",       icon: Briefcase },
+  { label: "छात्रवृत्ति",            to: "/?category=scholarship",   icon: Award },
+  { label: "प्रारूप",                to: "/?category=praroop",       icon: FileText },
+  { label: "अन्य",                   to: "/?category=other",         icon: LayoutGrid },
 ];
 
 export default function Navbar({ onSearch }) {
@@ -63,7 +64,18 @@ export default function Navbar({ onSearch }) {
           ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-ink-100"
           : "bg-white border-b border-ink-100"
       }`}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center gap-3">
+        <div className={`max-w-6xl mx-auto px-4 sm:px-6 flex items-center gap-3 transition-all duration-300 ${
+          scrolled ? "h-10 sm:h-14" : "h-12 sm:h-16"
+        }`}>
+
+          {/* Hamburger */}
+          <button
+            onClick={() => { setSidebarOpen(true); setMobileSearch(false); }}
+            className="p-2 -ml-2 rounded-xl hover:bg-ink-100 text-ink-600 transition-colors flex-shrink-0"
+            aria-label="Open menu"
+          >
+            <Menu size={20} />
+          </button>
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
@@ -73,12 +85,12 @@ export default function Navbar({ onSearch }) {
           </Link>
 
           {/* Site name */}
-          <span className="flex-1 font-display text-base sm:text-lg font-bold text-ink-900 leading-none truncate">
+          <Link to="/" className="flex-1 font-display text-base sm:text-lg font-bold text-ink-900 leading-none truncate hover:text-saffron-600 transition-colors">
             Shasnadeshupdates.com
-          </span>
+          </Link>
 
           {/* Desktop search — no X button */}
-          <div className="hidden sm:flex items-center relative w-48 lg:w-64 flex-shrink-0">
+          <div className="hidden sm:flex items-center relative w-80 lg:w-96 flex-shrink-0">
             <Search size={14} className="absolute left-3 text-ink-400 pointer-events-none" />
             <input
               type="text"
@@ -99,15 +111,6 @@ export default function Navbar({ onSearch }) {
               <Search size={19} />
             </button>
           </div>
-
-          {/* Hamburger */}
-          <button
-            onClick={() => { setSidebarOpen(true); setMobileSearch(false); }}
-            className="p-2 rounded-xl hover:bg-ink-100 text-ink-600 transition-colors flex-shrink-0"
-            aria-label="Open menu"
-          >
-            <Menu size={20} />
-          </button>
         </div>
 
         {/* Mobile search row — no X button, closes on outside click */}
@@ -128,7 +131,7 @@ export default function Navbar({ onSearch }) {
         )}
       </nav>
 
-      {/* ── Right sidebar ──────────────────────────── */}
+      {/* ── Left sidebar ──────────────────────────── */}
       {sidebarOpen && (
         <>
           <div
@@ -136,8 +139,8 @@ export default function Navbar({ onSearch }) {
             onClick={() => setSidebarOpen(false)}
           />
           <aside
-            className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-white shadow-2xl flex flex-col"
-            style={{ animation: "slideInRight 0.25s ease forwards" }}
+            className="fixed top-0 left-0 bottom-0 z-50 w-72 bg-white shadow-2xl flex flex-col"
+            style={{ animation: "slideInLeft 0.25s ease forwards" }}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-ink-100">
@@ -158,17 +161,72 @@ export default function Navbar({ onSearch }) {
 
             {/* Nav items */}
             <nav className="flex-1 overflow-y-auto py-3">
-              {NAV_ITEMS.map((item, idx) => (
-                <Link
-                  key={idx}
-                  to={item.to}
-                  onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 font-hindi text-sm text-ink-700 hover:bg-saffron-300 hover:text-black border-b border-ink-50 last:border-0 transition-colors"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-saffron-400 flex-shrink-0" />
-                  {item.label}
-                </Link>
-              ))}
+              {NAV_ITEMS.map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={idx}
+                    to={item.to}
+                    onClick={() => setSidebarOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3.5 font-hindi text-sm text-ink-700 hover:bg-ink-100 hover:text-black border-b border-ink-50 last:border-0 transition-colors"
+                  >
+                    <Icon size={18} className="text-saffron-500 flex-shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+
+              {/* Play Store App Download Box */}
+              <div className="px-5 mt-3 mb-2">
+                <div className="relative border border-ink-100 rounded-xl p-3 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+                  {/* Decorative background shapes */}
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-saffron-50 rounded-full translate-x-1/3 -translate-y-1/3 opacity-80" />
+                  <div className="absolute bottom-0 right-8 w-10 h-10 bg-orange-50 rounded-full translate-y-1/2 opacity-60" />
+
+                  <div className="relative z-10">
+                    {/* Rating & Tagline */}
+                    <div className="flex items-center gap-1 text-[11px] text-ink-600 mb-1.5">
+                      <span className="text-saffron-500 font-bold">★</span>
+                      <span className="font-bold text-ink-800">4.8</span>
+                      <span className="text-ink-300">|</span>
+                      <span>🏆 UP's #1 Updates App!</span>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="font-display font-bold text-base text-ink-900 mb-1">
+                      Shasnadeshupdates.com App
+                    </h3>
+
+                    {/* Subtitle */}
+                    <p className="text-[11px] text-ink-600 mb-2.5 max-w-[68%]">
+                      सभी शासनादेश और अपडेट्स सबसे पहले अपने फोन पर पाएं
+                    </p>
+
+                    {/* Button */}
+                    <a
+                      href="https://play.google.com/store/apps/details?id=com.shasnadeshupdates"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-saffron-600 font-bold text-xs hover:text-saffron-700 transition-colors"
+                    >
+                      Download Now
+                      <span className="bg-saffron-500 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] leading-none">
+                        ❯
+                      </span>
+                    </a>
+                  </div>
+
+                  {/* Phone Mockup Illustration */}
+                  <div className="absolute -right-2 -bottom-4 w-20 h-24 bg-ink-900 rounded-[10px] border-[2px] border-ink-800 shadow-lg rotate-[-12deg] z-0 opacity-90">
+                    <div className="absolute top-1 left-1/2 -translate-x-1/2 w-7 h-1.5 bg-ink-950 rounded-full" />
+                    <div className="absolute inset-[2px] mt-3.5 bg-white rounded-[6px] overflow-hidden flex flex-col p-1">
+                      <div className="w-full h-6 bg-saffron-100  mb-1 rounded-sm" />
+                      <div className="w-full h-3 bg-ink-100  mb-1 rounded-sm" />
+                      <div className="w-2/3 h-3 bg-ink-100   rounded-sm" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </nav>
 
             {/* Footer */}
@@ -193,8 +251,8 @@ export default function Navbar({ onSearch }) {
       )}
 
       <style>{`
-        @keyframes slideInRight {
-          from { transform: translateX(100%); }
+        @keyframes slideInLeft {
+          from { transform: translateX(-100%); }
           to   { transform: translateX(0); }
         }
       `}</style>

@@ -10,6 +10,9 @@ connectDB()
 
 const app = express()
 
+// Trust proxy headers (required for Vercel deployment)
+app.set('trust proxy', true)
+
 app.use(cors())
 app.use(helmet({ crossOriginResourcePolicy: false }))
 app.use(morgan('dev'))

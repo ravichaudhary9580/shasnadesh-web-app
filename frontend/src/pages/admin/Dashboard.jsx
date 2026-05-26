@@ -73,7 +73,7 @@ export default function Dashboard() {
     {
       to: "/admin/blogs/new",
       icon: PenSquare,
-      label: "Write Blog",
+      label: "Write Post",
       desc: "Create new post",
       color: "text-saffron-600",
       bg: "bg-saffron-50 group-hover:bg-saffron-100",
@@ -81,7 +81,7 @@ export default function Dashboard() {
     {
       to: "/admin/blogs",
       icon: BookOpen,
-      label: "Manage Blogs",
+      label: "Manage Posts",
       desc: "Edit, delete, publish",
       color: "text-blue-600",
       bg: "bg-blue-50 group-hover:bg-blue-100",
@@ -105,11 +105,11 @@ export default function Dashboard() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="font-display text-xl sm:text-2xl font-bold text-ink-900">Dashboard</h1>
-          <p className="font-ui text-sm text-ink-400 mt-0.5">Overview of your blog</p>
+          <p className="font-ui text-sm text-ink-400 mt-0.5">Overview of your post</p>
         </div>
         <Link to="/admin/blogs/new" className="btn-primary text-sm">
           <PenSquare size={15} strokeWidth={2} />
-          New Blog
+          New Post
         </Link>
       </div>
 
@@ -123,7 +123,7 @@ export default function Dashboard() {
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard icon={Eye}          label="Total Visits" value={overview?.totalVisits} color="blue"    />
-          <StatCard icon={FileText}     label="Total Blogs"  value={overview?.totalBlogs}  color="saffron" />
+          <StatCard icon={FileText}     label="Total Posts"  value={overview?.totalBlogs}  color="saffron" />
           <StatCard icon={CheckCircle2} label="Published"    value={overview?.published}   color="green"   />
           <StatCard icon={BarChart2}    label="Total Views"  value={overview?.totalViews}  color="crimson" />
         </div>

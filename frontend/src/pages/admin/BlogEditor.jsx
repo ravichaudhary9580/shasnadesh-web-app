@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { createBlog, updateBlog, adminGetBlogs, uploadFile } from "../../services/api";
+import { createBlog, updateBlog, adminGetBlogs, uploadFile, getCategories } from "../../services/api";
 import RichEditor from "../../components/admin/RichEditor";
 import toast from "react-hot-toast";
 import {
@@ -19,7 +19,7 @@ import {
   Check,
 } from "lucide-react";
 
-const CATEGORIES = ["hindi", "english", "news", "culture", "technology", "lifestyle", "opinion"];
+const DEFAULT_CATEGORIES = ["hindi", "english", "news", "culture", "technology", "lifestyle", "opinion"];
 
 function Field({ label, children, hint }) {
   return (
@@ -152,6 +152,7 @@ export default function BlogEditor() {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("content");
   const [hindiMode, setHindiMode] = useState(false);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
 
   useEffect(() => {
     if (!isEditing) return;
@@ -176,6 +177,16 @@ export default function BlogEditor() {
       })
       .finally(() => setLoading(false));
   }, [id, isEditing]);
+
+  useEffect(() => {
+    getCategories()
+      .then(({ data }) => {
+        const normalized = Array.isArray(data) ? data : [];
+        const unique = Array.from(new Set([...normalized, ...DEFAULT_CATEGORIES])).filter(Boolean);
+        setCategories(unique);
+      })
+      .catch(() => setCategories(DEFAULT_CATEGORIES));
+  }, []);
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -245,6 +256,8 @@ export default function BlogEditor() {
     { id: "meta", icon: Settings2, label: "Settings" },
     { id: "media", icon: Paperclip, label: "Media" },
   ];
+
+  const categoryOptions = Array.from(new Set([...(categories || []), form.category].filter(Boolean)));
 
   return (
     <div className="max-w-5xl space-y-4 animate-fade-in">
@@ -320,7 +333,7 @@ export default function BlogEditor() {
       {/* ── CONTENT TAB ── */}
       {activeTab === "content" && (
         <div className="space-y-3 animate-fade-in">
-          <Field label={hindiMode ? "सारांश / संक्षिप्त विवरण" : "Excerpt / Summary"} hint="Shown on blog cards and SEO description">
+          <Field label={hindiMode ? "सारांश / संक्षिप्त विवरण" : "Excerpt / Summary"} hint="Shown on post cards and SEO description">
             <textarea
               rows={3}
               placeholder={hindiMode ? "अपनी पोस्ट का संक्षिप्त सारांश यहां लिखें…" : "Short summary of your post..."}
@@ -352,7 +365,7 @@ export default function BlogEditor() {
                   className="input"
                 />
                 <div className="flex flex-wrap gap-1.5">
-                  {CATEGORIES.map((c) => (
+                  {categoryOptions.map((c) => (
                     <button
                       key={c}
                       type="button"

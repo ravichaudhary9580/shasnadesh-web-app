@@ -105,7 +105,8 @@ export default function Home() {
     if (params.toString() !== currentParams) {
       setSearchParams(params, { replace: true });
     }
-  }, [filters, page, searchParams, setSearchParams]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, page]);
 
   const updateFilter = (key, val) => {
     if (key === "search") {

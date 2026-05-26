@@ -38,7 +38,7 @@ export default function Analytics() {
 
   const statItems = [
     { label: "Total Visits", value: overview?.totalVisits, icon: "👁" },
-    { label: "Total Blogs",  value: overview?.totalBlogs,  icon: "📝" },
+    { label: "Total Posts",  value: overview?.totalBlogs,  icon: "📝" },
     { label: "Published",    value: overview?.published,   icon: "✅" },
     { label: "Total Views",  value: overview?.totalViews,  icon: "📊" },
   ];

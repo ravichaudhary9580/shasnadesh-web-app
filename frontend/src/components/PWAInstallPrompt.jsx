@@ -82,54 +82,42 @@ const PWAInstallPrompt = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-      <div className="bg-white rounded-lg shadow-lg border border-ink-200 p-4 animate-fade-in">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-saffron-100 flex items-center justify-center">
-              <Download size={16} className="text-saffron-600" />
-            </div>
-            <div>
-              <h3 className="font-ui font-semibold text-ink-900 text-sm">
-                Download Shasnadeshupdates.com
-              </h3>
-              <p className="text-xs text-ink-500">
-                Download app for better experience
-              </p>
-            </div>
+    <div className="fixed top-0 inset-x-0 z-[60] sm:top-auto sm:bottom-4 sm:right-4 sm:inset-x-auto sm:max-w-sm">
+      <div className="bg-white border-b border-ink-200 sm:border sm:rounded-lg shadow-sm sm:shadow-lg px-3 py-2.5 sm:p-4 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-saffron-100 flex items-center justify-center flex-shrink-0">
+            <Download size={14} className="text-saffron-600" />
           </div>
-          <button
-            onClick={handleDismiss}
-            className="text-ink-400 hover:text-ink-600 transition-colors"
-            aria-label="Dismiss"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {isIOS ? (
-          <div className="text-xs text-ink-600 mb-3">
-            <p className="mb-1">To install on iOS:</p>
-            <ol className="list-decimal pl-4 space-y-1">
-              <li>Tap the Share button <span className="font-mono">⎋</span></li>
-              <li>Scroll down and tap "Add to Home Screen"</li>
-              <li>Tap "Add" in the top right</li>
-            </ol>
+          <div className="min-w-0">
+            <h3 className="font-ui font-semibold text-ink-900 text-xs sm:text-sm leading-tight truncate">
+              Download Shasnadeshupdates.com
+            </h3>
+            <p className="text-[11px] sm:text-xs text-ink-500 leading-tight truncate">
+              Get the app for faster updates
+            </p>
           </div>
-        ) : (
-          <button
-            onClick={handleInstallClick}
-            className="w-full bg-saffron-500 hover:bg-saffron-600 text-white font-ui font-medium py-2 px-4 rounded-md text-sm transition-colors flex items-center justify-center gap-2"
-          >
-            <Download size={14} />
-            Install App
-          </button>
-        )}
-
-        <div className="mt-3 pt-3 border-t border-ink-100">
-          <p className="text-xs text-ink-400">
-            Installed apps work offline and load faster
-          </p>
+          <div className="ml-auto flex items-center gap-2">
+            {isIOS ? (
+              <span className="text-[10px] sm:text-xs text-ink-600 leading-tight max-w-[42vw] sm:max-w-none">
+                Share → Add to Home Screen
+              </span>
+            ) : (
+              <button
+                onClick={handleInstallClick}
+                className="bg-saffron-500 hover:bg-saffron-600 text-white font-ui font-medium py-1.5 px-2.5 rounded-md text-xs transition-colors flex items-center gap-1"
+              >
+                <Download size={12} />
+                Install
+              </button>
+            )}
+            <button
+              onClick={handleDismiss}
+              className="text-ink-400 hover:text-ink-600 transition-colors"
+              aria-label="Dismiss"
+            >
+              <X size={14} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

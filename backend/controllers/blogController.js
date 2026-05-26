@@ -50,7 +50,7 @@ exports.getBlog = async (req, res) => {
     const blog = await Blog.findOneAndUpdate(
       { slug: req.params.slug, status: 'published' },
       { $inc: { views: 1 } },
-      { new: true }
+      { returnDocument: 'after' }
     )
     if (!blog) return res.status(404).json({ message: 'Blog not found' })
     res.json(blog)
@@ -114,7 +114,7 @@ exports.updateBlog = async (req, res) => {
     const blog = await Blog.findByIdAndUpdate(
       req.params.id,
       allowedUpdates,
-      { new: true, runValidators: true } // runValidators ensures schema rules apply on update
+      { returnDocument: 'after', runValidators: true } // runValidators ensures schema rules apply on update
     )
     if (!blog) return res.status(404).json({ message: 'Blog not found' })
     res.json(blog)
