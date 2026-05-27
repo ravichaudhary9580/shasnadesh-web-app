@@ -17,11 +17,14 @@ exports.uploadFile = async (req, res) => {
     const allowedTypes = new Set([
       'application/pdf',
       'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.google-apps.document',
+      'application/vnd.oasis.opendocument.text', // ODT files
+      'text/plain' // Plain text files
     ])
 
     if (!allowedTypes.has(req.file.mimetype)) {
-      return res.status(400).json({ message: 'Only PDF or DOC/DOCX files are allowed' })
+      return res.status(400).json({ message: 'Only PDF, DOC, DOCX, Google Docs, ODT, or text files are allowed' })
     }
 
     const ext = path.extname(req.file.originalname)

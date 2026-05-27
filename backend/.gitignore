@@ -27,3 +27,5 @@ Thumbs.db
 # Scripts
 seed.js
 seedHindi.js
+seedBlogs.js
+seedCategories.js

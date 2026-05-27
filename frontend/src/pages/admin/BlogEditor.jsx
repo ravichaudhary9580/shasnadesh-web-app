@@ -249,6 +249,9 @@ export default function BlogEditor() {
     if (clean.endsWith(".pdf")) return "pdf";
     if (clean.endsWith(".docx")) return "docx";
     if (clean.endsWith(".doc")) return "doc";
+    if (clean.endsWith(".gdoc")) return "gdoc";
+    if (clean.endsWith(".odt")) return "odt";
+    if (clean.endsWith(".txt")) return "txt";
     return "file";
   };
 
@@ -500,7 +503,7 @@ export default function BlogEditor() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <FileText size={16} className="text-red-500" />
-                <p className="font-ui text-sm font-semibold text-ink-800">Documents (PDF/DOC)</p>
+                <p className="font-ui text-sm font-semibold text-ink-800">Documents (PDF/DOC/DOCX/GDOC/ODT/TXT)</p>
               </div>
               <button type="button" onClick={addPdf} className="btn-ghost text-xs gap-1">
                 <Plus size={13} /> Add Document
@@ -537,7 +540,7 @@ export default function BlogEditor() {
                     <Upload size={13} /> Upload
                     <input
                       type="file"
-                      accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.google-apps.document,application/vnd.oasis.opendocument.text,text/plain"
                       className="hidden"
                       onChange={(e) => handlePdfUpload(i, e)}
                     />
@@ -567,7 +570,7 @@ export default function BlogEditor() {
                         </div>
                       ) : (
                         <div className="text-xs text-ink-500 bg-white border border-ink-100 rounded-lg px-3 py-2">
-                          Preview not available for DOC/DOCX. Use the View link to open.
+                          Preview not available for DOC/DOCX/GDOC/ODT/TXT. Use the View link to open.
                         </div>
                       )}
                     </div>
