@@ -244,6 +244,14 @@ export default function BlogEditor() {
     e.target.value = "";
   };
 
+  const getDocType = (url = "") => {
+    const clean = url.split("?")[0].toLowerCase();
+    if (clean.endsWith(".pdf")) return "pdf";
+    if (clean.endsWith(".docx")) return "docx";
+    if (clean.endsWith(".doc")) return "doc";
+    return "file";
+  };
+
   if (loading)
     return (
       <div className="flex items-center justify-center py-24">
@@ -487,15 +495,15 @@ export default function BlogEditor() {
             </div>
           </div>
 
-          {/* PDF Documents */}
+          {/* Documents */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <FileText size={16} className="text-red-500" />
-                <p className="font-ui text-sm font-semibold text-ink-800">PDF Documents</p>
+                <p className="font-ui text-sm font-semibold text-ink-800">Documents (PDF/DOC)</p>
               </div>
               <button type="button" onClick={addPdf} className="btn-ghost text-xs gap-1">
-                <Plus size={13} /> Add PDF
+                <Plus size={13} /> Add Document
               </button>
             </div>
             <div className="space-y-3">
@@ -519,22 +527,50 @@ export default function BlogEditor() {
                   <div className="flex gap-2">
                     <input
                       type="url"
-                      placeholder="PDF URL (or upload below)"
+                      placeholder="Document URL (or upload below)"
                       value={pdf.url}
                       onChange={(e) => updatePdf(i, "url", e.target.value)}
                       className="input flex-1 text-sm"
                     />
                   </div>
-                  {/* File upload for PDF */}
-                  <label className="flex items-center gap-2 px-3 py-2 border border-dashed border-ink-200 rounded-lg cursor-pointer hover:border-saffron-300 hover:bg-white transition-colors">
-                    <Upload size={14} className="text-ink-400" />
-                    <span className="font-ui text-xs text-ink-500">Upload PDF file to S3</span>
-                    <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => handlePdfUpload(i, e)} />
+                  <label className="btn-ghost text-xs whitespace-nowrap w-fit">
+                    <Upload size={13} /> Upload
+                    <input
+                      type="file"
+                      accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      className="hidden"
+                      onChange={(e) => handlePdfUpload(i, e)}
+                    />
                   </label>
                   {pdf.url && (
-                    <p className="text-xs text-green-600 font-ui flex items-center gap-1">
-                      <Check size={11} /> File ready
-                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs text-green-600 font-ui">
+                        <Check size={11} /> File ready
+                        <span className="text-ink-400">•</span>
+                        <span className="text-ink-500 uppercase">{getDocType(pdf.url)}</span>
+                        <a
+                          href={pdf.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-ink-600 hover:text-ink-800"
+                        >
+                          View
+                        </a>
+                      </div>
+                      {getDocType(pdf.url) === "pdf" ? (
+                        <div className="border border-ink-100 rounded-lg overflow-hidden bg-white">
+                          <iframe
+                            src={pdf.url}
+                            title={`Document preview ${i + 1}`}
+                            className="w-full h-56"
+                          />
+                        </div>
+                      ) : (
+                        <div className="text-xs text-ink-500 bg-white border border-ink-100 rounded-lg px-3 py-2">
+                          Preview not available for DOC/DOCX. Use the View link to open.
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}

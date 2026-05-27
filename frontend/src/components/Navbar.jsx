@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { getSearchSuggestions } from "../services/api";
 import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award, LayoutGrid, FileText, } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -17,9 +18,12 @@ export default function Navbar({ onSearch }) {
   const [sidebarOpen,  setSidebarOpen]  = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
   const [searchVal,    setSearchVal]    = useState("");
+  const [suggestions,  setSuggestions]  = useState([]);
+  const [showSuggest,  setShowSuggest]  = useState(false);
 
   const mobileInput   = useRef(null);
   const searchAreaRef = useRef(null); // wraps search icon + input row
+  const desktopSearchRef = useRef(null);
 
   // Scroll shadow
   useEffect(() => {
@@ -45,6 +49,38 @@ export default function Navbar({ onSearch }) {
     return () => document.removeEventListener("mousedown", fn);
   }, [mobileSearch]);
 
+  useEffect(() => {
+    const q = searchVal.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      setShowSuggest(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await getSearchSuggestions(q, 8);
+        setSuggestions(data || []);
+        setShowSuggest(true);
+      } catch {
+        setSuggestions([]);
+        setShowSuggest(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [searchVal]);
+
+  useEffect(() => {
+    const fn = (e) => {
+      const inDesktop = desktopSearchRef.current?.contains(e.target);
+      const inMobile = searchAreaRef.current?.contains(e.target);
+      if (!inDesktop && !inMobile) setShowSuggest(false);
+    };
+    document.addEventListener("mousedown", fn);
+    return () => document.removeEventListener("mousedown", fn);
+  }, []);
+
   // Lock body scroll when sidebar open
   useEffect(() => {
     document.body.style.overflow = sidebarOpen ? "hidden" : "";
@@ -54,6 +90,12 @@ export default function Navbar({ onSearch }) {
   const handleChange = (val) => {
     setSearchVal(val);
     onSearch?.(val);
+  };
+
+  const applySuggestion = (title) => {
+    setSearchVal(title);
+    onSearch?.(title);
+    setShowSuggest(false);
   };
 
   return (
@@ -90,15 +132,35 @@ export default function Navbar({ onSearch }) {
           </Link>
 
           {/* Desktop search — no X button */}
-          <div className="hidden sm:flex items-center relative w-80 lg:w-96 flex-shrink-0">
+          <div ref={desktopSearchRef} className="hidden sm:flex items-center relative w-80 lg:w-96 flex-shrink-0">
             <Search size={14} className="absolute left-3 text-ink-400 pointer-events-none" />
             <input
               type="text"
               value={searchVal}
               onChange={(e) => handleChange(e.target.value)}
+              onFocus={() => setShowSuggest(true)}
               placeholder="खोजें..."
               className="w-full pl-8 pr-4 py-2 bg-ink-100 border border-transparent rounded-xl font-ui text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:bg-white focus:border-saffron-300 focus:ring-2 focus:ring-saffron-100 transition-all"
             />
+            {showSuggest && suggestions.length > 0 && searchVal.trim().length >= 2 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-ink-100 rounded-xl shadow-lg overflow-hidden z-50">
+                {suggestions.map((s) => (
+                  <button
+                    key={s._id || s.slug || s.title}
+                    type="button"
+                    onClick={() => applySuggestion(s.title)}
+                    className="w-full text-left px-3 py-2 text-sm text-ink-800 hover:bg-ink-50 flex items-center justify-between gap-2"
+                  >
+                    <span className="truncate">{s.title}</span>
+                    {s.category && (
+                      <span className="text-[11px] text-ink-500 bg-ink-100 rounded-full px-2 py-0.5 flex-shrink-0">
+                        {s.category}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Mobile: search icon — ref wraps both icon + input row for outside-click */}
@@ -123,9 +185,29 @@ export default function Navbar({ onSearch }) {
                 type="text"
                 value={searchVal}
                 onChange={(e) => handleChange(e.target.value)}
+                onFocus={() => setShowSuggest(true)}
                 placeholder="खोजें... / Search..."
                 className="w-full pl-9 pr-4 py-2.5 bg-ink-100 rounded-xl font-ui text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-saffron-100 transition-all"
               />
+              {showSuggest && suggestions.length > 0 && searchVal.trim().length >= 2 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-ink-100 rounded-xl shadow-lg overflow-hidden z-50">
+                  {suggestions.map((s) => (
+                    <button
+                      key={s._id || s.slug || s.title}
+                      type="button"
+                      onClick={() => applySuggestion(s.title)}
+                      className="w-full text-left px-3 py-2 text-sm text-ink-800 hover:bg-ink-50 flex items-center justify-between gap-2"
+                    >
+                      <span className="truncate">{s.title}</span>
+                      {s.category && (
+                        <span className="text-[11px] text-ink-500 bg-ink-100 rounded-full px-2 py-0.5 flex-shrink-0">
+                          {s.category}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

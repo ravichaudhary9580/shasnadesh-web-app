@@ -45,6 +45,25 @@ exports.getBlogs = async (req, res) => {
   }
 }
 
+// Search suggestions
+exports.getSuggestions = async (req, res) => {
+  try {
+    const { q, limit = 8 } = req.query
+    const query = (q || '').trim()
+    if (!query) return res.json([])
+
+    const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+    const suggestions = await Blog.find({ status: 'published', title: { $regex: regex } })
+      .sort({ views: -1, createdAt: -1 })
+      .limit(Number(limit))
+      .select('title slug category')
+
+    res.json(suggestions)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 exports.getBlog = async (req, res) => {
   try {
     const blog = await Blog.findOneAndUpdate(

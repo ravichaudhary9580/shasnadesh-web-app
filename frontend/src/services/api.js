@@ -32,6 +32,7 @@ export const updatePassword = (data) => api.put("/auth/update-password", data);
 export const getBlogs = (params) => api.get("/blogs", { params });
 export const getBlog = (slug) => api.get(`/blogs/${slug}`);
 export const getCategories = () => api.get("/blogs/categories/list");
+export const getSearchSuggestions = (q, limit = 8) => api.get("/blogs/suggestions", { params: { q, limit } });
 
 // --- Admin Blogs ---
 export const adminGetBlogs = (params) => api.get("/admin/blogs", { params });

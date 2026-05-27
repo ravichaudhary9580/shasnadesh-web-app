@@ -14,6 +14,16 @@ exports.uploadFile = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' })
 
+    const allowedTypes = new Set([
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ])
+
+    if (!allowedTypes.has(req.file.mimetype)) {
+      return res.status(400).json({ message: 'Only PDF or DOC/DOCX files are allowed' })
+    }
+
     const ext = path.extname(req.file.originalname)
     const key = `uploads/${randomUUID()}${ext}`
 
