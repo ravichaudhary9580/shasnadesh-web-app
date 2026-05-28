@@ -14,6 +14,8 @@
     "@tiptap/extension-youtube": "^2.5.9",
     "@tiptap/react": "^2.5.9",
     "@tiptap/starter-kit": "^2.5.9",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "axios": "^1.7.4",
     "date-fns": "^3.6.0",
     "lucide-react": "^1.16.0",

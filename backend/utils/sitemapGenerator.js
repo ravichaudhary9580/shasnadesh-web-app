@@ -13,7 +13,7 @@ async function generateSitemap() {
       .sort({ updatedAt: -1 })
       .limit(5000); // Limit to 5000 posts for sitemap
 
-    const baseUrl = process.env.FRONTEND_URL || 'https://shasnadesh.com';
+    const baseUrl = process.env.FRONTEND_URL || 'https://shasnadeshupdates.com';
     
     // Start XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -62,7 +62,7 @@ async function generateSitemap() {
  * Generate sitemap index for multiple sitemaps
  */
 function generateSitemapIndex() {
-  const baseUrl = process.env.FRONTEND_URL || 'https://shasnadesh.com';
+  const baseUrl = process.env.FRONTEND_URL || 'https://shasnadeshupdates.com';
   const today = new Date().toISOString().split('T')[0];
   
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

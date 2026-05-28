@@ -5,6 +5,6 @@ Disallow: /api
 Disallow: /login
 
 # Sitemaps
-Sitemap: https://shasnadeshupdates.vercel.app/sitemap-index.xml
-Sitemap: https://shasnadeshupdates.vercel.app/sitemap.xml
-Sitemap: https://shasnadeshupdates.vercel.app/sitemap-blogs.xml
+Sitemap: https://shasnadeshupdates.com/sitemap-index.xml
+Sitemap: https://shasnadeshupdates.com/sitemap.xml
+Sitemap: https://shasnadeshupdates.com/sitemap-blogs.xml

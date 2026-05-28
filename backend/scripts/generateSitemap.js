@@ -5,10 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/shasnadesh', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/shasnadesh');
 
 async function generateBlogSitemap() {
   try {
@@ -22,7 +19,7 @@ async function generateBlogSitemap() {
 
     console.log(`📝 Found ${blogs.length} published blogs`);
 
-    const baseUrl = process.env.FRONTEND_URL || 'https://shasnadeshupdates.vercel.app';
+    const baseUrl = process.env.FRONTEND_URL || 'https://shasnadeshupdates.com';
     
     // Start XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>

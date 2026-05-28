@@ -7,7 +7,7 @@ router.get('/generate', generateSitemapHandler);
 
 // Get sitemap index
 router.get('/index', (req, res) => {
-  const baseUrl = process.env.FRONTEND_URL || 'https://shasnadesh.com';
+  const baseUrl = process.env.FRONTEND_URL || 'https://shasnadeshupdates.com';
   const today = new Date().toISOString().split('T')[0];
   
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

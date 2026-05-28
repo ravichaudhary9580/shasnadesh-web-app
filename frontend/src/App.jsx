@@ -14,6 +14,9 @@ import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
 import AdminLayout from "./components/admin/AdminLayout";
 
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/react"
+
 function ProtectedRoute({ children }) {
   const { admin, loading } = useAuth();
   if (loading) return (
@@ -51,6 +54,8 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <VercelAnalytics/>
+        <SpeedInsights/>
         <AppRoutes />
         <PWAInstallPrompt />
         <NotificationPrompt />

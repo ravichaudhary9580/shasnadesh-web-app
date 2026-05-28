@@ -2,6 +2,7 @@ const Blog = require('../models/Blog')
 const Analytics = require('../models/Analytics')
 const slugify = require('../utils/slugify')
 const { sendNotification } = require('./pushController')
+const { generateSitemap } = require('../utils/sitemapGenerator')
 
 // Public
 exports.getBlogs = async (req, res) => {
@@ -100,6 +101,9 @@ exports.createBlog = async (req, res) => {
         `/blog/${blog.slug}`,
         blog.thumbnail || '/logo512.png' // Use blog thumbnail or fallback to logo
       ).catch(err => console.error('Push notification failed:', err))
+      
+      // Regenerate sitemap when blog is published
+      generateSitemap().catch(err => console.error('Sitemap regeneration failed:', err))
     }
     
     res.status(201).json(blog)
@@ -136,6 +140,12 @@ exports.updateBlog = async (req, res) => {
       { returnDocument: 'after', runValidators: true } // runValidators ensures schema rules apply on update
     )
     if (!blog) return res.status(404).json({ message: 'Blog not found' })
+    
+    // Regenerate sitemap if blog status changed to published
+    if (status !== undefined && status === 'published') {
+      generateSitemap().catch(err => console.error('Sitemap regeneration failed:', err))
+    }
+    
     res.json(blog)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -156,8 +166,15 @@ exports.toggleStatus = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id)
     if (!blog) return res.status(404).json({ message: 'Blog not found' })
-    blog.status = blog.status === 'published' ? 'draft' : 'published'
+    const wasPublished = blog.status === 'published'
+    blog.status = wasPublished ? 'draft' : 'published'
     await blog.save()
+    
+    // Regenerate sitemap if status changed to published
+    if (!wasPublished && blog.status === 'published') {
+      generateSitemap().catch(err => console.error('Sitemap regeneration failed:', err))
+    }
+    
     res.json(blog)
   } catch (error) {
     res.status(500).json({ message: error.message })

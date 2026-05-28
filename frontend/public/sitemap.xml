@@ -6,7 +6,7 @@
     
     <!-- Home Page -->
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/</loc>
+        <loc>https://shasnadeshupdates.com/</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
@@ -14,7 +14,7 @@
     
     <!-- Login Page -->
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/login</loc>
+        <loc>https://shasnadeshupdates.com/login</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
@@ -22,21 +22,21 @@
     
     <!-- Admin Pages (lower priority) -->
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/admin</loc>
+        <loc>https://shasnadeshupdates.com/admin</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/admin/blogs</loc>
+        <loc>https://shasnadeshupdates.com/admin/blogs</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/admin/analytics</loc>
+        <loc>https://shasnadeshupdates.com/admin/analytics</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
@@ -44,28 +44,28 @@
     
     <!-- Static Pages -->
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/about</loc>
+        <loc>https://shasnadeshupdates.com/about</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/contact</loc>
+        <loc>https://shasnadeshupdates.com/contact</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/privacy</loc>
+        <loc>https://shasnadeshupdates.com/privacy</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/terms</loc>
+        <loc>https://shasnadeshupdates.com/terms</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
@@ -73,35 +73,35 @@
     
     <!-- Category Pages -->
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/?category=government</loc>
+        <loc>https://shasnadeshupdates.com/?category=government</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/?category=education</loc>
+        <loc>https://shasnadeshupdates.com/?category=education</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/?category=health</loc>
+        <loc>https://shasnadeshupdates.com/?category=health</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/?category=finance</loc>
+        <loc>https://shasnadeshupdates.com/?category=finance</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.vercel.app/?category=technology</loc>
+        <loc>https://shasnadeshupdates.com/?category=technology</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
