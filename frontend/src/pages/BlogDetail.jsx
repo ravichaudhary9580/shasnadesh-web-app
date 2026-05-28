@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { getBlog, trackVisit } from "../services/api";
 import Navbar from "../components/Navbar";
+import SEO from "../components/SEO";
 import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "../utils/imageUtils";
 import { Download, ExternalLink } from "lucide-react";
+import { generateBlogSchema, generateBreadcrumbSchema, injectSchema } from "../utils/schemaUtils";
 
 // ── Inline PDF viewer — always open, no toggle ─────────────────────────────
 function PdfViewer({ pdf }) {
@@ -77,12 +79,23 @@ export default function BlogDetail() {
       .then(({ data }) => {
         setBlog(data);
         trackVisit({ blogId: data._id, slug: data.slug, referrer: document.referrer }).catch(() => {});
-        document.title = `${data.title} | Shasnadesh`;
       })
       .catch(() => navigate("/", { replace: true }))
       .finally(() => setLoading(false));
-    return () => { document.title = "Shasnadesh"; };
   }, [slug, navigate]);
+
+  // Inject structured data when blog loads
+  useEffect(() => {
+    if (!blog) return;
+    const cleanup1 = injectSchema(generateBlogSchema(blog));
+    const breadcrumbItems = [
+      { name: 'Home', url: 'https://shasnadeshupdates.com' },
+      { name: blog.category || 'Blog', url: `https://shasnadeshupdates.com/?category=${blog.category}` },
+      { name: blog.title, url: `https://shasnadeshupdates.com/blog/${blog.slug}` }
+    ];
+    const cleanup2 = injectSchema(generateBreadcrumbSchema(breadcrumbItems));
+    return () => { cleanup1(); cleanup2(); };
+  }, [blog]);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -106,6 +119,20 @@ export default function BlogDetail() {
 
   return (
     <div className="min-h-screen bg-ink-50">
+      {blog && (
+        <SEO 
+          title={`${blog.title} | Shasnadesh Updates`}
+          description={blog.excerpt || blog.title}
+          keywords={blog.tags?.join(', ') || ''}
+          image={blog.thumbnail ? `https://shasnadeshupdates.com${blog.thumbnail}` : undefined}
+          url={`https://shasnadeshupdates.com/blog/${blog.slug}`}
+          type="article"
+          publishedTime={blog.createdAt}
+          modifiedTime={blog.updatedAt}
+          category={blog.category}
+          tags={blog.tags}
+        />
+      )}
       <Navbar />
 
       {/* Thumbnail hero */}
