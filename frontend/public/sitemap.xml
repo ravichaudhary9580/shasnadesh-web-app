@@ -12,36 +12,6 @@
         <priority>1.0</priority>
     </url>
     
-    <!-- Login Page -->
-    <url>
-        <loc>https://shasnadeshupdates.com/login</loc>
-        <lastmod>2025-01-01</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.5</priority>
-    </url>
-    
-    <!-- Admin Pages (lower priority) -->
-    <url>
-        <loc>https://shasnadeshupdates.com/admin</loc>
-        <lastmod>2025-01-01</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.3</priority>
-    </url>
-    
-    <url>
-        <loc>https://shasnadeshupdates.com/admin/blogs</loc>
-        <lastmod>2025-01-01</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.3</priority>
-    </url>
-    
-    <url>
-        <loc>https://shasnadeshupdates.com/admin/analytics</loc>
-        <lastmod>2025-01-01</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.3</priority>
-    </url>
-    
     <!-- Static Pages -->
     <url>
         <loc>https://shasnadeshupdates.com/about</loc>
@@ -51,21 +21,7 @@
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.com/contact</loc>
-        <lastmod>2025-01-01</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-    
-    <url>
-        <loc>https://shasnadeshupdates.com/privacy</loc>
-        <lastmod>2025-01-01</lastmod>
-        <changefreq>yearly</changefreq>
-        <priority>0.5</priority>
-    </url>
-    
-    <url>
-        <loc>https://shasnadeshupdates.com/terms</loc>
+        <loc>https://shasnadeshupdates.com/privacy-policy</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
@@ -73,7 +29,7 @@
     
     <!-- Category Pages -->
     <url>
-        <loc>https://shasnadeshupdates.com/?category=government</loc>
+        <loc>https://shasnadeshupdates.com/?category=up-government</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
@@ -87,21 +43,35 @@
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.com/?category=health</loc>
+        <loc>https://shasnadeshupdates.com/?category=vacancy</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.com/?category=finance</loc>
+        <loc>https://shasnadeshupdates.com/?category=scholarship</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://shasnadeshupdates.com/?category=technology</loc>
+        <loc>https://shasnadeshupdates.com/?category=praroop</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.com/?category=holiday-calendar</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://shasnadeshupdates.com/?category=other</loc>
         <lastmod>2025-01-01</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
