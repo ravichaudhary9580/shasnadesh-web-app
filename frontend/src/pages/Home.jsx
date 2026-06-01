@@ -5,8 +5,10 @@ import BlogCard from "../components/BlogCard";
 import SearchFilter from "../components/SearchFilter";
 import FeaturedSlideshow from "../components/FeaturedSlideshow";
 import Footer from "../components/Footer";
+import SEO from "../components/SEO";
 import { getBlogs } from "../services/api";
 import { Newspaper } from "lucide-react";
+import { generateWebsiteSchema, generateOrganizationSchema, injectSchema } from "../utils/schemaUtils";
 
 const SORT_OPTIONS = [
   { label: "Latest",      value: "-createdAt" },
@@ -71,6 +73,13 @@ export default function Home() {
 
   useEffect(() => { fetchFeaturedBlogs(); }, [fetchFeaturedBlogs]);
 
+  // Inject structured data
+  useEffect(() => {
+    const cleanup1 = injectSchema(generateWebsiteSchema());
+    const cleanup2 = injectSchema(generateOrganizationSchema());
+    return () => { cleanup1(); cleanup2(); };
+  }, []);
+
   // Sync page and filters with URL params when they change (e.g., logo click)
   useEffect(() => {
     const urlPage = parseInt(searchParams.get("page")) || 1;
@@ -129,6 +138,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO 
+        title="Shasnadesh Updates - सरकारी आदेश और अपडेट | Government Orders & Schemes"
+        description="भारत सरकार के नवीनतम आदेश, योजनाएं और अपडेट। Latest government orders, schemes and updates in Hindi and English. Sarkari Yojana, Government Schemes."
+        keywords="सरकारी आदेश, शासनादेश, government orders, sarkari yojana, govt schemes, india updates, सरकारी योजना, government updates, भारत सरकार"
+        url="https://shasnadeshupdates.com"
+      />
 
       <Navbar onSearch={(v) => updateFilter("search", v)} />
 

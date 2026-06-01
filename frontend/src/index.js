@@ -3,8 +3,17 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<React.StrictMode><App /></React.StrictMode>);
+const rootElement = document.getElementById("root");
+
+// Support for react-snap pre-rendering
+if (rootElement.hasChildNodes()) {
+  // Hydrate for pre-rendered content (from react-snap)
+  ReactDOM.hydrateRoot(rootElement, <React.StrictMode><App /></React.StrictMode>);
+} else {
+  // Normal render for development
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(<React.StrictMode><App /></React.StrictMode>);
+}
 
 // PWA Service Worker Registration
 function registerServiceWorker() {
