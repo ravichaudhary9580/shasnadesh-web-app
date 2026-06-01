@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { getBlog, trackVisit } from "../services/api";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "../utils/imageUtils";
 import { Download, ExternalLink } from "lucide-react";
@@ -261,17 +262,7 @@ export default function BlogDetail() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-ink-100 py-8">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-center">
-            <div className="text-center">
-              <p className="font-hindi text-ink-400 text-sm">सत्यमेव जयते · Satyameva Jayate</p>
-              <p className="font-ui text-xs text-ink-300 mt-1">© 2025 Shasnadeshupdates.com</p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer variant="narrow" />
     </div>
   );
 }

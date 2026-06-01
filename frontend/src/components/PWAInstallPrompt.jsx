@@ -82,7 +82,7 @@ const PWAInstallPrompt = () => {
   }
 
   return (
-    <div className="fixed top-0 inset-x-0 z-[60] sm:top-auto sm:bottom-4 sm:right-4 sm:inset-x-auto sm:max-w-sm">
+    <div className="fixed top-12 inset-x-0 z-40 sm:top-auto sm:bottom-4 sm:right-4 sm:inset-x-auto sm:max-w-sm">
       <div className="bg-white border-b border-ink-200 sm:border sm:rounded-lg shadow-sm sm:shadow-lg px-3 py-2.5 sm:p-4 animate-fade-in">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-saffron-100 flex items-center justify-center flex-shrink-0">

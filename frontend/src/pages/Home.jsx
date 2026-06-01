@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import BlogCard from "../components/BlogCard";
 import SearchFilter from "../components/SearchFilter";
 import FeaturedSlideshow from "../components/FeaturedSlideshow";
+import Footer from "../components/Footer";
 import { getBlogs } from "../services/api";
 import { Newspaper } from "lucide-react";
 
@@ -307,37 +308,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-ink-100 py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-center">
-            <div className="text-center space-y-1">
-              <p className="font-hindi text-ink-400 text-sm">सत्यमेव जयते · Satyameva Jayate</p>
-              <p className="font-ui text-xs text-ink-300">© 2025 Shasnadeshupdates.com</p>
-              <p className="font-ui text-xs text-ink-300">
-                Designed by{" "}
-                <a 
-                  href="https://bharatwebservices.live/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-saffron-500 font-medium hover:text-saffron-600 transition-colors"
-                >
-                  dev
-                </a>
-                .
-                <a 
-                  href="https://ravichaudhary9580.github.io/Portfolio-New/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-saffron-500 font-medium hover:text-saffron-600 transition-colors"
-                >
-                  ravi
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

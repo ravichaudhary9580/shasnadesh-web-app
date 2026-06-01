@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getSearchSuggestions } from "../services/api";
-import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award, LayoutGrid, FileText, } from "lucide-react";
+import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award, LayoutGrid, FileText, CalendarDays } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "होम",                    to: "/",                          icon: HomeIcon },
   { label: "उत्तर प्रदेश शासनादेश", to: "/?category=up-government", icon: Landmark },
   { label: "शिक्षा विभाग",           to: "/?category=education",     icon: BookOpen },
-  { label: "वैकेंस अलर्ट",           to: "/?category=vacancy",       icon: Briefcase },
+  { label: "वैकेंसी",           to: "/?category=vacancy",       icon: Briefcase },
+  { label: "अवकाश कैलेंडर",      to: "/?category=holiday-calendar", icon: CalendarDays },
   { label: "छात्रवृत्ति",            to: "/?category=scholarship",   icon: Award },
   { label: "प्रारूप",                to: "/?category=praroop",       icon: FileText },
   { label: "अन्य",                   to: "/?category=other",         icon: LayoutGrid },
@@ -107,7 +108,7 @@ export default function Navbar({ onSearch }) {
           : "bg-white border-b border-ink-100"
       }`}>
         <div className={`max-w-6xl mx-auto px-4 sm:px-6 flex items-center gap-3 transition-all duration-300 ${
-          scrolled ? "h-10 sm:h-14" : "h-12 sm:h-16"
+          scrolled ? "h-12 sm:h-14" : "h-12 sm:h-16"
         }`}>
 
           {/* Hamburger */}
@@ -121,9 +122,13 @@ export default function Navbar({ onSearch }) {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
-            <span className="w-9 h-9 rounded-full bg-saffron-500 flex items-center justify-center text-white font-display font-bold text-base shadow-sm group-hover:scale-110 transition-transform">
-              श
-            </span>
+            <img
+              src={`${process.env.PUBLIC_URL}/logo192.png`}
+              alt="Shasnadesh"
+              className="w-9 h-9 rounded-full shadow-sm group-hover:scale-110 transition-transform"
+              loading="eager"
+            />
+
           </Link>
 
           {/* Site name */}

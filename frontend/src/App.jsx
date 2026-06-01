@@ -6,6 +6,8 @@ import NotificationPrompt from "./components/NotificationPrompt";
 
 import Home from "./pages/Home";
 import BlogDetail from "./pages/BlogDetail";
+import About from "./pages/About";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Login from "./pages/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import BlogEditor from "./pages/admin/BlogEditor";
@@ -33,6 +35,8 @@ function AppRoutes() {
       {/* Public */}
       <Route path="/" element={<Home />} />
       <Route path="/blog/:slug" element={<BlogDetail />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/login" element={<Login />} />
 
       {/* Admin */}

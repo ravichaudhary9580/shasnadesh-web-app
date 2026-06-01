@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getCategories } from "../services/api";
 
 export default function SearchFilter({
@@ -10,12 +10,48 @@ export default function SearchFilter({
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [categories, setCategories] = useState(["All"]);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     getCategories()
       .then(({ data }) => setCategories(["All", ...data]))
       .catch(() => setCategories(["All", "hindi", "english", "news", "culture", "technology", "lifestyle", "opinion"]));
   }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    let direction = -1;
+    let frameId = 0;
+    let paused = false;
+
+    const handleEnter = () => { paused = true; };
+    const handleLeave = () => { paused = false; };
+
+    const step = () => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+      if (!paused) {
+        const speed = Math.min(1.5, 0.4 + categories.length * 0.03);
+        el.scrollLeft += speed * direction;
+        if (el.scrollLeft >= maxScroll) direction = -1;
+        if (el.scrollLeft <= 0) direction = 1;
+      }
+      frameId = window.requestAnimationFrame(step);
+    };
+
+    el.addEventListener("mouseenter", handleEnter);
+    el.addEventListener("mouseleave", handleLeave);
+    frameId = window.requestAnimationFrame(step);
+    return () => {
+      el.removeEventListener("mouseenter", handleEnter);
+      el.removeEventListener("mouseleave", handleLeave);
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [categories.length]);
 
   const handleSearch = (e) => { setSearch(e.target.value); onSearch?.(e.target.value); };
   const handleCategory = (cat) => { setActiveCategory(cat); onCategory?.(cat === "All" ? "" : cat); };
@@ -38,8 +74,8 @@ export default function SearchFilter({
       )}
 
       {/* Category pills — horizontal scroll on mobile, wrap on desktop */}
-      <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-2 w-max sm:w-auto sm:flex-wrap">
+      <div ref={scrollRef} className="overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-2 w-max">
           {categories.map((cat) => (
             <button
               key={cat}
