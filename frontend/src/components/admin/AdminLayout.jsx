@@ -13,7 +13,7 @@ import {
   ChevronRight,
   Menu,
   ExternalLink,
-  Zap,
+
 } from "lucide-react";
 
 const navItems = [
@@ -44,9 +44,7 @@ export default function AdminLayout() {
           collapsed && !isMobile ? "px-3 py-4 justify-center" : "px-5 py-4 gap-3"
         }`}
       >
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-saffron-400 to-saffron-600 flex items-center justify-center text-white font-display font-bold text-lg shadow-lg flex-shrink-0">
-          <Zap size={18} strokeWidth={2.5} />
-        </div>
+        <img src="/logo192.png" alt="Logo" className="w-9 h-9 rounded-xl shadow-lg flex-shrink-0" />
         {(!collapsed || isMobile) && (
           <div className="overflow-hidden">
             <p className="font-display font-bold text-white text-sm leading-none">Shasnadeshupdates.com</p>

@@ -40,9 +40,7 @@ export default function Login() {
         <div className="bg-ink-50 rounded-3xl p-8 shadow-2xl">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-saffron-500 flex items-center justify-center text-white text-3xl font-display font-bold mx-auto mb-4 shadow-lg">
-              श
-            </div>
+            <img src="/logo192.png" alt="Logo" className="w-16 h-16 rounded-2xl mx-auto mb-4 shadow-lg" />
             <h1 className="font-display text-2xl font-bold text-ink-900">Admin Login</h1>
             <p className="font-hindi text-ink-400 text-sm mt-1">प्रशासक पैनल</p>
           </div>
