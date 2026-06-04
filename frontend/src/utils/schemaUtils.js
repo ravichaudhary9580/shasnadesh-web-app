@@ -54,9 +54,26 @@ export function generateOrganizationSchema() {
     "name": "Shasnadesh Updates",
     "alternateName": "शासनादेश अपडेट",
     "url": "https://shasnadeshupdates.com",
-    "logo": "https://shasnadeshupdates.com/logo512.png",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://shasnadeshupdates.com/logo512.png",
+      "width": 512,
+      "height": 512
+    },
     "description": "Trusted source for government orders and updates in India",
-    "sameAs": []
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "contact@shasnadeshupdates.com",
+      "contactType": "Customer Service",
+      "availableLanguage": ["Hindi", "English"]
+    },
+    "sameAs": [
+      "https://www.facebook.com/shasnadeshupdates",
+      "https://www.instagram.com/shasnadeshupdates",
+      "https://twitter.com/shasnadeshupdates",
+      "https://www.youtube.com/@shasnadeshupdates",
+      "https://t.me/shasnadeshupdates"
+    ]
   };
 }
 

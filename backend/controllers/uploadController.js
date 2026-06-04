@@ -19,12 +19,17 @@ exports.uploadFile = async (req, res) => {
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.google-apps.document',
-      'application/vnd.oasis.opendocument.text', // ODT files
-      'text/plain' // Plain text files
+      'application/vnd.oasis.opendocument.text',
+      'text/plain',
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/gif'
     ])
 
     if (!allowedTypes.has(req.file.mimetype)) {
-      return res.status(400).json({ message: 'Only PDF, DOC, DOCX, Google Docs, ODT, or text files are allowed' })
+      return res.status(400).json({ message: 'Only PDF, DOC, DOCX, images (JPEG, PNG, WebP, GIF), or text files are allowed' })
     }
 
     const ext = path.extname(req.file.originalname)
