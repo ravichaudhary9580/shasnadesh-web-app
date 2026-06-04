@@ -8,7 +8,7 @@ const vapidKeys = {
 }
 
 webPush.setVapidDetails(
-  'mailto:' + (process.env.VAPID_EMAIL || 'admin@shasnadesh.com'),
+  'mailto:' + (process.env.VAPID_EMAIL || 'admin@shasnadeshupdates.com'),
   vapidKeys.publicKey,
   vapidKeys.privateKey
 )

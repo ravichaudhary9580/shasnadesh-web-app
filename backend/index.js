@@ -28,7 +28,7 @@ app.use('/api/analytics', require('./routes/analytics'))
 app.use('/api/sitemap', require('./routes/sitemap'))
 app.use('/api/push', require('./routes/push'))
 
-app.get('/', (req, res) => res.json({ message: 'Shasnadesh API running' }))
+app.get('/', (req, res) => res.json({ message: 'Shasnadesh Updates API running' }))
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

@@ -60,6 +60,18 @@ export default function Footer({ variant = "wide" }) {
               About Us
             </Link>
             <Link
+              to="/contact"
+              className="text-ink-500 hover:text-saffron-600 transition-colors"
+            >
+              Contact Us
+            </Link>
+            <Link
+              to="/disclaimer"
+              className="text-ink-500 hover:text-saffron-600 transition-colors font-hindi"
+            >
+              अस्वीकरण
+            </Link>
+            <Link
               to="/privacy-policy"
               className="text-ink-500 hover:text-saffron-600 transition-colors"
             >

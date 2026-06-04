@@ -39,14 +39,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Shasnadesh - Government Orders Portal (Desktop)"
+      "label": "Shasnadesh Updates- Government Orders Portal (Desktop)"
     },
     {
       "src": "screenshots/mobile.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Shasnadesh - Government Orders Portal (Mobile)"
+      "label": "Shasnadesh Updates - Government Orders Portal (Mobile)"
     }
   ],
   "shortcuts": [

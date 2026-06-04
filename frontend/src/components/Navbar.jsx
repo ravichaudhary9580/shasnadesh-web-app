@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { label: "होम",                    to: "/",                          icon: HomeIcon },
   { label: "उत्तर प्रदेश शासनादेश", to: "/?category=up-government", icon: Landmark },
   { label: "शिक्षा विभाग",           to: "/?category=education",     icon: BookOpen },
-  { label: "वैकेंसी",           to: "/?category=vacancy",       icon: Briefcase },
+  { label: "वैकेंसी अलर्ट",           to: "/?category=vacancy",       icon: Briefcase },
   { label: "अवकाश कैलेंडर",      to: "/?category=holiday-calendar", icon: CalendarDays },
   { label: "छात्रवृत्ति",            to: "/?category=scholarship",   icon: Award },
   { label: "प्रारूप",                to: "/?category=praroop",       icon: FileText },
@@ -124,7 +124,7 @@ export default function Navbar({ onSearch }) {
           <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
             <img
               src={`${process.env.PUBLIC_URL}/logo192.png`}
-              alt="Shasnadesh"
+              alt="Shasnadesh Updates"
               className="w-9 h-9 rounded-full shadow-sm group-hover:scale-110 transition-transform"
               loading="eager"
             />
@@ -232,9 +232,7 @@ export default function Navbar({ onSearch }) {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-ink-100">
               <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-saffron-500 flex items-center justify-center text-white font-display font-bold text-sm">
-                  श
-                </span>
+                <img src="/logo192.png" alt="Logo" className="w-8 h-8 rounded-full shadow-sm" />
                 <span className="font-display text-base font-bold text-ink-900">Shasnadeshupdates.com</span>
               </div>
               <button
