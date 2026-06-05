@@ -1,3 +1,4 @@
+# Allow all search engines to crawl entire site
 User-agent: *
 Allow: /
 Disallow: /admin
