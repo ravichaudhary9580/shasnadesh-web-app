@@ -1,17 +1,18 @@
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'shasnadesh-v4';
+const CACHE_NAME = 'shasnadesh-v5'; // ← bumped version to force fresh install
 const OFFLINE_URL = '/offline.html';
+const BASE_URL = 'https://www.shasnadeshupdates.com';
 
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.ico',
-  '/offline.html',
-  '/logo192.png',
-  '/logo512.png',
-  '/robots.txt',
+  `${BASE_URL}/`,
+  `${BASE_URL}/index.html`,
+  `${BASE_URL}/manifest.json`,
+  `${BASE_URL}/favicon.ico`,
+  `${BASE_URL}/offline.html`,
+  `${BASE_URL}/logo192.png`,
+  `${BASE_URL}/logo512.png`,
+  `${BASE_URL}/robots.txt`,
 ];
 
 // ── Install ──────────────────────────────────────────────────────────────────
@@ -42,32 +43,33 @@ self.addEventListener('activate', (event) => {
 
 // ── Fetch ─────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
-
-  // Skip chrome-extension and non-http requests
   if (!event.request.url.startsWith('http')) return;
 
+  // ✅ FIX: Ignore cross-origin requests that aren't whitelisted
   const url = new URL(event.request.url);
+  const isOwnOrigin = url.origin === self.location.origin;
+  const isGoogleFont =
+    url.hostname === 'fonts.googleapis.com' ||
+    url.hostname === 'fonts.gstatic.com';
+  const isS3 = url.hostname.includes('amazonaws.com');
 
-  // ── 1. API requests → always network, never cache ──────────────────────────
+  // ── 1. API requests → network only ────────────────────────────────────────
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request).catch(
-        () => new Response(JSON.stringify({ error: 'You are offline' }), {
-          status: 503,
-          headers: { 'Content-Type': 'application/json' },
-        })
+        () =>
+          new Response(JSON.stringify({ error: 'You are offline' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' },
+          })
       )
     );
     return;
   }
 
   // ── 2. Google Fonts → cache-first ─────────────────────────────────────────
-  if (
-    url.hostname === 'fonts.googleapis.com' ||
-    url.hostname === 'fonts.gstatic.com'
-  ) {
+  if (isGoogleFont) {
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) =>
         cache.match(event.request).then(
@@ -83,8 +85,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ── 3. S3 images → cache-first, long lived ────────────────────────────────
-  if (url.hostname.includes('amazonaws.com')) {
+  // ── 3. S3 images → cache-first ────────────────────────────────────────────
+  if (isS3) {
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) =>
         cache.match(event.request).then(
@@ -100,17 +102,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ── 4. Navigation requests (HTML pages) → network-first ───────────────────
+  // ✅ FIX: Skip unknown cross-origin requests entirely
+  if (!isOwnOrigin) return;
+
+  // ── 4. Navigation → network-first, fallback to offline page ───────────────
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // Cache successful navigation responses
           if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) =>
-              cache.put(event.request, clone)
-            );
+            caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put(event.request, response.clone()));
           }
           return response;
         })
@@ -123,15 +126,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ── 5. Static assets (JS, CSS, images) → network-first, fallback cache ────
+  // ── 5. Static assets → network-first, fallback cache ─────────────────────
   event.respondWith(
     fetch(event.request)
       .then((response) => {
         if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) =>
-            cache.put(event.request, clone)
-          );
+          caches
+            .open(CACHE_NAME)
+            .then((cache) => cache.put(event.request, response.clone()));
         }
         return response;
       })
@@ -146,7 +148,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// ── Push Notification ────────────────────────────────────────────────────────
+// ── Push Notifications ────────────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   const title = data.title || 'नया ब्लॉग पोस्ट';
@@ -154,38 +156,32 @@ self.addEventListener('push', (event) => {
     body: data.body || 'नया ब्लॉग उपलब्ध है',
     icon: '/logo192.png',
     badge: '/logo192.png',
-    image: data.image, // Large thumbnail image
+    image: data.image,
     data: { url: data.url || '/' },
     vibrate: [200, 100, 200],
     tag: 'blog-notification',
     requireInteraction: false,
     actions: [
       { action: 'open', title: 'पढ़ें', icon: '/logo192.png' },
-      { action: 'close', title: 'बंद करें' }
-    ]
+      { action: 'close', title: 'बंद करें' },
+    ],
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  
-  if (event.action === 'close') {
-    return;
-  }
-  
+  if (event.action === 'close') return;
+
   const url = event.notification.data.url || '/';
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
+    clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
         for (const client of clientList) {
-          if (client.url === url && 'focus' in client) {
-            return client.focus();
-          }
+          if (client.url === url && 'focus' in client) return client.focus();
         }
-        if (clients.openWindow) {
-          return clients.openWindow(url);
-        }
+        if (clients.openWindow) return clients.openWindow(url);
       })
   );
 });

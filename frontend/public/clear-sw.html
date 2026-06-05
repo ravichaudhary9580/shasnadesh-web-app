@@ -1,82 +1,368 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Clear Service Workers</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
-        .success { color: green; }
-        .error { color: red; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SW Cleaner — Shasnadesh Updates</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="https://www.shasnadeshupdates.com/logo192.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #faf8f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e8e6e0;
+      border-radius: 14px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 620px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .header-icon {
+      width: 40px;
+      height: 40px;
+      background: #fff3e0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .badge {
+      font-size: 11px;
+      background: #fff3e0;
+      color: #854f0b;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric {
+      background: #f5f4f0;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    #status-badge {
+      font-size: 13px;
+      font-weight: 500;
+      margin-top: 2px;
+      color: #888;
+    }
+
+    #sw-list {
+      margin-bottom: 1.25rem;
+    }
+
+    .sw-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: #fff8f0;
+      border: 1px solid #fde8c8;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .sw-row-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e8920a;
+      flex-shrink: 0;
+    }
+
+    .sw-row-scope {
+      flex: 1;
+      color: #333;
+      word-break: break-all;
+    }
+
+    .sw-row-state {
+      font-size: 11px;
+      color: #888;
+      background: #f0ede8;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #333;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    button:hover { background: #f5f4f0; }
+    button:active { opacity: 0.85; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #btn-clear-all {
+      background: #e8920a;
+      color: #fff;
+      border-color: #e8920a;
+    }
+
+    #btn-clear-all:hover { background: #cf7e08; }
+
+    .log-box {
+      background: #1a1a1a;
+      color: #ccc;
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12.5px;
+      min-height: 100px;
+      max-height: 220px;
+      overflow-y: auto;
+      line-height: 1.8;
+    }
+
+    .log-box::-webkit-scrollbar { width: 4px; }
+    .log-box::-webkit-scrollbar-track { background: #2a2a2a; }
+    .log-box::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
+
+    .log-info   { color: #aaa; }
+    .log-success { color: #4caf50; }
+    .log-warn   { color: #e8920a; }
+    .log-error  { color: #ef5350; }
+
+    .log-label {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 480px) {
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .metric:last-child { grid-column: span 2; }
+    }
+  </style>
 </head>
 <body>
-    <h1>Clear Service Workers</h1>
-    <p>Click the button below to clear all service workers and caches:</p>
-    
-    <button onclick="clearServiceWorkers()">Clear Service Workers</button>
-    <button onclick="clearCaches()">Clear Caches</button>
-    <button onclick="reloadPage()">Reload Page</button>
-    
-    <div id="result"></div>
-    
-    <script>
-        async function clearServiceWorkers() {
-            if ('serviceWorker' in navigator) {
-                try {
-                    const registrations = await navigator.serviceWorker.getRegistrations();
-                    for (let registration of registrations) {
-                        await registration.unregister();
-                        console.log('Unregistered:', registration);
-                    }
-                    document.getElementById('result').innerHTML = 
-                        `<p class="success">Unregistered ${registrations.length} service worker(s)</p>`;
-                } catch (error) {
-                    document.getElementById('result').innerHTML = 
-                        `<p class="error">Error: ${error.message}</p>`;
-                }
-            } else {
-                document.getElementById('result').innerHTML = 
-                    '<p>Service Workers not supported</p>';
-            }
-        }
-        
-        async function clearCaches() {
-            if ('caches' in window) {
-                try {
-                    const cacheNames = await caches.keys();
-                    for (let cacheName of cacheNames) {
-                        await caches.delete(cacheName);
-                        console.log('Deleted cache:', cacheName);
-                    }
-                    document.getElementById('result').innerHTML = 
-                        `<p class="success">Deleted ${cacheNames.length} cache(s)</p>`;
-                } catch (error) {
-                    document.getElementById('result').innerHTML = 
-                        `<p class="error">Error: ${error.message}</p>`;
-                }
-            } else {
-                document.getElementById('result').innerHTML = 
-                    '<p>Cache API not supported</p>';
-            }
-        }
-        
-        function reloadPage() {
-            location.reload();
-        }
-        
-        // Auto-run on page load
-        window.addEventListener('load', () => {
-            console.log('Clear Service Workers page loaded');
-            console.log('Current service workers:');
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    console.log('Found', registrations.length, 'service workers');
-                    registrations.forEach(reg => {
-                        console.log(' -', reg.scope);
-                    });
-                });
-            }
+  <div class="card">
+
+    <div class="header">
+      <div class="header-icon">🔧</div>
+      <div>
+        <h1>SW Cleaner <span class="badge">shasnadeshupdates.com</span></h1>
+      </div>
+    </div>
+    <p class="subtitle" style="margin-top:8px;">Detects, unregisters, and clears all cached service workers in one click.</p>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Service workers</div>
+        <div class="metric-value" id="sw-count">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Caches found</div>
+        <div class="metric-value" id="cache-count">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Status</div>
+        <div id="status-badge">Scanning…</div>
+      </div>
+    </div>
+
+    <div id="sw-list"></div>
+
+    <div class="actions">
+      <button id="btn-clear-all" onclick="clearAll()">
+        🗑️ Clear everything
+      </button>
+      <button onclick="scanSW()">
+        🔄 Re-scan
+      </button>
+      <button onclick="location.reload(true)">
+        ▶️ Hard reload
+      </button>
+    </div>
+
+    <div class="log-label">Activity log</div>
+    <div class="log-box" id="log"></div>
+
+  </div>
+
+  <script>
+    function log(msg, type = 'info') {
+      const el = document.getElementById('log');
+      const ts = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = `log-${type}`;
+      div.textContent = `[${ts}] ${msg}`;
+      el.appendChild(div);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function setStatus(txt, color = '#888') {
+      const el = document.getElementById('status-badge');
+      el.textContent = txt;
+      el.style.color = color;
+    }
+
+    async function scanSW() {
+      document.getElementById('sw-count').textContent = '—';
+      document.getElementById('cache-count').textContent = '—';
+      document.getElementById('sw-list').innerHTML = '';
+      setStatus('Scanning…', '#888');
+      log('Scanning for service workers and caches…', 'info');
+
+      if (!('serviceWorker' in navigator)) {
+        log('Service workers not supported in this browser.', 'warn');
+        setStatus('Not supported', '#e8920a');
+        return;
+      }
+
+      const regs = await navigator.serviceWorker.getRegistrations();
+      document.getElementById('sw-count').textContent = regs.length;
+      log(`Found ${regs.length} service worker(s).`, regs.length ? 'warn' : 'success');
+
+      if (regs.length) {
+        const list = document.getElementById('sw-list');
+        regs.forEach(r => {
+          const state = r.active ? 'active' : r.waiting ? 'waiting' : 'installing';
+          const row = document.createElement('div');
+          row.className = 'sw-row';
+          row.innerHTML = `
+            <div class="sw-row-dot"></div>
+            <span class="sw-row-scope">${r.scope}</span>
+            <span class="sw-row-state">${state}</span>
+          `;
+          list.appendChild(row);
+          log(`  Scope: ${r.scope} [${state}]`, 'warn');
         });
-    </script>
+      }
+
+      const cacheNames = ('caches' in window) ? await caches.keys() : [];
+      document.getElementById('cache-count').textContent = cacheNames.length;
+
+      if (cacheNames.length) {
+        log(`Caches found: ${cacheNames.join(', ')}`, 'warn');
+      } else {
+        log('No caches found.', 'success');
+      }
+
+      if (!regs.length && !cacheNames.length) {
+        setStatus('All clear ✓', '#4caf50');
+        log('No service workers or caches detected. Site is clean.', 'success');
+      } else {
+        setStatus('Needs clearing', '#e8920a');
+      }
+    }
+
+    async function clearAll() {
+      const btn = document.getElementById('btn-clear-all');
+      btn.disabled = true;
+      btn.textContent = '⏳ Clearing…';
+      log('Starting full clear…', 'info');
+
+      let swCount = 0, cacheCount = 0;
+
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) {
+          await r.unregister();
+          log(`Unregistered SW: ${r.scope}`, 'success');
+          swCount++;
+        }
+      }
+
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (const k of keys) {
+          await caches.delete(k);
+          log(`Deleted cache: ${k}`, 'success');
+          cacheCount++;
+        }
+      }
+
+      log(`Done. Removed ${swCount} SW(s) and ${cacheCount} cache(s).`, 'success');
+      log('You can now hard reload the main site — it will fetch a fresh service worker.', 'info');
+
+      setStatus('Cleared ✓', '#4caf50');
+      document.getElementById('sw-count').textContent = '0';
+      document.getElementById('cache-count').textContent = '0';
+      document.getElementById('sw-list').innerHTML = '';
+
+      btn.disabled = false;
+      btn.textContent = '🗑️ Clear everything';
+    }
+
+    // Auto-scan on load
+    window.addEventListener('load', scanSW);
+  </script>
 </body>
 </html>

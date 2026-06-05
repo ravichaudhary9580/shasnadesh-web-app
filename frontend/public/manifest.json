@@ -1,10 +1,10 @@
 {
-  "id": "/",
+  "id": "https://www.shasnadeshupdates.com/",
   "short_name": "Shasnadeshupdates.com",
   "name": "Shasnadesh Updates",
   "description": "सभी सरकारी आदेश, नियम और अधिसूचनाएं हिंदी और अंग्रेजी में | Know the governments update in blog in Hindi and English",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "https://www.shasnadeshupdates.com/",
+  "scope": "https://www.shasnadeshupdates.com/",
   "display": "standalone",
   "theme_color": "#e8920a",
   "background_color": "#faf8f5",
@@ -15,38 +15,16 @@
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "icons": [
     {
-      "src": "logo192.png",
+      "src": "https://www.shasnadeshupdates.com/logo192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "logo512.png",
+      "src": "https://www.shasnadeshupdates.com/logo512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any"
-    },
-    {
-      "src": "logo512-maskable.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshots/desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Shasnadesh Updates- Government Orders Portal (Desktop)"
-    },
-    {
-      "src": "screenshots/mobile.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Shasnadesh Updates - Government Orders Portal (Mobile)"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
@@ -54,16 +32,24 @@
       "name": "Latest Orders",
       "short_name": "Latest",
       "description": "View the latest government orders",
-      "url": "/?sort=-createdAt",
-      "icons": [{ "src": "logo192.png", "sizes": "192x192", "type": "image/png" }]
+      "url": "https://www.shasnadeshupdates.com/?sort=-createdAt",
+      "icons": [{ 
+        "src": "https://www.shasnadeshupdates.com/logo192.png", 
+        "sizes": "192x192", 
+        "type": "image/png" 
+      }]
     },
     {
       "name": "Hindi Orders",
       "short_name": "हिंदी",
       "description": "View Hindi government orders",
-      "url": "/?category=hindi",
-      "icons": [{ "src": "logo192.png", "sizes": "192x192", "type": "image/png" }]
+      "url": "https://www.shasnadeshupdates.com/?category=hindi",
+      "icons": [{ 
+        "src": "https://www.shasnadeshupdates.com/logo192.png", 
+        "sizes": "192x192", 
+        "type": "image/png" 
+      }]
     }
   ],
   "prefer_related_applications": false
-} 
+}
