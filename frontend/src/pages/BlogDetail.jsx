@@ -18,7 +18,6 @@ function PdfViewer({ pdf }) {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const urlFilename = pdf.title.endsWith('.pdf') ? pdf.title : `${pdf.title}.pdf`;
       a.download = pdf.title.endsWith('.pdf') ? pdf.title : `${pdf.title}.pdf`;
       document.body.appendChild(a);
       a.click();
