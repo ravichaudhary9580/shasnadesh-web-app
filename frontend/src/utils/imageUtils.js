@@ -1,15 +1,29 @@
 /**
- * Convert S3 URL to proxy URL for images
- * @param {string} s3Url - The S3 URL (e.g., https://bucket.s3.region.amazonaws.com/key)
- * @returns {string} - Proxy URL or original URL if not S3
+ * Convert image path to full URL
+ * @param {string} imagePath - The image path (relative or absolute)
+ * @returns {string} - Full URL for the image
  */
-export function getImageUrl(s3Url) {
-  // Just return the S3 URL directly - bucket will be made public
-  return s3Url;
+export function getImageUrl(imagePath) {
+  if (!imagePath) return '';
+  
+  // If it's already a full URL, return it
+  if (imagePath.startsWith('http')) {
+    return imagePath;
+  }
+  
+  // For relative paths starting with /uploads/, assume they're on the backend
+  if (imagePath.startsWith('/uploads/')) {
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+    return `${backendUrl}${imagePath}`;
+  }
+  
+  // For other relative paths, assume they're relative to current origin
+  const baseUrl = window.location.origin;
+  return `${baseUrl}${imagePath}`;
 }
 
 /**
- * Check if URL needs proxy
+ * Check if URL is an S3 URL
  * @param {string} url - The URL to check
  * @returns {boolean} - True if it's an S3 URL
  */

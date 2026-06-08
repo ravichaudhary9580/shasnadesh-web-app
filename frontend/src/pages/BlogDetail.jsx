@@ -140,22 +140,52 @@ export default function BlogDetail() {
   }, [blog]);
 
   const handleShare = async () => {
+    const shareUrl = window.location.href;
     const shareData = {
       title: blog.title,
       text: blog.excerpt || blog.title,
-      url: window.location.href
+      url: shareUrl
     };
 
     try {
       if (navigator.share) {
+        // Mobile: Try to share with image
+        if (blog && blog.thumbnail && navigator.canShare && navigator.canShare({ files: [] })) {
+          const imageUrl = getImageUrl(blog.thumbnail);
+          
+          try {
+            const response = await fetch(imageUrl);
+            if (response.ok) {
+              const blob = await response.blob();
+              const file = new File([blob], 'blog-image.jpg', { type: blob.type });
+              
+              if (navigator.canShare({ files: [file] })) {
+                await navigator.share({ ...shareData, files: [file] });
+                return;
+              }
+            }
+          } catch (err) {
+            console.log('Image share failed, using text-only:', err);
+          }
+        }
+        
+        // Text-only share
         await navigator.share(shareData);
       } else {
-        navigator.clipboard.writeText(window.location.href);
+        // Desktop: Copy URL
+        navigator.clipboard.writeText(shareUrl);
         setShared(true);
         setTimeout(() => setShared(false), 2000);
       }
     } catch (error) {
-      console.error('Share failed:', error);
+      console.log('Share error:', error);
+      
+      // Final fallback
+      if (error.name !== 'AbortError') {
+        navigator.clipboard.writeText(shareUrl);
+        setShared(true);
+        setTimeout(() => setShared(false), 2000);
+      }
     }
   };
 
