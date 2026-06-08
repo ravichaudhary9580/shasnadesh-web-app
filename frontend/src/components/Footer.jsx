@@ -67,9 +67,9 @@ export default function Footer({ variant = "wide" }) {
             </Link>
             <Link
               to="/disclaimer"
-              className="text-ink-500 hover:text-saffron-600 transition-colors font-hindi"
+              className="text-ink-500 hover:text-saffron-600 transition-colors"
             >
-              अस्वीकरण
+              Disclaimer
             </Link>
             <Link
               to="/privacy-policy"

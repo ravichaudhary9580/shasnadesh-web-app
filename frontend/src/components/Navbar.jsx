@@ -6,8 +6,8 @@ import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award
 const NAV_ITEMS = [
   { label: "होम",                    to: "/",                          icon: HomeIcon },
   { label: "उत्तर प्रदेश शासनादेश", to: "/?category=up-government", icon: Landmark },
-  { label: "शिक्षा विभाग",           to: "/?category=education",     icon: BookOpen },
-  { label: "वैकेंसी अलर्ट",           to: "/?category=vacancy",       icon: Briefcase },
+  { label: "शिक्षा विभाग",           to: "/?category=शिक्षा विभाग",     icon: BookOpen },
+  { label: "वैकेंसी अलर्ट",           to: "/?category=वैकेंसी अलर्ट",       icon: Briefcase },
   { label: "अवकाश कैलेंडर",      to: "/?category=holiday-calendar", icon: CalendarDays },
   { label: "छात्रवृत्ति",            to: "/?category=scholarship",   icon: Award },
   { label: "प्रारूप",                to: "/?category=praroop",       icon: FileText },

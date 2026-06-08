@@ -6,11 +6,49 @@ import Footer from "../components/Footer";
 import SEO from "../components/SEO";
 import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "../utils/imageUtils";
-import { Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink, Share2 } from "lucide-react";
 import { generateBlogSchema, generateBreadcrumbSchema, injectSchema } from "../utils/schemaUtils";
 
 // ── Inline PDF viewer — always open, no toggle ─────────────────────────────
 function PdfViewer({ pdf }) {
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(pdf.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const urlFilename = pdf.title.endsWith('.pdf') ? pdf.title : `${pdf.title}.pdf`;
+      a.download = pdf.title.endsWith('.pdf') ? pdf.title : `${pdf.title}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download failed:', error);
+      window.location.href = pdf.url;
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: pdf.title,
+      text: `Check out this document: ${pdf.title}`,
+      url: pdf.url
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(pdf.url);
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+    }
+  };
+
   return (
     <div className="border border-ink-200 rounded-2xl overflow-hidden">
       {/* Header row */}
@@ -20,16 +58,20 @@ function PdfViewer({ pdf }) {
           {pdf.title}
         </span>
         <div className="flex items-center gap-1 flex-shrink-0">
-          <a
-            href={pdf.url}
-            download
-            target="_blank"
-            rel="noreferrer"
+          <button
+            onClick={handleShare}
+            className="p-2 rounded-lg hover:bg-ink-100 text-ink-500 hover:text-ink-800 transition-colors"
+            title="Share PDF"
+          >
+            <Share2 size={15} />
+          </button>
+          <button
+            onClick={handleDownload}
             className="p-2 rounded-lg hover:bg-ink-100 text-ink-500 hover:text-ink-800 transition-colors"
             title="Download PDF"
           >
             <Download size={15} />
-          </a>
+          </button>
           <a
             href={pdf.url}
             target="_blank"
@@ -99,12 +141,22 @@ export default function BlogDetail() {
   }, [blog]);
 
   const handleShare = async () => {
-    if (navigator.share) {
-      await navigator.share({ title: blog.title, url: window.location.href });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      setShared(true);
-      setTimeout(() => setShared(false), 2000);
+    const shareData = {
+      title: blog.title,
+      text: blog.excerpt || blog.title,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        setShared(true);
+        setTimeout(() => setShared(false), 2000);
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
     }
   };
 

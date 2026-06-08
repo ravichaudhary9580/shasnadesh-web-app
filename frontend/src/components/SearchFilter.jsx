@@ -15,7 +15,7 @@ export default function SearchFilter({
   useEffect(() => {
     getCategories()
       .then(({ data }) => setCategories(["All", ...data]))
-      .catch(() => setCategories(["All", "hindi", "english", "news", "culture", "technology", "lifestyle", "opinion"]));
+      .catch(() => setCategories(["All", "उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "holiday-calendar", "scholarship", "praroop", "other"]));
   }, []);
 
   useEffect(() => {

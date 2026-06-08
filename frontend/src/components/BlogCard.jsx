@@ -1,10 +1,33 @@
 import { Link, useLocation } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "../utils/imageUtils";
+import { Share2 } from "lucide-react";
 
 export default function BlogCard({ blog, featured = false }) {
   const timeAgo = formatDistanceToNow(new Date(blog.createdAt), { addSuffix: true });
   const location = useLocation();
+
+  const handleShare = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const shareData = {
+      title: blog.title,
+      text: blog.excerpt || blog.title,
+      url: `${window.location.origin}/blog/${blog.slug}`
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+    }
+  };
 
   if (featured) {
     return (
@@ -70,11 +93,7 @@ export default function BlogCard({ blog, featured = false }) {
             <span className="text-4xl text-ink-300 font-display">श</span>
           </div>
         )}
-        {blog.category && (
-          <span className="absolute top-3 left-3 badge bg-white/90 text-ink-700 shadow-sm">
-            {blog.category}
-          </span>
-        )}
+        
       </div>
 
       {/* Content */}
@@ -96,6 +115,13 @@ export default function BlogCard({ blog, featured = false }) {
           <span className="text-xs text-ink-400 font-ui">{timeAgo}</span>
           <div className="flex items-center gap-2 text-xs text-ink-400 font-ui">
             {blog.views > 0 && <span>👁 {blog.views.toLocaleString()}</span>}
+            <button
+              onClick={handleShare}
+              className="p-1 hover:text-saffron-600 transition-colors"
+              title="Share"
+            >
+              <Share2 size={14} />
+            </button>
           </div>
         </div>
         {/* Tags */}

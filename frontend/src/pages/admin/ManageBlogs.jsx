@@ -4,7 +4,7 @@ import { adminGetBlogs, deleteBlog, toggleStatus, toggleFeatured, getCategories 
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 
-const CATEGORIES = ["hindi", "english", "news", "culture", "technology", "lifestyle", "opinion"];
+const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "holiday-calendar", "scholarship", "praroop", "other"];
 
 export default function ManageBlogs() {
   const [blogs, setBlogs] = useState([]);
@@ -31,7 +31,7 @@ export default function ManageBlogs() {
       setBlogs(data.blogs);
       setTotal(data.total);
     } catch {
-      toast.error("Failed to load blogs");
+      toast.error("Failed to load posts");
     } finally {
       setLoading(false);
     }
@@ -58,7 +58,7 @@ export default function ManageBlogs() {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
     try {
       await deleteBlog(id);
-      toast.success("Blog deleted");
+      toast.success("Post deleted");
       fetchBlogs();
     } catch {
       toast.error("Delete failed");
@@ -94,10 +94,10 @@ export default function ManageBlogs() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-display text-xl sm:text-2xl font-bold text-ink-900">Manage Blogs</h1>
+          <h1 className="font-display text-xl sm:text-2xl font-bold text-ink-900">Manage Posts</h1>
           <p className="font-ui text-sm text-ink-400 mt-0.5">{total} total posts</p>
         </div>
-        <Link to="/admin/blogs/new" className="btn-primary text-sm">+ New Blog</Link>
+        <Link to="/admin/blogs/new" className="btn-primary text-sm">+ New Post</Link>
       </div>
 
       {/* Filters */}
@@ -107,7 +107,7 @@ export default function ManageBlogs() {
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-sm">🔍</span>
           <input
             type="text"
-            placeholder="Search blogs..."
+            placeholder="Search posts..."
             value={search}
             onChange={(e) => {
               const val = e.target.value;
@@ -168,7 +168,7 @@ export default function ManageBlogs() {
         ) : blogs.length === 0 ? (
           <div className="text-center py-14">
             <p className="text-4xl mb-3">📭</p>
-            <p className="font-ui text-ink-400 text-sm">No blogs found</p>
+            <p className="font-ui text-ink-400 text-sm">No posts found</p>
           </div>
         ) : (
           <div className="divide-y divide-ink-100">

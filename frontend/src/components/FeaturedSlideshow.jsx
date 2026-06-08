@@ -57,7 +57,7 @@ export default function FeaturedSlideshow({ blogs }) {
                 </div>
 
                 {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white">
+                {/* <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white">
                   {blog.category && (
                     <span className="inline-block px-2.5 py-0.5 rounded-full bg-saffron-500 text-white text-xs font-medium mb-1.5">
                       {blog.category}
@@ -71,7 +71,7 @@ export default function FeaturedSlideshow({ blogs }) {
                       {blog.excerpt}
                     </p>
                   )}
-                </div>
+                </div> */}
               </Link>
             ))}
           </div>

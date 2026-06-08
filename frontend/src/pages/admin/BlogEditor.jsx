@@ -19,7 +19,8 @@ import {
   Check,
 } from "lucide-react";
 
-const DEFAULT_CATEGORIES = ["hindi", "english", "news", "culture", "technology", "lifestyle", "opinion"];
+const DEFAULT_CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "holiday-calendar", "scholarship", "praroop", "other"];
+
 
 function Field({ label, children, hint }) {
   return (
