@@ -12,7 +12,7 @@ export default function Disclaimer() {
 
         <section className="mt-6 space-y-4">
           <p className="text-ink-700 font-hindi text-sm sm:text-base leading-relaxed">
-            Shasnadesh Updates (shasnadeshupdates.com) एक स्वतंत्र सूचना मंच है। इस वेबसाइट/ऐप पर प्रकाशित शासनादेश, अधिसूचनाएँ, कार्यालय आदेश, परिपत्र एवं अन्य सरकारी दस्तावेज विभिन्न सरकारी विभागों एवं उनकी आधिकारिक वेबसाइटों से प्राप्त सार्वजनिक सूचनाओं पर आधारित हैं।
+            Shasnadeshupdates (shasnadeshupdates.com) एक स्वतंत्र सूचना मंच है। इस वेबसाइट/ऐप पर प्रकाशित शासनादेश, अधिसूचनाएँ, कार्यालय आदेश, परिपत्र एवं अन्य सरकारी दस्तावेज विभिन्न सरकारी विभागों एवं उनकी आधिकारिक वेबसाइटों से प्राप्त सार्वजनिक सूचनाओं पर आधारित हैं।
           </p>
           <p className="text-ink-700 font-hindi text-sm sm:text-base leading-relaxed">
             हम किसी भी सरकारी विभाग, मंत्रालय अथवा उत्तर प्रदेश सरकार से संबद्ध या अधिकृत संस्था नहीं हैं।
@@ -34,12 +34,12 @@ export default function Disclaimer() {
         </section>
 
         <section className="mt-8 space-y-3 border-t pt-6 border-ink-200">
-          <h2 className="font-ui font-semibold text-ink-900 text-base sm:text-lg">Copyright &amp; Source Notice</h2>
+          <h2 className="font-ui font-semibold text-ink-900 text-base sm:text-lg">Source Notice</h2>
           <p className="text-ink-600 font-hindi text-sm leading-relaxed">
             इस वेबसाइट पर प्रकाशित शासनादेश एवं सरकारी दस्तावेज संबंधित विभागों की आधिकारिक वेबसाइटों से प्राप्त सार्वजनिक अभिलेख हैं।
           </p>
           <p className="text-ink-600 font-hindi text-sm leading-relaxed">
-            प्रत्येक दस्तावेज के साथ उसका मूल स्रोत (Official Source) उपलब्ध कराया जाता है। दस्तावेजों के साथ प्रकाशित सारांश, लेख, विश्लेषण एवं सरल भाषा में दी गई जानकारी Shasnadesh Updates द्वारा तैयार की गई मौलिक सामग्री है।
+            प्रत्येक दस्तावेज के साथ उसका मूल स्रोत (Official Source) उपलब्ध कराया जाता है। दस्तावेजों के साथ प्रकाशित सारांश, लेख, विश्लेषण एवं सरल भाषा में दी गई जानकारी Shasnadeshupdates द्वारा तैयार की गई मौलिक सामग्री है।
           </p>
           <p className="text-ink-600 font-hindi text-sm leading-relaxed">
             यदि किसी विभाग, संस्था अथवा अधिकारधारी को किसी सामग्री पर आपत्ति हो तो वे हमसे संपर्क कर सकते हैं। उचित सत्यापन के उपरांत आवश्यक कार्रवाई की जाएगी।
