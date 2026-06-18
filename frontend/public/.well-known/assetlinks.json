@@ -1,8 +1,16 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.vercel.shasnadeshupdates.twa",
-        "sha256_cert_fingerprints": ["05:EB:E9:DA:42:90:3A:30:A4:0B:80:B2:1F:03:67:1F:88:EF:4B:B2:D9:32:4C:EA:70:02:20:3B:D4:5C:8A:A3"]
-      }
-}]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.shasnadeshupdates.twa",
+      "sha256_cert_fingerprints": [
+        "05:EB:E9:DA:42:90:3A:30:A4:0B:80:B2:1F:03:67:1F:88:EF:4B:B2:D9:32:4C:EA:70:02:20:3B:D4:5C:8A:A3",
+        "F6:03:F2:7B:E3:80:FF:73:81:74:F3:7B:B2:08:0C:C5:F2:02:D3:13:EE:78:70:8C:B1:43:0E:9A:57:7C:BD:CA"
+      ]
+    }
+  }
+]
