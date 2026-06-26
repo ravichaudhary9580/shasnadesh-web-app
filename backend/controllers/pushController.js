@@ -1,5 +1,6 @@
 const webPush = require('web-push')
 const PushSubscription = require('../models/PushSubscription')
+const NotificationLog = require('../models/NotificationLog')
 
 // VAPID keys setup
 const vapidKeys = {
@@ -37,17 +38,37 @@ exports.unsubscribe = async (req, res) => {
   }
 }
 
-exports.sendNotification = async (title, body, url, image) => {
+exports.sendNotification = async (title, body, url, image, tag) => {
   try {
+    // Check last notification time (prevent spam)
+    const lastNotification = await NotificationLog.findOne().sort({ sentAt: -1 })
+    if (lastNotification) {
+      const timeDiff = Date.now() - lastNotification.sentAt.getTime()
+      const minInterval = 3600000 // 1 hour minimum
+      if (timeDiff < minInterval) {
+        throw new Error(`Please wait ${Math.ceil((minInterval - timeDiff) / 60000)} minutes before sending next notification`)
+      }
+    }
+
     const subscriptions = await PushSubscription.find()
-    const payload = JSON.stringify({ title, body, url, image })
+    const payload = JSON.stringify({ 
+      title, 
+      body, 
+      url, 
+      image,
+      tag: tag || `notification-${Date.now()}`,
+      timestamp: Date.now()
+    })
     
     const results = await Promise.allSettled(
       subscriptions.map(sub =>
         webPush.sendNotification({
           endpoint: sub.endpoint,
           keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth }
-        }, payload)
+        }, payload, {
+          urgency: 'normal',
+          TTL: 86400 // 24 hours
+        })
       )
     )
 
@@ -62,6 +83,9 @@ exports.sendNotification = async (title, body, url, image) => {
     if (invalidSubs.length > 0) {
       await PushSubscription.deleteMany({ _id: { $in: invalidSubs } })
     }
+
+    // Log notification
+    await NotificationLog.create({ type: 'push', sentAt: new Date() })
 
     return { sent: results.filter(r => r.status === 'fulfilled').length }
   } catch (error) {

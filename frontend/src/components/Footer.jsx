@@ -8,13 +8,13 @@ const SOCIAL_LINKS = [
   },
   {
     label: "Facebook",
-    href: "https://www.facebook.com/shasnadeshupdates", // Replace with your actual Facebook page
+    href: "https://www.facebook.com/share/183kRbiM23/",
     viewBox: "0 0 24 24",
     path: "M13.5 9H16V6h-2.5C11.6 6 10 7.6 10 9.5V12H8v3h2v6h3v-6h2.4l.6-3H13v-2.1c0-.5.4-.9.9-.9Z",
   },
   {
     label: "Instagram",
-    href: "https://www.instagram.com/shasnadeshupdates", // Replace with your actual Instagram
+    href: "https://www.instagram.com/shasnadeshupdates?igsh=MWU5ajg4ejR6NWpycQ==",
     viewBox: "0 0 24 24",
     path: "M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5Zm6.2-.9a.8.8 0 1 1-1.6 0 .8.8 0 0 1 1.6 0Z",
   },

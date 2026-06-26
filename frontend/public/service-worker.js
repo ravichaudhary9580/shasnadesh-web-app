@@ -157,12 +157,14 @@ self.addEventListener('push', (event) => {
     icon: '/logo192.png',
     badge: '/logo192.png',
     image: data.image,
-    data: { url: data.url || '/' },
-    vibrate: [200, 100, 200],
-    tag: 'blog-notification',
+    data: { url: data.url || '/', timestamp: Date.now() },
+    vibrate: [100],
+    tag: data.tag || `blog-${Date.now()}`,
     requireInteraction: false,
+    silent: false,
+    renotify: false,
     actions: [
-      { action: 'open', title: 'पढ़ें', icon: '/logo192.png' },
+      { action: 'open', title: 'पढ़ें' },
       { action: 'close', title: 'बंद करें' },
     ],
   };
