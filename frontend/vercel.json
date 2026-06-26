@@ -1,0 +1,40 @@
+{
+  "rewrites": [
+    {
+      "source": "/sitemap-blogs.xml",
+      "destination": "https://shasnadesh-web-app.vercel.app/api/sitemap/blogs.xml"
+    },
+    {
+      "source": "/sitemap-index.xml",
+      "destination": "https://shasnadesh-web-app.vercel.app/api/sitemap/index.xml"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/sitemap-blogs.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=3600"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap-index.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=3600"
+        }
+      ]
+    }
+  ]
+}
