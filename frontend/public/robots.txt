@@ -5,7 +5,6 @@ Disallow: /admin
 Disallow: /api
 Disallow: /login
 
-# Sitemaps
-Sitemap: https://shasnadeshupdates.com/sitemap-index.xml
+# Sitemaps (dynamic blog sitemap from API)
 Sitemap: https://shasnadeshupdates.com/sitemap.xml
-Sitemap: https://shasnadeshupdates.com/sitemap-blogs.xml
+Sitemap: https://shasnadesh-web-app.vercel.app/api/sitemap/blogs.xml
