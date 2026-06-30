@@ -24,13 +24,13 @@ async function generateSitemap() {
 
     // Add blog URLs
     blogs.forEach(blog => {
-      const url = `${baseUrl}/blog/${blog.slug}`;
+      const url = `${baseUrl}/blog/${encodeURIComponent(blog.slug)}`;
       const lastmod = blog.updatedAt.toISOString().split('T')[0];
       
       xml += `    <url>
         <loc>${url}</loc>
         <lastmod>${lastmod}</lastmod>
-        <changefreq>weekly</changefreq>
+        <changefreq>hourly</changefreq>
         <priority>0.8</priority>
     </url>\n`;
     });

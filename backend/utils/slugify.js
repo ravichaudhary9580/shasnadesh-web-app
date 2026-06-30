@@ -4,6 +4,6 @@ module.exports = (text) => {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
+    .replace(/[^\p{L}\p{M}\p{N}\-]+/gu, '')
     .replace(/\-\-+/g, '-')
 }
