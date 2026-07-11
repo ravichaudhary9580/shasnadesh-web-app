@@ -30,7 +30,7 @@ export default function FeaturedSlideshow({ blogs }) {
         {/* Slideshow container */}
         <div className="relative overflow-hidden rounded-xl bg-white shadow-md">
           {/* Slides */}
-          <div className="relative" style={{ paddingBottom: "45%" }}>
+          <div className="relative aspect-video">
             {blogs.map((blog, idx) => (
               <Link
                 key={blog._id}
