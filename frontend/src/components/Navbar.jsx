@@ -4,25 +4,25 @@ import { getSearchSuggestions } from "../services/api";
 import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award, LayoutGrid, FileText, CalendarDays } from "lucide-react";
 
 const NAV_ITEMS = [
-  { label: "होम",                    to: "/",                          icon: HomeIcon },
-  { label: "उत्तर प्रदेश शासनादेश", to: "/?category=up-government", icon: Landmark },
-  { label: "शिक्षा विभाग",           to: "/?category=शिक्षा विभाग",     icon: BookOpen },
-  { label: "वैकेंसी अलर्ट",           to: "/?category=वैकेंसी अलर्ट",       icon: Briefcase },
-  { label: "अवकाश कैलेंडर",      to: "/?category=holiday-calendar", icon: CalendarDays },
-  { label: "छात्रवृत्ति",            to: "/?category=scholarship",   icon: Award },
-  { label: "प्रारूप",                to: "/?category=praroop",       icon: FileText },
-  { label: "अन्य",                   to: "/?category=other",         icon: LayoutGrid },
+  { label: "होम", to: "/", icon: HomeIcon },
+  { label: "उत्तर प्रदेश शासनादेश", to: "/?category=उत्तर प्रदेश शासनादेश", icon: Landmark },
+  { label: "शिक्षा विभाग", to: "/?category=शिक्षा विभाग", icon: BookOpen },
+  { label: "वैकेंसी अलर्ट", to: "/?category=वैकेंसी अलर्ट", icon: Briefcase },
+  { label: "अवकाश कैलेंडर", to: "/?category=अवकाश कैलेंडर", icon: CalendarDays },
+  { label: "छात्रवृत्ति", to: "/?category=छात्रवृत्ति", icon: Award },
+  { label: "प्रारूप", to: "/?category=प्रारूप", icon: FileText },
+  { label: "अन्य", to: "/?category=अन्य", icon: LayoutGrid },
 ];
 
 export default function Navbar({ onSearch }) {
-  const [scrolled,     setScrolled]     = useState(false);
-  const [sidebarOpen,  setSidebarOpen]  = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
-  const [searchVal,    setSearchVal]    = useState("");
-  const [suggestions,  setSuggestions]  = useState([]);
-  const [showSuggest,  setShowSuggest]  = useState(false);
+  const [searchVal, setSearchVal] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggest, setShowSuggest] = useState(false);
 
-  const mobileInput   = useRef(null);
+  const mobileInput = useRef(null);
   const searchAreaRef = useRef(null); // wraps search icon + input row
   const desktopSearchRef = useRef(null);
 
@@ -102,14 +102,12 @@ export default function Navbar({ onSearch }) {
   return (
     <>
       {/* ── Navbar bar ─────────────────────────────── */}
-      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        scrolled
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled
           ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-ink-100"
           : "bg-white border-b border-ink-100"
-      }`}>
-        <div className={`max-w-6xl mx-auto px-4 sm:px-6 flex items-center gap-3 transition-all duration-300 ${
-          scrolled ? "h-12 sm:h-14" : "h-12 sm:h-16"
         }`}>
+        <div className={`max-w-6xl mx-auto px-4 sm:px-6 flex items-center gap-3 transition-all duration-300 ${scrolled ? "h-12 sm:h-14" : "h-12 sm:h-16"
+          }`}>
 
           {/* Hamburger */}
           <button

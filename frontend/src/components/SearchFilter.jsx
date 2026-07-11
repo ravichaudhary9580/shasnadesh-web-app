@@ -12,10 +12,15 @@ export default function SearchFilter({
   const [categories, setCategories] = useState(["All"]);
   const scrollRef = useRef(null);
 
+  // Sync state if parent changes initialCategory (e.g. via URL change)
+  useEffect(() => {
+    setActiveCategory(initialCategory);
+  }, [initialCategory]);
+
   useEffect(() => {
     getCategories()
       .then(({ data }) => setCategories(["All", ...data]))
-      .catch(() => setCategories(["All", "उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "holiday-calendar", "scholarship", "praroop", "other"]));
+      .catch(() => setCategories(["All", "उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "अवकाश कैलेंडर", "छात्रवृत्ति", "प्रारूप", "अन्य"]));
   }, []);
 
   useEffect(() => {

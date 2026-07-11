@@ -19,7 +19,7 @@ import {
   Check,
 } from "lucide-react";
 
-const DEFAULT_CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "holiday-calendar", "scholarship", "praroop", "other"];
+const DEFAULT_CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "अवकाश कैलेंडर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
 
 
 function Field({ label, children, hint }) {

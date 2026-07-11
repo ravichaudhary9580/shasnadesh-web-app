@@ -4,7 +4,7 @@ import { adminGetBlogs, deleteBlog, toggleStatus, toggleFeatured, getCategories 
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 
-const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "holiday-calendar", "scholarship", "praroop", "other"];
+const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "अवकाश कैलेंडर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
 
 export default function ManageBlogs() {
   const [blogs, setBlogs] = useState([]);

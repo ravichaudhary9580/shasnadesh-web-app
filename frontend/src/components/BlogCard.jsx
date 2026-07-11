@@ -64,7 +64,7 @@ export default function BlogCard({ blog, featured = false }) {
       <Link
         to={`/blog/${blog.slug}`}
         state={{ from: location.pathname + location.search }}
-        className="blog-card-link group block relative overflow-hidden rounded-3xl aspect-[21/9] max-h-[350px] bg-ink-200"
+        className="blog-card-link group block relative overflow-hidden rounded-3xl aspect-video bg-ink-200"
       >
         {blog.thumbnail ? (
           <img
@@ -110,7 +110,7 @@ export default function BlogCard({ blog, featured = false }) {
       className="blog-card-link group card flex flex-col overflow-hidden"
     >
       {/* Thumbnail */}
-      <div className="relative overflow-hidden aspect-[16/10] bg-ink-100">
+      <div className="relative overflow-hidden aspect-video bg-ink-100">
         {blog.thumbnail ? (
           <img
             src={getImageUrl(blog.thumbnail)}

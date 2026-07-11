@@ -220,11 +220,17 @@ export default function BlogDetail() {
       {/* Thumbnail hero */}
       <div className="pt-14 sm:pt-16">
         {blog.thumbnail && (
-          <div className="w-full aspect-[21/9] max-h-[480px] overflow-hidden">
+          <div className="relative w-full h-[35vh] sm:h-[50vh] lg:h-[65vh] xl:h-[75vh] max-h-[800px] overflow-hidden bg-ink-950 flex justify-center items-center">
+            {/* Blurred background */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl scale-110"
+              style={{ backgroundImage: `url(${getImageUrl(blog.thumbnail)})` }}
+            />
+            {/* Foreground image (fully visible) */}
             <img
               src={getImageUrl(blog.thumbnail)}
               alt={blog.title}
-              className="w-full h-full object-cover"
+              className="relative z-10 w-full h-full object-contain drop-shadow-2xl"
             />
           </div>
         )}
