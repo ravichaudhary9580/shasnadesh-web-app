@@ -24,7 +24,7 @@ async function generateSitemap() {
 
     // Add blog URLs
     blogs.forEach(blog => {
-      const url = `${baseUrl}/blog/${encodeURIComponent(blog.slug)}`;
+      const url = `${baseUrl}/blog/${blog.slug}`;
       const lastmod = blog.updatedAt.toISOString().split('T')[0];
       
       xml += `    <url>

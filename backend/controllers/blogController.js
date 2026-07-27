@@ -2,6 +2,7 @@ const Blog = require('../models/Blog')
 const Analytics = require('../models/Analytics')
 const slugify = require('../utils/slugify')
 const { sendNotification } = require('./pushController')
+const { generateSitemap, generateSitemapIndex } = require('../utils/sitemapGenerator')
 
 // Public
 exports.getBlogs = async (req, res) => {
@@ -66,17 +67,29 @@ exports.getSuggestions = async (req, res) => {
 
 exports.getBlog = async (req, res) => {
   try {
-    const blog = await Blog.findOneAndUpdate(
-      { slug: req.params.slug, status: 'published' },
+    const rawSlug = req.params.slug;
+    const decodedSlug = decodeURIComponent(rawSlug);
+
+    let blog = await Blog.findOneAndUpdate(
+      { slug: rawSlug, status: 'published' },
       { $inc: { views: 1 } },
       { returnDocument: 'after' }
-    )
-    if (!blog) return res.status(404).json({ message: 'Blog not found' })
-    res.json(blog)
+    );
+
+    if (!blog && decodedSlug !== rawSlug) {
+      blog = await Blog.findOneAndUpdate(
+        { slug: decodedSlug, status: 'published' },
+        { $inc: { views: 1 } },
+        { returnDocument: 'after' }
+      );
+    }
+
+    if (!blog) return res.status(404).json({ message: 'Blog not found' });
+    res.json(blog);
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
 // Admin
 exports.createBlog = async (req, res) => {
@@ -92,8 +105,9 @@ exports.createBlog = async (req, res) => {
 
     const blog = await Blog.create({ ...req.body, slug })
     
-    // Send push notification if blog is published
+    // Auto-update sitemaps and send push notification if blog is published
     if (blog.status === 'published') {
+      generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
       sendNotification(
         'नया ब्लॉग पोस्ट',
         blog.title,
@@ -137,6 +151,8 @@ exports.updateBlog = async (req, res) => {
     )
     if (!blog) return res.status(404).json({ message: 'Blog not found' })
     
+    generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
+
     res.json(blog)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -147,6 +163,9 @@ exports.deleteBlog = async (req, res) => {
   try {
     const blog = await Blog.findByIdAndDelete(req.params.id)
     if (!blog) return res.status(404).json({ message: 'Blog not found' })
+
+    generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
+
     res.json({ message: 'Blog deleted' })
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -161,6 +180,8 @@ exports.toggleStatus = async (req, res) => {
     blog.status = wasPublished ? 'draft' : 'published'
     await blog.save()
     
+    generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
+
     res.json(blog)
   } catch (error) {
     res.status(500).json({ message: error.message })

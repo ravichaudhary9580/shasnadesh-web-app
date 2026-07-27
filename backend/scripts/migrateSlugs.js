@@ -1,14 +1,11 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const connectDB = require('../config/db');
 const Blog = require('../models/Blog');
 const slugify = require('../utils/slugify');
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/shasnadesh')
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
-
 async function migrateSlugs() {
   try {
+    await connectDB();
     const blogs = await Blog.find({});
     console.log(`Found ${blogs.length} blogs to migrate.`);
     

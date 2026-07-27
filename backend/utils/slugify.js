@@ -1,9 +1,13 @@
+const { transliterate } = require('transliteration');
+
 module.exports = (text) => {
-  return text
-    .toString()
+  if (!text) return '';
+  const transliterated = transliterate(text);
+  return transliterated
     .toLowerCase()
     .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-    .replace(/[^\p{L}\p{M}\p{N}\-]+/gu, '')
     .replace(/\-\-+/g, '-')
-}
+    .replace(/^-+|-+$/g, '');
+};

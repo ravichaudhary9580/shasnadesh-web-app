@@ -1,14 +1,12 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const connectDB = require('../config/db');
 const Blog = require('../models/Blog');
 const fs = require('fs');
 const path = require('path');
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/shasnadesh');
-
 async function generateBlogSitemap() {
   try {
+    await connectDB();
     console.log('🔍 Fetching published blogs...');
     
     // Fetch all published blogs
@@ -30,7 +28,7 @@ async function generateBlogSitemap() {
 
     // Add blog URLs
     blogs.forEach(blog => {
-      const url = `${baseUrl}/blog/${encodeURIComponent(blog.slug)}`;
+      const url = `${baseUrl}/blog/${blog.slug}`;
       const lastmod = blog.updatedAt.toISOString().split('T')[0];
       
       xml += `    <url>

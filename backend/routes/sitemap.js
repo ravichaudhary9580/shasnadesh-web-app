@@ -19,7 +19,7 @@ router.get('/blogs.xml', async (req, res) => {
     blogs.forEach(blog => {
       xml += `
     <url>
-        <loc>${baseUrl}/blog/${encodeURIComponent(blog.slug)}</loc>
+        <loc>${baseUrl}/blog/${blog.slug}</loc>
         <lastmod>${blog.updatedAt.toISOString().split('T')[0]}</lastmod>
         <changefreq>hourly</changefreq>
         <priority>0.8</priority>
