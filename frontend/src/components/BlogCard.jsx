@@ -11,7 +11,7 @@ export default function BlogCard({ blog, featured = false }) {
     e.preventDefault();
     e.stopPropagation();
     
-    const shareUrl = `${window.location.origin}/blog/${blog.slug}`;
+    const shareUrl = decodeURIComponent(`${window.location.origin}/blog/${blog.slug}`);
     const shareData = {
       title: blog.title,
       text: blog.excerpt || blog.title,

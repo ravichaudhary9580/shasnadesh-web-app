@@ -140,7 +140,7 @@ export default function BlogDetail() {
   }, [blog]);
 
   const handleShare = async () => {
-    const shareUrl = window.location.href;
+    const shareUrl = decodeURIComponent(window.location.href);
     const shareData = {
       title: blog.title,
       text: blog.excerpt || blog.title,

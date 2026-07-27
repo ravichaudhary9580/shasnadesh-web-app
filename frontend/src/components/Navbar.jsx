@@ -26,6 +26,44 @@ export default function Navbar({ onSearch }) {
   const searchAreaRef = useRef(null); // wraps search icon + input row
   const desktopSearchRef = useRef(null);
 
+  // Detect if app is installed / running in standalone mode
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator?.standalone === true ||
+      document.referrer?.includes('android-app://');
+
+    if (isStandalone) {
+      setIsAppInstalled(true);
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    const handleMediaChange = (e) => {
+      if (e.matches) setIsAppInstalled(true);
+    };
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleMediaChange);
+    } else if (mediaQuery.addListener) {
+      mediaQuery.addListener(handleMediaChange);
+    }
+
+    const handleAppInstalled = () => setIsAppInstalled(true);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleMediaChange);
+      } else if (mediaQuery.removeListener) {
+        mediaQuery.removeListener(handleMediaChange);
+      }
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
   // Scroll shadow
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10);
@@ -259,57 +297,59 @@ export default function Navbar({ onSearch }) {
                 );
               })}
 
-              {/* Play Store App Download Box */}
-              <div className="px-5 mt-3 mb-2">
-                <div className="relative border border-ink-100 rounded-xl p-3 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-                  {/* Decorative background shapes */}
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-saffron-50 rounded-full translate-x-1/3 -translate-y-1/3 opacity-80" />
-                  <div className="absolute bottom-0 right-8 w-10 h-10 bg-orange-50 rounded-full translate-y-1/2 opacity-60" />
+              {/* Play Store App Download Box (only show if app is NOT installed / running in browser) */}
+              {!isAppInstalled && (
+                <div className="px-5 mt-3 mb-2">
+                  <div className="relative border border-ink-100 rounded-xl p-3 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+                    {/* Decorative background shapes */}
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-saffron-50 rounded-full translate-x-1/3 -translate-y-1/3 opacity-80" />
+                    <div className="absolute bottom-0 right-8 w-10 h-10 bg-orange-50 rounded-full translate-y-1/2 opacity-60" />
 
-                  <div className="relative z-10">
-                    {/* Rating & Tagline */}
-                    <div className="flex items-center gap-1 text-[11px] text-ink-600 mb-1.5">
-                      <span className="text-saffron-500 font-bold">★</span>
-                      <span className="font-bold text-ink-800">4.8</span>
-                      <span className="text-ink-300">|</span>
-                      <span>🏆 UP's #1 Updates App!</span>
+                    <div className="relative z-10">
+                      {/* Rating & Tagline */}
+                      <div className="flex items-center gap-1 text-[11px] text-ink-600 mb-1.5">
+                        <span className="text-saffron-500 font-bold">★</span>
+                        <span className="font-bold text-ink-800">4.8</span>
+                        <span className="text-ink-300">|</span>
+                        <span>🏆 UP's #1 Updates App!</span>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="font-display font-bold text-base text-ink-900 mb-1">
+                        Shasnadeshupdates.com App
+                      </h3>
+
+                      {/* Subtitle */}
+                      <p className="text-[11px] text-ink-600 mb-2.5 max-w-[68%]">
+                        सभी शासनादेश और अपडेट्स सबसे पहले अपने फोन पर पाएं
+                      </p>
+
+                      {/* Button */}
+                      <a
+                        href="https://play.google.com/store/apps/details?id=com.shasnadeshupdates"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-saffron-600 font-bold text-xs hover:text-saffron-700 transition-colors"
+                      >
+                        Download Now
+                        <span className="bg-saffron-500 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] leading-none">
+                          ❯
+                        </span>
+                      </a>
                     </div>
 
-                    {/* Title */}
-                    <h3 className="font-display font-bold text-base text-ink-900 mb-1">
-                      Shasnadeshupdates.com App
-                    </h3>
-
-                    {/* Subtitle */}
-                    <p className="text-[11px] text-ink-600 mb-2.5 max-w-[68%]">
-                      सभी शासनादेश और अपडेट्स सबसे पहले अपने फोन पर पाएं
-                    </p>
-
-                    {/* Button */}
-                    <a
-                      href="https://play.google.com/store/apps/details?id=com.shasnadeshupdates"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-saffron-600 font-bold text-xs hover:text-saffron-700 transition-colors"
-                    >
-                      Download Now
-                      <span className="bg-saffron-500 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] leading-none">
-                        ❯
-                      </span>
-                    </a>
-                  </div>
-
-                  {/* Phone Mockup Illustration */}
-                  <div className="absolute -right-2 -bottom-4 w-20 h-24 bg-ink-900 rounded-[10px] border-[2px] border-ink-800 shadow-lg rotate-[-12deg] z-0 opacity-90">
-                    <div className="absolute top-1 left-1/2 -translate-x-1/2 w-7 h-1.5 bg-ink-950 rounded-full" />
-                    <div className="absolute inset-[2px] mt-3.5 bg-white rounded-[6px] overflow-hidden flex flex-col p-1">
-                      <div className="w-full h-6 bg-saffron-100  mb-1 rounded-sm" />
-                      <div className="w-full h-3 bg-ink-100  mb-1 rounded-sm" />
-                      <div className="w-2/3 h-3 bg-ink-100   rounded-sm" />
+                    {/* Phone Mockup Illustration */}
+                    <div className="absolute -right-2 -bottom-4 w-20 h-24 bg-ink-900 rounded-[10px] border-[2px] border-ink-800 shadow-lg rotate-[-12deg] z-0 opacity-90">
+                      <div className="absolute top-1 left-1/2 -translate-x-1/2 w-7 h-1.5 bg-ink-950 rounded-full" />
+                      <div className="absolute inset-[2px] mt-3.5 bg-white rounded-[6px] overflow-hidden flex flex-col p-1">
+                        <div className="w-full h-6 bg-saffron-100  mb-1 rounded-sm" />
+                        <div className="w-full h-3 bg-ink-100  mb-1 rounded-sm" />
+                        <div className="w-2/3 h-3 bg-ink-100   rounded-sm" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </nav>
 
             {/* Footer */}
