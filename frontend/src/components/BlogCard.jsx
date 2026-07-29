@@ -13,8 +13,6 @@ export default function BlogCard({ blog, featured = false }) {
     
     const shareUrl = decodeURIComponent(`${window.location.origin}/blog/${blog.slug}`);
     const shareData = {
-      title: blog.title,
-      text: blog.excerpt || blog.title,
       url: shareUrl
     };
 
