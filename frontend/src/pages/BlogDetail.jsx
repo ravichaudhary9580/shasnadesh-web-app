@@ -207,7 +207,7 @@ export default function BlogDetail() {
           title={`${blog.title} | Shasnadesh Updates`}
           description={blog.excerpt || blog.title}
           keywords={blog.tags?.join(', ') || ''}
-          image={blog.thumbnail ? `https://shasnadeshupdates.com${blog.thumbnail}` : undefined}
+          image={getImageUrl(blog.thumbnail)}
           url={`https://shasnadeshupdates.com/blog/${blog.slug}`}
           type="article"
           publishedTime={blog.createdAt}

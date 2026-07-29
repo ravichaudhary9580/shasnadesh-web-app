@@ -1,6 +1,17 @@
 {
   "rewrites": [
     {
+      "source": "/blog/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|WhatsApp|twitterbot|telegrambot|linkedinbot|slackbot|discordbot).*"
+        }
+      ],
+      "destination": "https://shasnadesh-web-app.vercel.app/api/blogs/og/:slug"
+    },
+    {
       "source": "/sitemap-blogs.xml",
       "destination": "https://shasnadesh-web-app.vercel.app/api/sitemap/blogs.xml"
     },

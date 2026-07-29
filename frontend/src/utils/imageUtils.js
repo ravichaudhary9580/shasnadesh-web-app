@@ -4,7 +4,7 @@
  * @returns {string} - Full URL for the image
  */
 export function getImageUrl(imagePath) {
-  if (!imagePath) return '';
+  if (!imagePath) return 'https://shasnadeshupdates.com/logo512.png';
   
   // If it's already a full URL, return it
   if (imagePath.startsWith('http')) {
@@ -13,13 +13,15 @@ export function getImageUrl(imagePath) {
   
   // For relative paths starting with /uploads/, assume they're on the backend
   if (imagePath.startsWith('/uploads/')) {
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-    return `${backendUrl}${imagePath}`;
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://shasnadesh-web-app.vercel.app';
+    return `${backendUrl.replace(/\/$/, '')}${imagePath}`;
   }
   
-  // For other relative paths, assume they're relative to current origin
-  const baseUrl = window.location.origin;
-  return `${baseUrl}${imagePath}`;
+  // For other relative paths, assume they're relative to site origin
+  const baseUrl = typeof window !== 'undefined' && window.location?.origin 
+    ? window.location.origin 
+    : 'https://shasnadeshupdates.com';
+  return imagePath.startsWith('/') ? `${baseUrl}${imagePath}` : `${baseUrl}/${imagePath}`;
 }
 
 /**

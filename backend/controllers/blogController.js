@@ -217,12 +217,72 @@ exports.adminGetBlogs = async (req, res) => {
   }
 }
 
-// Get all unique categories
-exports.getCategories = async (req, res) => {
+// Get dynamic Open Graph meta HTML for social bot previews (WhatsApp, Facebook, Twitter, etc.)
+exports.getBlogOgMeta = async (req, res) => {
   try {
-    const categories = await Blog.distinct('category', { status: 'published', category: { $ne: null, $ne: '' } })
-    res.json(categories.sort())
+    const rawSlug = req.params.slug;
+    const decodedSlug = decodeURIComponent(rawSlug);
+
+    const blog = await Blog.findOne({
+      $or: [{ slug: rawSlug }, { slug: decodedSlug }],
+      status: 'published'
+    });
+
+    if (!blog) {
+      return res.redirect('https://shasnadeshupdates.com');
+    }
+
+    const title = (blog.title || 'Shasnadesh Updates').replace(/"/g, '&quot;');
+    const description = (blog.excerpt || blog.title).replace(/"/g, '&quot;');
+    const siteUrl = `https://shasnadeshupdates.com/blog/${blog.slug}`;
+    
+    let imageUrl = 'https://shasnadeshupdates.com/logo512.png';
+    if (blog.thumbnail) {
+      if (blog.thumbnail.startsWith('http')) {
+        imageUrl = blog.thumbnail;
+      } else if (blog.thumbnail.startsWith('/uploads/')) {
+        imageUrl = `https://shasnadesh-web-app.vercel.app${blog.thumbnail}`;
+      } else {
+        imageUrl = `https://shasnadeshupdates.com${blog.thumbnail.startsWith('/') ? '' : '/'}${blog.thumbnail}`;
+      }
+    }
+
+    const html = `<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>${title} | Shasnadesh Updates</title>
+  <meta name="description" content="${description}">
+  <link rel="canonical" href="${siteUrl}">
+
+  <!-- Open Graph / WhatsApp / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="${siteUrl}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Shasnadesh Updates">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="${siteUrl}">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${imageUrl}">
+
+  <script>window.location.href = "${siteUrl}";</script>
+  <meta http-equiv="refresh" content="0;url=${siteUrl}">
+</head>
+<body>
+  <p>Redirecting to <a href="${siteUrl}">${title}</a>...</p>
+</body>
+</html>`;
+
+    res.set('Content-Type', 'text/html');
+    res.send(html);
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res.redirect('https://shasnadeshupdates.com');
   }
-}
+};
