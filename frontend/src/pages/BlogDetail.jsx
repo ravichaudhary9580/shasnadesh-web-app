@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "../utils/imageUtils";
 import { Download, ExternalLink, Share2 } from "lucide-react";
 import { generateBlogSchema, generateBreadcrumbSchema, injectSchema } from "../utils/schemaUtils";
+import AdSense from "../components/AdSense";
 
 // ── Inline PDF viewer — always open, no toggle ─────────────────────────────
 function PdfViewer({ pdf }) {
@@ -297,6 +298,9 @@ export default function BlogDetail() {
           className={`prose-blog ${isHindi ? "font-hindi" : ""}`}
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
+
+        {/* AdSense Unit Below Article */}
+        <AdSense className="my-8" />
 
         {/* Video */}
         {blog.videoUrl && (
