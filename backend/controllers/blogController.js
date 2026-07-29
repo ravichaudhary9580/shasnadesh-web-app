@@ -286,3 +286,13 @@ exports.getBlogOgMeta = async (req, res) => {
     res.redirect('https://shasnadeshupdates.com');
   }
 };
+
+// Get all unique categories
+exports.getCategories = async (req, res) => {
+  try {
+    const categories = await Blog.distinct('category', { status: 'published', category: { $ne: null, $ne: '' } })
+    res.json(categories.sort())
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
