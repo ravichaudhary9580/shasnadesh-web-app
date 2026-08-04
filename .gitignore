@@ -1,0 +1,3 @@
+# Ignore 'other' directory containing non-code assets and packages
+other/
+count.js

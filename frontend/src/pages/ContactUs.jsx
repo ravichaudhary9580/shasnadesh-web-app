@@ -20,10 +20,10 @@ export default function ContactUs() {
           <div>
             <h2 className="font-ui font-semibold text-ink-900 text-sm mb-2">Email</h2>
             <a 
-              href="mailto:admin@shasnadeshupdates.com" 
+              href="mailto:shasnadeshupdates@gmail.com" 
               className="text-saffron-600 hover:text-saffron-700 text-sm transition-colors"
             >
-              admin@shasnadeshupdates.com
+              shasnadeshupdates@gmail.com
             </a>
           </div>
           
