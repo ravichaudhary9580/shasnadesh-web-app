@@ -23,8 +23,8 @@
     color: #26201a;
   }
 
-  /* Visited links — site-wide: muted grey, clearly read but de-emphasised */
-  a:visited { color: #8a7055; }
+  /* Visited links — site-wide: readable muted tone with high contrast */
+  a:visited { color: #574432; }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }

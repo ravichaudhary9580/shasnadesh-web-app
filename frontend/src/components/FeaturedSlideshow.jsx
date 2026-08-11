@@ -84,17 +84,17 @@ export default function FeaturedSlideshow({ blogs }) {
             <>
               <button
                 onClick={(e) => { e.preventDefault(); goToPrev(); }}
-                className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all"
+                className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all"
                 aria-label="Previous"
               >
-                <ChevronLeft size={16} className="text-ink-900" />
+                <ChevronLeft size={18} className="text-ink-900" />
               </button>
               <button
                 onClick={(e) => { e.preventDefault(); goToNext(); }}
-                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all"
+                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all"
                 aria-label="Next"
               >
-                <ChevronRight size={16} className="text-ink-900" />
+                <ChevronRight size={18} className="text-ink-900" />
               </button>
             </>
           )}

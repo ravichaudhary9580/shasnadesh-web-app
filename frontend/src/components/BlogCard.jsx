@@ -114,15 +114,16 @@ export default function BlogCard({ blog, featured = false, priority = false }) {
           </p>
         )}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-ink-100">
-          <span className="text-xs text-ink-400 font-ui">{timeAgo}</span>
-          <div className="flex items-center gap-2 text-xs text-ink-400 font-ui">
+          <span className="text-xs text-ink-600 font-ui">{timeAgo}</span>
+          <div className="flex items-center gap-2 text-xs text-ink-600 font-ui">
             {blog.views > 0 && <span>👁 {blog.views.toLocaleString()}</span>}
             <button
               onClick={handleShare}
-              className="p-1 hover:text-saffron-600 transition-colors"
+              className="p-2 -mr-1 rounded-full hover:bg-ink-100 hover:text-saffron-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               title="Share"
+              aria-label="Share post"
             >
-              <Share2 size={14} />
+              <Share2 size={16} />
             </button>
           </div>
         </div>

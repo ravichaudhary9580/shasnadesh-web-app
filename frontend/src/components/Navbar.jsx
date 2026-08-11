@@ -162,7 +162,7 @@ export default function Navbar({ onSearch }) {
             <img
               src={`${process.env.PUBLIC_URL}/logo192.png`}
               alt="Shasnadesh Updates"
-              className="w-9 h-9 rounded-full shadow-sm group-hover:scale-110 transition-transform"
+              className="w-9 h-9  rounded-lg shadow-sm group-hover:scale-110 transition-transform"
               loading="eager"
             />
 
