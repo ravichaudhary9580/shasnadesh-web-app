@@ -39,6 +39,9 @@ export default function SEO({
     setMeta('og:title', title, true);
     setMeta('og:description', description, true);
     setMeta('og:image', image, true);
+    setMeta('og:image:secure_url', image, true);
+    setMeta('og:image:width', '1200', true);
+    setMeta('og:image:height', '630', true);
     setMeta('og:url', url, true);
     setMeta('og:type', type, true);
     setMeta('og:site_name', 'Shasnadesh Updates', true);

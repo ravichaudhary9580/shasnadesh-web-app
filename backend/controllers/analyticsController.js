@@ -45,7 +45,7 @@ exports.getOverview = async (req, res) => {
 exports.getPopular = async (req, res) => {
   try {
     const blogs = await Blog.find({ status: 'published' })
-      .sort('-views').limit(5).select('title slug views')
+      .sort('-views').limit(10).select('title slug views category')
     res.json(blogs)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -74,6 +74,95 @@ exports.getDailyVisits = async (req, res) => {
       },
       { $sort: { _id: 1 } },
       { $limit: 30 }
+    ])
+    res.json(data)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+exports.getAllTimeVisits = async (req, res) => {
+  try {
+    const { range, startDate, endDate } = req.query;
+    let match = {};
+    let format = '%Y-%m'; 
+    
+    const now = new Date();
+    
+    if (range === '30days') {
+      match = { visitedAt: { $gte: new Date(now.setDate(now.getDate() - 30)) } };
+      format = '%Y-%m-%d'; 
+    } else if (range === 'thisYear') {
+      match = { visitedAt: { $gte: new Date(now.getFullYear(), 0, 1) } };
+      format = '%Y-%m'; 
+    } else if (range === 'lastYear') {
+      match = { 
+        visitedAt: { 
+          $gte: new Date(now.getFullYear() - 1, 0, 1),
+          $lt: new Date(now.getFullYear(), 0, 1)
+        } 
+      };
+      format = '%Y-%m';
+    } else if (range === 'custom' && startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      match = { visitedAt: { $gte: start, $lte: end } };
+      
+      const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24));
+      format = diffDays > 60 ? '%Y-%m' : '%Y-%m-%d';
+    }
+
+    const pipeline = [];
+    if (Object.keys(match).length > 0) pipeline.push({ $match: match });
+
+    pipeline.push(
+      {
+        $group: {
+          _id: { $dateToString: { format, date: '$visitedAt' } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    );
+
+    const data = await Analytics.aggregate(pipeline);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+exports.getTopCategories = async (req, res) => {
+  try {
+    const data = await Blog.aggregate([
+      { $match: { status: 'published', category: { $ne: null, $ne: '' } } },
+      { $group: { _id: '$category', views: { $sum: '$views' } } },
+      { $sort: { views: -1 } }
+    ])
+    res.json(data)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+exports.getTrafficSources = async (req, res) => {
+  try {
+    const data = await Analytics.aggregate([
+      {
+        $group: {
+          _id: {
+            $cond: [
+              { $or: [{ $eq: ['$referrer', null] }, { $eq: ['$referrer', ''] }] },
+              'Direct / Unknown',
+              '$referrer'
+            ]
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
     ])
     res.json(data)
   } catch (error) {

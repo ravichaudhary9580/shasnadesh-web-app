@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
-import { getBlog, trackVisit } from "../services/api";
+import { getBlog, getBlogs, trackVisit } from "../services/api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import BlogCard from "../components/BlogCard";
 import SEO from "../components/SEO";
 import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "../utils/imageUtils";
+import { shareBlog } from "../utils/shareUtils";
 import { Download, ExternalLink, Share2 } from "lucide-react";
 import { generateBlogSchema, generateBreadcrumbSchema, injectSchema } from "../utils/schemaUtils";
 import AdSense from "../components/AdSense";
@@ -115,6 +117,33 @@ export default function BlogDetail() {
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [shared, setShared] = useState(false);
+  const [headings, setHeadings] = useState([]);
+  const [relatedBlogs, setRelatedBlogs] = useState([]);
+  const [tagsExpanded, setTagsExpanded] = useState(false);
+
+  // Extract headings for Table of Contents after content renders
+  useEffect(() => {
+    if (blog && !loading) {
+      // Give React a tick to render the HTML
+      setTimeout(() => {
+        const article = document.querySelector('.prose-blog');
+        if (article) {
+          const elements = article.querySelectorAll('h1, h2, h3, h4');
+          const extracted = Array.from(elements).map((el, idx) => {
+            // Assign an ID if it doesn't have one
+            const id = el.id || `heading-${idx}`;
+            el.id = id;
+            return {
+              id,
+              text: el.textContent || el.innerText || "",
+              level: parseInt(el.tagName.replace('H', '')) || 2
+            };
+          }).filter(h => h.text.trim().length > 0);
+          setHeadings(extracted);
+        }
+      }, 100);
+    }
+  }, [blog, loading]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -122,6 +151,17 @@ export default function BlogDetail() {
       .then(({ data }) => {
         setBlog(data);
         trackVisit({ blogId: data._id, slug: data.slug, referrer: document.referrer }).catch(() => {});
+        
+        // Fetch related blogs in the same category
+        if (data.category) {
+          getBlogs({ category: data.category, limit: 4 })
+            .then(res => {
+              // Filter out the current blog
+              const filtered = res.data.blogs.filter(b => b._id !== data._id).slice(0, 3);
+              setRelatedBlogs(filtered);
+            })
+            .catch(() => {});
+        }
       })
       .catch(() => navigate("/", { replace: true }))
       .finally(() => setLoading(false));
@@ -141,49 +181,16 @@ export default function BlogDetail() {
   }, [blog]);
 
   const handleShare = async () => {
-    const shareUrl = decodeURIComponent(window.location.href);
-    const shareData = {
-      url: shareUrl
-    };
-
     try {
-      if (navigator.share) {
-        // Mobile: Try to share with image
-        if (blog && blog.thumbnail && navigator.canShare && navigator.canShare({ files: [] })) {
-          const imageUrl = getImageUrl(blog.thumbnail);
-          
-          try {
-            const response = await fetch(imageUrl);
-            if (response.ok) {
-              const blob = await response.blob();
-              const file = new File([blob], 'blog-image.jpg', { type: blob.type });
-              
-              if (navigator.canShare({ files: [file] })) {
-                await navigator.share({ ...shareData, files: [file] });
-                return;
-              }
-            }
-          } catch (err) {
-            console.log('Image share failed, using text-only:', err);
-          }
-        }
-        
-        // Text-only share
-        await navigator.share(shareData);
-      } else {
-        // Desktop: Copy URL
-        navigator.clipboard.writeText(shareUrl);
-        setShared(true);
-        setTimeout(() => setShared(false), 2000);
-      }
+      await shareBlog(blog, window.location.origin);
+      setShared(true);
+      setTimeout(() => setShared(false), 2500);
     } catch (error) {
-      console.log('Share error:', error);
-      
-      // Final fallback
       if (error.name !== 'AbortError') {
-        navigator.clipboard.writeText(shareUrl);
+        console.error('Share error:', error);
+        navigator.clipboard.writeText(window.location.href);
         setShared(true);
-        setTimeout(() => setShared(false), 2000);
+        setTimeout(() => setShared(false), 2500);
       }
     }
   };
@@ -260,9 +267,17 @@ export default function BlogDetail() {
           {blog.category && (
             <span className="badge bg-saffron-100 text-saffron-700">{blog.category}</span>
           )}
-          {blog.tags?.map((t) => (
+          {blog.tags?.slice(0, tagsExpanded ? blog.tags.length : 3).map((t) => (
             <span key={t} className="badge bg-ink-100 text-ink-600">#{t}</span>
           ))}
+          {blog.tags?.length > 3 && (
+            <button
+              onClick={() => setTagsExpanded(!tagsExpanded)}
+              className="badge bg-white text-ink-500 hover:bg-ink-50 hover:text-ink-800 transition-colors border border-ink-200 cursor-pointer"
+            >
+              {tagsExpanded ? "Show less" : `+${blog.tags.length - 3} more`}
+            </button>
+          )}
         </div>
 
         {/* Title */}
@@ -291,6 +306,74 @@ export default function BlogDetail() {
           </button>
         </div>
 
+        {/* Table of Contents */}
+        {headings.length > 0 && (
+          <div className="mb-8 p-5 sm:p-6 bg-white border border-ink-100 rounded-2xl shadow-sm animate-fade-in">
+            <h3 className="font-display text-lg font-bold text-ink-900 mb-4 flex items-center gap-2">
+              <span className="text-xl">📑</span> विषय सूची (Table of Contents)
+            </h3>
+            <ul className="space-y-3">
+              {headings.map((h) => (
+                <li key={h.id} className={h.level === 3 ? "ml-5" : ""}>
+                  <a
+                    href={`#${h.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const el = document.getElementById(h.id);
+                      if (el) {
+                        const y = el.getBoundingClientRect().top + window.scrollY - 100; // Offset for fixed navbar
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                      }
+                    }}
+                    className="group flex items-start gap-2.5 text-ink-600 hover:text-saffron-600 font-ui text-sm sm:text-base transition-colors"
+                  >
+                    <span className="text-ink-300 group-hover:text-saffron-400 select-none mt-0.5">•</span>
+                    <span className="leading-tight">{h.text}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            {/* Static ToC items for Links and Documents */}
+            {(blog.links?.length > 0 || blog.pdfs?.length > 0) && (
+              <ul className="mt-3 pt-3 border-t border-ink-100 space-y-3">
+                {blog.links?.length > 0 && (
+                  <li>
+                    <a
+                      href="#related-links"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const el = document.getElementById('related-links');
+                        if (el) window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' });
+                      }}
+                      className="group flex items-center gap-2 text-ink-700 hover:text-saffron-600 font-ui font-medium text-sm sm:text-base transition-colors"
+                    >
+                      <span className="text-base group-hover:scale-110 transition-transform">🔗</span>
+                      <span>महत्वपूर्ण लिंक (Related Links)</span>
+                    </a>
+                  </li>
+                )}
+                {blog.pdfs?.length > 0 && (
+                  <li>
+                    <a
+                      href="#documents"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const el = document.getElementById('documents');
+                        if (el) window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' });
+                      }}
+                      className="group flex items-center gap-2 text-ink-700 hover:text-saffron-600 font-ui font-medium text-sm sm:text-base transition-colors"
+                    >
+                      <span className="text-base group-hover:scale-110 transition-transform">📄</span>
+                      <span>शासनादेश (Documents)</span>
+                    </a>
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
+        )}
+
         {/* Body */}
         <article
           className={`prose-blog ${isHindi ? "font-hindi" : ""}`}
@@ -316,22 +399,9 @@ export default function BlogDetail() {
           </div>
         )}
 
-        {/* ── PDFs — inline viewer ── */}
-        {blog.pdfs?.length > 0 && (
-          <div className="mt-10">
-            <div className="divider-ornament"><span>📄</span></div>
-            <h3 className="font-display text-xl font-bold text-ink-900 mb-4">Documents</h3>
-            <div className="space-y-3">
-              {blog.pdfs.map((pdf, i) => (
-                <PdfViewer key={i} pdf={pdf} />
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Links */}
         {blog.links?.length > 0 && (
-          <div className="mt-10">
+          <div id="related-links" className="mt-10 scroll-mt-24">
             <div className="divider-ornament"><span>🔗</span></div>
             <h3 className="font-display text-xl font-bold text-ink-900 mb-4">Related Links</h3>
             <div className="space-y-2">
@@ -345,6 +415,19 @@ export default function BlogDetail() {
                 >
                   <span>→</span>{link.title}
                 </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── PDFs — inline viewer ── */}
+        {blog.pdfs?.length > 0 && (
+          <div id="documents" className="mt-10 scroll-mt-24">
+            <div className="divider-ornament"><span>📄</span></div>
+            <h3 className="font-display text-xl font-bold text-ink-900 mb-4">Documents</h3>
+            <div className="space-y-3">
+              {blog.pdfs.map((pdf, i) => (
+                <PdfViewer key={i} pdf={pdf} />
               ))}
             </div>
           </div>
@@ -367,14 +450,59 @@ export default function BlogDetail() {
           </div>
         )}
 
+        {/* Editorial Trust & Fact Check Box */}
+        <div className="mt-12 bg-white border border-ink-100 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-saffron-500 text-white font-bold flex items-center justify-center text-sm shadow-sm flex-shrink-0">
+              SU
+            </div>
+            <div>
+              <h4 className="font-ui font-bold text-sm text-ink-900">
+                Shasnadesh Updates Editorial Team
+              </h4>
+              <p className="font-hindi text-xs text-ink-500">
+                सत्यापित शासनादेश एवं आधिकारिक सूचना पोर्टल · Verified Information
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/about"
+            className="text-xs font-semibold text-saffron-600 hover:text-saffron-700 underline font-ui flex-shrink-0"
+          >
+            Editorial Policy & Fact-Checking →
+          </Link>
+        </div>
+
+        {/* Auto Related Posts Section */}
+        {relatedBlogs.length > 0 && (
+          <div className="mt-16 pt-8 border-t border-ink-200">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-2xl">🔥</span>
+              <h3 className="font-display text-2xl font-bold text-ink-900">
+                सम्बंधित खबरें (Related Posts)
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedBlogs.map((relatedBlog, i) => (
+                <div key={relatedBlog._id} className="animate-slide-up" style={{ animationDelay: `${i * 100}ms` }}>
+                  <BlogCard blog={relatedBlog} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Back */}
-        <div className="mt-14 pt-8 border-t border-ink-100">
+        <div className="mt-8 pt-6 border-t border-ink-100 flex items-center justify-between">
           <button
             onClick={() => navigate(location.state?.from || "/")}
-            className="btn-ghost"
+            className="btn-ghost text-xs sm:text-sm"
           >
             ← Back to all posts
           </button>
+          <Link to="/contact" className="text-xs text-ink-400 hover:text-ink-600 underline">
+            Report an issue with this post
+          </Link>
         </div>
       </main>
 

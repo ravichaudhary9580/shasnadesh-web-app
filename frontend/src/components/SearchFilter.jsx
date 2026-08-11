@@ -18,9 +18,19 @@ export default function SearchFilter({
   }, [initialCategory]);
 
   useEffect(() => {
+    const MENU_ORDER = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "अवकाश कैलेंडर", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
     getCategories()
-      .then(({ data }) => setCategories(["All", ...data]))
-      .catch(() => setCategories(["All", "उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "अवकाश कैलेंडर", "छात्रवृत्ति", "प्रारूप", "अन्य"]));
+      .then(({ data }) => {
+        const sortedData = [...data].sort((a, b) => {
+          const indexA = MENU_ORDER.indexOf(a);
+          const indexB = MENU_ORDER.indexOf(b);
+          const weightA = indexA === -1 ? 999 : indexA;
+          const weightB = indexB === -1 ? 999 : indexB;
+          return weightA - weightB;
+        });
+        setCategories(["All", ...sortedData]);
+      })
+      .catch(() => setCategories(["All", ...MENU_ORDER]));
   }, []);
 
   useEffect(() => {

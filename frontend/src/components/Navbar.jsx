@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getSearchSuggestions } from "../services/api";
-import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award, LayoutGrid, FileText, CalendarDays } from "lucide-react";
+import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award, LayoutGrid, FileText, CalendarDays, GraduationCap } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "होम", to: "/", icon: HomeIcon },
   { label: "उत्तर प्रदेश शासनादेश", to: "/?category=उत्तर प्रदेश शासनादेश", icon: Landmark },
   { label: "शिक्षा विभाग", to: "/?category=शिक्षा विभाग", icon: BookOpen },
-  { label: "वैकेंसी अलर्ट", to: "/?category=वैकेंसी अलर्ट", icon: Briefcase },
   { label: "अवकाश कैलेंडर", to: "/?category=अवकाश कैलेंडर", icon: CalendarDays },
+  { label: "वैकेंसी अलर्ट", to: "/?category=वैकेंसी अलर्ट", icon: Briefcase },
+  { label: "स्टूडेंट कॉर्नर", to: "/?category=स्टूडेंट कॉर्नर", icon: GraduationCap },
   { label: "छात्रवृत्ति", to: "/?category=छात्रवृत्ति", icon: Award },
   { label: "प्रारूप", to: "/?category=प्रारूप", icon: FileText },
   { label: "अन्य", to: "/?category=अन्य", icon: LayoutGrid },
@@ -316,7 +317,7 @@ export default function Navbar({ onSearch }) {
 
                       {/* Title */}
                       <h3 className="font-display font-bold text-base text-ink-900 mb-1">
-                        Shasnadeshupdates.com App
+                        Shasnadesh Tracker: Info App
                       </h3>
 
                       {/* Subtitle */}
@@ -326,7 +327,7 @@ export default function Navbar({ onSearch }) {
 
                       {/* Button */}
                       <a
-                        href="https://play.google.com/store/apps/details?id=com.shasnadeshupdates"
+                        href="https://play.google.com/store/apps/details?id=app.vercel.shasnadeshupdates.twa"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-saffron-600 font-bold text-xs hover:text-saffron-700 transition-colors"
@@ -357,7 +358,7 @@ export default function Navbar({ onSearch }) {
               <Link
                 to="/login"
                 onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl bg-ink-100 hover:bg-saffron-50 text-ink-600 hover:text-saffron-700 font-ui text-sm font-medium transition-colors"
+                className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-xl bg-ink-100 hover:bg-saffron-50 text-ink-600 hover:text-saffron-700 font-ui text-xs font-medium transition-colors"
               >
                 <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -365,7 +366,7 @@ export default function Navbar({ onSearch }) {
                 </svg>
                 Admin Login
               </Link>
-              <p className="font-hindi text-xs text-ink-400 text-center">
+              <p className="font-hindi text-[11px] text-ink-400 text-center">
                 सत्यमेव जयते · Satyameva Jayate
               </p>
             </div>

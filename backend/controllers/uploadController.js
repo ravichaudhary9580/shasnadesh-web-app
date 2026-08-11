@@ -1,6 +1,7 @@
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
 const { randomUUID } = require('crypto')
 const path = require('path')
+const sharp = require('sharp')
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -32,17 +33,36 @@ exports.uploadFile = async (req, res) => {
       return res.status(400).json({ message: 'Only PDF, DOC, DOCX, images (JPEG, PNG, WebP, GIF), or text files are allowed' })
     }
 
-    const ext = path.extname(req.file.originalname)
+    let ext = path.extname(req.file.originalname)
+    let body = req.file.buffer
+    let mimetype = req.file.mimetype
+
+    // Optimize images to WebP (skip GIFs to preserve animation)
+    if (mimetype.startsWith('image/') && mimetype !== 'image/gif') {
+      try {
+        body = await sharp(req.file.buffer)
+          .webp({ quality: 80 })
+          .toBuffer()
+        ext = '.webp'
+        mimetype = 'image/webp'
+      } catch (err) {
+        console.error('Image optimization failed, falling back to original:', err)
+      }
+    }
+
     const key = `uploads/${randomUUID()}${ext}`
 
     await s3.send(new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,
-      Body: req.file.buffer,
-      ContentType: req.file.mimetype
+      Body: body,
+      ContentType: mimetype,
+      CacheControl: 'public, max-age=31536000, immutable'
     }))
 
-    const url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
+    const url = process.env.CLOUDFRONT_DOMAIN 
+      ? `https://${process.env.CLOUDFRONT_DOMAIN}/${key}`
+      : `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
     res.json({ url, key })
   } catch (error) {
     console.error('Upload error:', error.message)

@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { adminGetBlogs, deleteBlog, toggleStatus, toggleFeatured, getCategories } from "../../services/api";
+import { adminGetBlogs, deleteBlog, toggleStatus, toggleFeatured, getCategories, requestInstantIndexing } from "../../services/api";
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 
-const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "अवकाश कैलेंडर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
+const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "अवकाश कैलेंडर", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
 
 export default function ManageBlogs() {
   const [blogs, setBlogs] = useState([]);
@@ -78,10 +78,20 @@ export default function ManageBlogs() {
   const handleToggleFeatured = async (id) => {
     try {
       const { data } = await toggleFeatured(id);
-      toast.success(`Blog ${data.featured ? "marked as featured" : "unmarked as featured"}`);
-      fetchBlogs();
+      setBlogs((prev) => prev.map((b) => (b._id === id ? { ...b, featured: data.featured } : b)));
+      toast.success(data.featured ? "Marked as featured" : "Removed from featured");
     } catch {
       toast.error("Failed to update featured status");
+    }
+  };
+
+  const handleInstantIndex = async (blogId) => {
+    try {
+      toast.loading("Sending Instant Indexing request...", { id: "indexing" });
+      const { data } = await requestInstantIndexing({ blogId });
+      toast.success(data.message || "Indexing request sent to Google & IndexNow!", { id: "indexing" });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Indexing request failed", { id: "indexing" });
     }
   };
 
@@ -241,6 +251,13 @@ export default function ManageBlogs() {
                     }`}
                   >
                     {blog.status === "published" ? "Unpublish" : "Publish"}
+                  </button>
+                  <button
+                    onClick={() => handleInstantIndex(blog._id)}
+                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all flex items-center gap-1"
+                    title="Send Instant Indexing request to Google & IndexNow"
+                  >
+                    ⚡ Instant Index
                   </button>
                   <Link
                     to={`/admin/blogs/edit/${blog._id}`}

@@ -32,6 +32,7 @@ export const updatePassword = (data) => api.put("/auth/update-password", data);
 export const getBlogs = (params) => api.get("/blogs", { params });
 export const getBlog = (slug) => api.get(`/blogs/${slug}`);
 export const getCategories = () => api.get("/blogs/categories/list");
+export const getYears = () => api.get("/blogs/years/list");
 export const getSearchSuggestions = (q, limit = 8) => api.get("/blogs/suggestions", { params: { q, limit } });
 
 // --- Admin Blogs ---
@@ -41,6 +42,7 @@ export const updateBlog = (id, data) => api.put(`/admin/blogs/${id}`, data);
 export const deleteBlog = (id) => api.delete(`/admin/blogs/${id}`);
 export const toggleStatus = (id) => api.patch(`/admin/blogs/${id}/status`);
 export const toggleFeatured = (id) => api.patch(`/admin/blogs/${id}/featured`);
+export const requestInstantIndexing = (data) => api.post("/admin/indexing/request", data);
 
 // --- Upload ---
 export const uploadFile = (file) => {
@@ -55,5 +57,13 @@ export const getOverview = () => api.get("/admin/analytics/overview");
 export const getPopular = () => api.get("/admin/analytics/popular");
 export const getDeviceSplit = () => api.get("/admin/analytics/devices");
 export const getDailyVisits = () => api.get("/admin/analytics/daily");
+export const getAllTimeVisits = (range, startDate, endDate) => api.get("/admin/analytics/all-time", { params: { range, startDate, endDate } });
+export const getTopCategories = () => api.get("/admin/analytics/categories");
+export const getTrafficSources = () => api.get("/admin/analytics/traffic-sources");
+
+// --- Backup ---
+export const getBackupPreview = (params) => api.get("/admin/backup", { params: { ...params, format: "preview" } });
+export const downloadBackup = (params) => api.get("/admin/backup", { params, responseType: "blob" });
+export const downloadS3MediaZip = (params) => api.get("/admin/backup/s3-zip", { params, responseType: "blob" });
 
 export default api;

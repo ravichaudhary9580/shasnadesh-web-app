@@ -13,7 +13,7 @@ import {
   ChevronRight,
   Menu,
   ExternalLink,
-
+  HardDriveDownload,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +21,7 @@ const navItems = [
   { to: "/admin/blogs", label: "Manage Posts", icon: FileText },
   { to: "/admin/blogs/new", label: "New Post", icon: PenSquare },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/admin/backup", label: "System Backup", icon: HardDriveDownload },
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon },
 ];
 
@@ -131,12 +132,11 @@ export default function AdminLayout() {
   const sidebarWidth = collapsed ? "w-[68px]" : "w-64";
 
   return (
-    // ── FIX 1: overflow-x-hidden on root prevents any child from causing page-level scroll
-    <div className="min-h-screen bg-ink-100 flex overflow-x-hidden">
+    <div className="min-h-screen bg-ink-100 flex min-w-0">
 
       {/* Desktop sidebar */}
       <aside
-        className={`hidden lg:flex ${sidebarWidth} bg-ink-950 flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 overflow-hidden`}
+        className={`hidden lg:flex ${sidebarWidth} bg-ink-950 flex-col fixed inset-y-0 left-0 z-50 transition-all duration-300 overflow-hidden`}
       >
         <SidebarContent />
       </aside>
@@ -151,13 +151,13 @@ export default function AdminLayout() {
         </div>
       )}
 
-      {/* ── FIX 2: min-w-0 + w-full ensures this column never exceeds viewport */}
+      {/* Main content wrapper */}
       <div
         className={`flex-1 flex flex-col min-h-screen min-w-0 w-full transition-all duration-300 ${
           collapsed ? "lg:ml-[68px]" : "lg:ml-64"
         }`}
       >
-        {/* Top bar */}
+        {/* Admin Header */}
         <header className="h-12 sm:h-14 bg-white border-b border-ink-100 flex items-center px-3 sm:px-4 lg:px-6 gap-3 sm:gap-4">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -177,8 +177,7 @@ export default function AdminLayout() {
           </a>
         </header>
 
-        {/* ── FIX 3: overflow-x-hidden + w-full on main so page content can't overflow */}
-        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden w-full">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 min-w-0 w-full">
           <Outlet />
         </main>
       </div>

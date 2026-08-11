@@ -22,7 +22,7 @@ export default function FeaturedSlideshow({ blogs }) {
     <div className="mb-8 animate-fade-in">
       <div className="flex items-center justify-center gap-2 mb-3">
         <div className="h-px flex-1 max-w-[60px] bg-gradient-to-r from-transparent to-saffron-400" />
-        <p className="font-hindi text-sm font-medium text-saffron-600 whitespace-nowrap">फीचर्ड आदेश</p>
+        <p className="font-hindi text-sm font-medium text-saffron-700 whitespace-nowrap">फीचर्ड आदेश</p>
         <div className="h-px flex-1 max-w-[60px] bg-gradient-to-l from-transparent to-saffron-400" />
       </div>
 
@@ -46,6 +46,9 @@ export default function FeaturedSlideshow({ blogs }) {
                       src={blog.thumbnail}
                       alt={blog.title}
                       className="w-full h-full object-cover"
+                      fetchPriority={idx === 0 ? "high" : "auto"}
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      decoding={idx === 0 ? "sync" : "async"}
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-saffron-100 to-saffron-200 flex items-center justify-center">

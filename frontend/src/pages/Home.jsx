@@ -6,7 +6,7 @@ import SearchFilter from "../components/SearchFilter";
 import FeaturedSlideshow from "../components/FeaturedSlideshow";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
-import { getBlogs } from "../services/api";
+import { getBlogs, getYears } from "../services/api";
 import { Newspaper } from "lucide-react";
 import { generateWebsiteSchema, generateOrganizationSchema, injectSchema } from "../utils/schemaUtils";
 
@@ -16,14 +16,7 @@ const SORT_OPTIONS = [
   { label: "Most Viewed", value: "-views"     },
 ];
 
-function getYearOptions() {
-  const currentYear = new Date().getFullYear();
-  const years = ["All"];
-  for (let y = currentYear; y >= 2020; y--) years.push(y.toString());
-  return years;
-}
 
-const YEAR_OPTIONS = getYearOptions();
 
 export default function Home() {
   const [blogs,   setBlogs]   = useState([]);
@@ -31,6 +24,7 @@ export default function Home() {
   const [total,   setTotal]   = useState(0);
   const [pages,   setPages]   = useState(1);
   const [loading, setLoading] = useState(true);
+  const [yearOptions, setYearOptions] = useState(["All"]);
   const [searchParams, setSearchParams] = useSearchParams();
   const lastPageBeforeSearch = useRef(1);
 
@@ -72,6 +66,12 @@ export default function Home() {
   useEffect(() => { fetchBlogs(filters, page); }, [filters, page, fetchBlogs]);
 
   useEffect(() => { fetchFeaturedBlogs(); }, [fetchFeaturedBlogs]);
+
+  useEffect(() => {
+    getYears()
+      .then(({ data }) => setYearOptions(["All", ...data]))
+      .catch(() => setYearOptions(["All", new Date().getFullYear().toString()]));
+  }, []);
 
   // Inject structured data
   useEffect(() => {
@@ -196,8 +196,9 @@ export default function Home() {
                   value={filters.year || "All"}
                   onChange={(e) => updateFilter("year", e.target.value === "All" ? "" : e.target.value)}
                   className="input w-auto py-1.5 text-sm cursor-pointer"
+                  aria-label="Filter by year"
                 >
-                  {YEAR_OPTIONS.map((y) => (
+                  {yearOptions.map((y) => (
                     <option key={y} value={y}>{y === "All" ? "All Years" : y}</option>
                   ))}
                 </select>
@@ -205,6 +206,7 @@ export default function Home() {
                   value={filters.sort}
                   onChange={(e) => updateFilter("sort", e.target.value)}
                   className="input w-auto py-1.5 text-sm cursor-pointer"
+                  aria-label="Sort articles"
                 >
                   {SORT_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>

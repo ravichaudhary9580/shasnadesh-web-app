@@ -19,7 +19,7 @@ import {
   Check,
 } from "lucide-react";
 
-const DEFAULT_CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "वैकेंसी अलर्ट", "अवकाश कैलेंडर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
+const DEFAULT_CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "अवकाश कैलेंडर", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
 
 
 function Field({ label, children, hint }) {
@@ -64,9 +64,8 @@ function ThumbnailUploader({ value, onChange }) {
             key={m}
             type="button"
             onClick={() => setMode(m)}
-            className={`px-3 py-1.5 rounded-md font-ui text-xs font-medium capitalize transition-all ${
-              mode === m ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-700"
-            }`}
+            className={`px-3 py-1.5 rounded-md font-ui text-xs font-medium capitalize transition-all ${mode === m ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-700"
+              }`}
           >
             {m === "upload" ? "📁 Upload File" : "🔗 URL"}
           </button>
@@ -75,11 +74,10 @@ function ThumbnailUploader({ value, onChange }) {
 
       {mode === "upload" ? (
         <label
-          className={`flex flex-col items-center gap-3 px-6 py-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${
-            uploading
+          className={`flex flex-col items-center gap-3 px-6 py-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${uploading
               ? "border-saffron-300 bg-saffron-50"
               : "border-ink-200 hover:border-saffron-300 hover:bg-saffron-50/30"
-          }`}
+            }`}
         >
           {uploading ? (
             <Loader2 size={28} className="text-saffron-500 animate-spin" />
@@ -287,9 +285,8 @@ export default function BlogEditor() {
           <button
             type="button"
             onClick={() => setHindiMode(!hindiMode)}
-            className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all ${
-              hindiMode ? "bg-saffron-100 text-saffron-700" : "bg-ink-100 text-ink-600 hover:bg-ink-200"
-            }`}
+            className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all ${hindiMode ? "bg-saffron-100 text-saffron-700" : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+              }`}
             title="Toggle Hindi/English mode"
           >
             {hindiMode ? "हिंदी मोड" : "English"}
@@ -332,9 +329,8 @@ export default function BlogEditor() {
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all flex-1 sm:flex-initial ${
-              activeTab === id ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-700"
-            }`}
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all flex-1 sm:flex-initial ${activeTab === id ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-700"
+              }`}
           >
             <Icon size={14} strokeWidth={activeTab === id ? 2.5 : 2} />
             {label}
@@ -357,8 +353,33 @@ export default function BlogEditor() {
             />
           </Field>
           <div>
-            <p className="font-ui text-sm font-medium text-ink-700 mb-1.5">Content</p>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="font-ui text-sm font-medium text-ink-700">Content</p>
+              {(() => {
+                const textOnly = (form.content || "").replace(/<[^>]*>/g, " ").trim();
+                const wordCount = textOnly ? textOnly.split(/\s+/).filter(Boolean).length : 0;
+                const isOptimal = wordCount >= 350;
+                return (
+                  <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${isOptimal
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : "bg-amber-50 text-amber-700 border-amber-200"
+                    }`}>
+                    {wordCount} words {isOptimal ? "✓ (Optimal for AdSense)" : "(Aim for 350+ words)"}
+                  </span>
+                );
+              })()}
+            </div>
             <RichEditor content={form.content} onChange={(val) => set("content", val)} />
+
+            {/* AdSense Quality Guidance Callout */}
+            <div className="mt-3 p-3 bg-ink-50/70 border border-ink-100 rounded-xl text-xs text-ink-600 space-y-1">
+              <span className="font-bold text-ink-800">💡 Google AdSense High-Quality Content Checklist:</span>
+              <ul className="list-disc list-inside space-y-0.5 pl-1 text-[11px] text-ink-500">
+                <li>Include <strong>Overview (सार)</strong>, <strong>Key Highlights (मुख्य बिंदु)</strong>, and <strong>How to Apply / Process</strong>.</li>
+                <li>Avoid thin 1-2 sentence posts; aim for <strong>350 to 600+ original words</strong> with clear headings (H2/H3).</li>
+                <li>Provide official PDF attachment links & verified government circular details.</li>
+              </ul>
+            </div>
           </div>
         </div>
       )}
@@ -382,11 +403,10 @@ export default function BlogEditor() {
                       key={c}
                       type="button"
                       onClick={() => set("category", c)}
-                      className={`px-2.5 py-1 rounded-lg font-ui text-xs font-medium transition-all ${
-                        form.category === c
+                      className={`px-2.5 py-1 rounded-lg font-ui text-xs font-medium transition-all ${form.category === c
                           ? "bg-saffron-500 text-white shadow-sm"
                           : "bg-ink-100 text-ink-600 hover:bg-ink-200"
-                      }`}
+                        }`}
                     >
                       {c === "hindi" ? "हिंदी" : c.charAt(0).toUpperCase() + c.slice(1)}
                     </button>

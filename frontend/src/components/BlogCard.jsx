@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "../utils/imageUtils";
+import { shareBlog } from "../utils/shareUtils";
 import { Share2 } from "lucide-react";
 
-export default function BlogCard({ blog, featured = false }) {
+export default function BlogCard({ blog, featured = false, priority = false }) {
   const timeAgo = formatDistanceToNow(new Date(blog.createdAt), { addSuffix: true });
   const location = useLocation();
 
@@ -11,46 +12,14 @@ export default function BlogCard({ blog, featured = false }) {
     e.preventDefault();
     e.stopPropagation();
     
-    const shareUrl = decodeURIComponent(`${window.location.origin}/blog/${blog.slug}`);
-    const shareData = {
-      url: shareUrl
-    };
-
     try {
-      if (navigator.share) {
-        // Mobile: Try to share with image
-        if (blog.thumbnail && navigator.canShare && navigator.canShare({ files: [] })) {
-          const imageUrl = getImageUrl(blog.thumbnail);
-          
-          try {
-            const response = await fetch(imageUrl);
-            if (response.ok) {
-              const blob = await response.blob();
-              const file = new File([blob], 'blog-image.jpg', { type: blob.type });
-              
-              if (navigator.canShare({ files: [file] })) {
-                await navigator.share({ ...shareData, files: [file] });
-                return;
-              }
-            }
-          } catch (err) {
-            console.log('Image share failed, using text-only:', err);
-          }
-        }
-        
-        // Text-only share
-        await navigator.share(shareData);
-      } else {
-        // Desktop: Copy URL
-        await navigator.clipboard.writeText(shareUrl);
+      const nativeShared = await shareBlog(blog, window.location.origin);
+      if (!nativeShared) {
         alert('Link copied to clipboard!');
       }
     } catch (error) {
-      console.log('Share error:', error);
-      
-      // Final fallback
       if (error.name !== 'AbortError') {
-        await navigator.clipboard.writeText(shareUrl);
+        console.error('Share error:', error);
         alert('Link copied to clipboard!');
       }
     }
@@ -69,6 +38,9 @@ export default function BlogCard({ blog, featured = false }) {
             src={getImageUrl(blog.thumbnail)}
             alt={blog.title}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            fetchPriority={priority ? "high" : "auto"}
+            loading={priority ? "eager" : "lazy"}
+            decoding={priority ? "sync" : "async"}
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-ink-700 to-ink-900" />
@@ -114,6 +86,9 @@ export default function BlogCard({ blog, featured = false }) {
             src={getImageUrl(blog.thumbnail)}
             alt={blog.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fetchPriority={priority ? "high" : "auto"}
+            loading={priority ? "eager" : "lazy"}
+            decoding={priority ? "sync" : "async"}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-ink-100 to-ink-200 flex items-center justify-center">

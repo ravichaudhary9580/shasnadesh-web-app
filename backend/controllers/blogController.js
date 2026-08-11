@@ -3,6 +3,16 @@ const Analytics = require('../models/Analytics')
 const slugify = require('../utils/slugify')
 const { sendNotification } = require('./pushController')
 const { generateSitemap, generateSitemapIndex } = require('../utils/sitemapGenerator')
+const { notifyAllIndexing } = require('../services/indexingService')
+const { S3Client, DeleteObjectsCommand } = require('@aws-sdk/client-s3')
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  }
+})
 
 // Public
 exports.getBlogs = async (req, res) => {
@@ -105,9 +115,10 @@ exports.createBlog = async (req, res) => {
 
     const blog = await Blog.create({ ...req.body, slug })
     
-    // Auto-update sitemaps and send push notification if blog is published
+    // Auto-update sitemaps, notify indexing APIs, and send push notification if blog is published
     if (blog.status === 'published') {
       generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
+      notifyAllIndexing(blog.slug, 'URL_UPDATED').catch(err => console.error('Indexing failed:', err))
       sendNotification(
         'नया ब्लॉग पोस्ट',
         blog.title,
@@ -152,6 +163,9 @@ exports.updateBlog = async (req, res) => {
     if (!blog) return res.status(404).json({ message: 'Blog not found' })
     
     generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
+    if (blog.status === 'published') {
+      notifyAllIndexing(blog.slug, 'URL_UPDATED').catch(err => console.error('Indexing failed:', err))
+    }
 
     res.json(blog)
   } catch (error) {
@@ -164,7 +178,58 @@ exports.deleteBlog = async (req, res) => {
     const blog = await Blog.findByIdAndDelete(req.params.id)
     if (!blog) return res.status(404).json({ message: 'Blog not found' })
 
+    // Extract all S3 URLs associated with the blog
+    const urlsToDelete = new Set()
+    
+    if (blog.thumbnail) urlsToDelete.add(blog.thumbnail)
+    
+    if (Array.isArray(blog.images)) {
+      blog.images.forEach(url => url && urlsToDelete.add(url))
+    }
+    
+    if (Array.isArray(blog.pdfs)) {
+      blog.pdfs.forEach(pdf => {
+        const url = typeof pdf === 'string' ? pdf : pdf?.url
+        if (url) urlsToDelete.add(url)
+      })
+    }
+    
+    if (blog.content) {
+      const regex = /(?:src|href|data-src|poster)=["']([^"']+)["']/g
+      const bgRegex = /url\(["']?([^"')]+)["']?\)/g
+      let match
+      while ((match = regex.exec(blog.content)) !== null) {
+        if (match[1] && match[1].includes('amazonaws.com')) urlsToDelete.add(match[1])
+      }
+      while ((match = bgRegex.exec(blog.content)) !== null) {
+        if (match[1] && match[1].includes('amazonaws.com')) urlsToDelete.add(match[1])
+      }
+    }
+    
+    // Convert URLs to keys and delete
+    const keys = []
+    urlsToDelete.forEach(url => {
+      try {
+        const u = new URL(url)
+        if (u.hostname.includes('amazonaws.com')) {
+          keys.push({ Key: u.pathname.replace(/^\//, '') })
+        }
+      } catch (e) {}
+    })
+    
+    if (keys.length > 0) {
+      const BATCH_SIZE = 1000
+      for (let i = 0; i < keys.length; i += BATCH_SIZE) {
+        const batch = keys.slice(i, i + BATCH_SIZE)
+        s3.send(new DeleteObjectsCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Delete: { Objects: batch, Quiet: true }
+        })).catch(err => console.error('S3 delete failed during blog deletion:', err))
+      }
+    }
+
     generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
+    notifyAllIndexing(blog.slug, 'URL_DELETED').catch(err => console.error('Indexing delete failed:', err))
 
     res.json({ message: 'Blog deleted' })
   } catch (error) {
@@ -181,6 +246,7 @@ exports.toggleStatus = async (req, res) => {
     await blog.save()
     
     generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
+    notifyAllIndexing(blog.slug, blog.status === 'published' ? 'URL_UPDATED' : 'URL_DELETED').catch(err => console.error('Indexing toggle failed:', err))
 
     res.json(blog)
   } catch (error) {
@@ -217,6 +283,29 @@ exports.adminGetBlogs = async (req, res) => {
   }
 }
 
+// Manual trigger to request Google / IndexNow Instant Indexing
+exports.requestInstantIndexing = async (req, res) => {
+  try {
+    const { url, blogId, type = 'URL_UPDATED' } = req.body
+    let targetUrl = url
+
+    if (!targetUrl && blogId) {
+      const blog = await Blog.findById(blogId)
+      if (!blog) return res.status(404).json({ message: 'Blog not found' })
+      targetUrl = blog.slug
+    }
+
+    if (!targetUrl) {
+      return res.status(400).json({ message: 'url or blogId is required' })
+    }
+
+    const result = await notifyAllIndexing(targetUrl, type)
+    res.json({ message: 'Indexing notification sent', result })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 // Get dynamic Open Graph meta HTML for social bot previews (WhatsApp, Facebook, Twitter, etc.)
 exports.getBlogOgMeta = async (req, res) => {
   try {
@@ -238,12 +327,15 @@ exports.getBlogOgMeta = async (req, res) => {
     
     let imageUrl = 'https://shasnadeshupdates.com/logo512.png';
     if (blog.thumbnail) {
-      if (blog.thumbnail.startsWith('http')) {
-        imageUrl = blog.thumbnail;
-      } else if (blog.thumbnail.startsWith('/uploads/')) {
-        imageUrl = `https://shasnadesh-web-app.vercel.app${blog.thumbnail}`;
+      const cleanThumb = blog.thumbnail.replace(/\\/g, '/');
+      if (cleanThumb.startsWith('http')) {
+        imageUrl = cleanThumb;
+      } else if (cleanThumb.startsWith('/uploads/') || cleanThumb.startsWith('uploads/')) {
+        const formattedPath = cleanThumb.startsWith('/') ? cleanThumb : `/${cleanThumb}`;
+        imageUrl = `https://shasnadesh-web-app.vercel.app${formattedPath}`;
       } else {
-        imageUrl = `https://shasnadeshupdates.com${blog.thumbnail.startsWith('/') ? '' : '/'}${blog.thumbnail}`;
+        const formattedPath = cleanThumb.startsWith('/') ? cleanThumb : `/${cleanThumb}`;
+        imageUrl = `https://shasnadeshupdates.com${formattedPath}`;
       }
     }
 
@@ -261,6 +353,7 @@ exports.getBlogOgMeta = async (req, res) => {
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
   <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:secure_url" content="${imageUrl}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="Shasnadesh Updates">
@@ -289,10 +382,25 @@ exports.getBlogOgMeta = async (req, res) => {
 
 // Get all unique categories
 exports.getCategories = async (req, res) => {
-  try {
-    const categories = await Blog.distinct('category', { status: 'published', category: { $ne: null, $ne: '' } })
-    res.json(categories.sort())
-  } catch (error) {
-    res.status(500).json({ message: error.message })
-  }
+    try {
+        const categories = await Blog.distinct('category', { status: 'published', category: { $ne: null, $ne: '' } })
+        res.json(categories.sort())
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+
+// Get all unique years
+exports.getYears = async (req, res) => {
+    try {
+        const years = await Blog.aggregate([
+            { $match: { status: 'published' } },
+            { $project: { year: { $year: "$createdAt" } } },
+            { $group: { _id: "$year" } },
+            { $sort: { _id: -1 } }
+        ])
+        res.json(years.map(y => y._id.toString()))
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
 }

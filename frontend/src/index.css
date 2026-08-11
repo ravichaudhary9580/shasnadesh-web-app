@@ -198,6 +198,167 @@
     content: "";
     @apply flex-1 h-px bg-ink-200;
   }
+
+  /* ── Table styles ── */
+  .prose-blog table,
+  .tiptap-editor .ProseMirror table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.875rem;
+    border-radius: 0 !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #cbd5e1;
+  }
+  .prose-blog th,
+  .tiptap-editor .ProseMirror th {
+    background-color: #f8fafc;
+    color: #1e293b;
+    font-weight: 600;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+  }
+  .prose-blog td,
+  .tiptap-editor .ProseMirror td {
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+  }
+  .prose-blog tr:nth-child(even),
+  .tiptap-editor .ProseMirror tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+
+  /* Interactive Table Editor Hover & Selection Styles */
+  .tiptap-editor .ProseMirror table th,
+  .tiptap-editor .ProseMirror table td {
+    position: relative;
+    cursor: cell;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .tiptap-editor .ProseMirror table tr:hover {
+    background-color: rgba(232, 146, 10, 0.04);
+  }
+  .tiptap-editor .ProseMirror table td:hover,
+  .tiptap-editor .ProseMirror table th:hover {
+    outline: 2px solid #e8920a;
+    outline-offset: -2px;
+  }
+
+  /* Active Focused Cell (where cursor is currently active/typing) */
+  .tiptap-editor .ProseMirror table td:focus-within,
+  .tiptap-editor .ProseMirror table th:focus-within,
+  .tiptap-editor .ProseMirror table td.has-focus,
+  .tiptap-editor .ProseMirror table th.has-focus {
+    background-color: rgba(2, 132, 199, 0.08) !important;
+    outline: 3px solid #0284c7 !important;
+    outline-offset: -3px;
+    box-shadow: inset 0 0 0 1.5px #0284c7, 0 0 10px rgba(2, 132, 199, 0.4) !important;
+    z-index: 15;
+  }
+
+  /* Multi-cell selection (dragged cells for merge/split) */
+  .tiptap-editor .ProseMirror table .selectedCell {
+    background-color: rgba(232, 146, 10, 0.25) !important;
+    outline: 2px solid #e8920a !important;
+    outline-offset: -2px;
+  }
+  .tiptap-editor .ProseMirror table .column-resize-handle {
+    background-color: #e8920a;
+    width: 4px;
+    position: absolute;
+    right: -2px;
+    top: 0;
+    bottom: 0;
+    cursor: col-resize;
+    z-index: 20;
+  }
+
+  /* ── Callout Boxes ── */
+  .prose-blog .callout-box,
+  .tiptap-editor .ProseMirror .callout-box {
+    padding: 1rem 1.25rem;
+    border-radius: 0.875rem;
+    margin: 1.5rem 0;
+    border-left-width: 4px;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .prose-blog .callout-notice,
+  .tiptap-editor .ProseMirror .callout-notice {
+    background-color: #fffbeb;
+    border-color: #e8920a;
+    color: #78350f;
+  }
+  .prose-blog .callout-warning,
+  .tiptap-editor .ProseMirror .callout-warning {
+    background-color: #fef2f2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+  .prose-blog .callout-info,
+  .tiptap-editor .ProseMirror .callout-info {
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+    color: #1e40af;
+  }
+  .prose-blog .callout-success,
+  .tiptap-editor .ProseMirror .callout-success {
+    background-color: #f0fdf4;
+    border-color: #22c55e;
+    color: #166534;
+  }
+
+  /* ── CTA Buttons ── */
+  .prose-blog .btn-cta,
+  .tiptap-editor .ProseMirror .btn-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    margin: 1rem 0;
+  }
+  .prose-blog .btn-cta-saffron,
+  .tiptap-editor .ProseMirror .btn-cta-saffron {
+    background-color: #e8920a;
+    color: #ffffff !important;
+  }
+  .prose-blog .btn-cta-saffron:hover {
+    background-color: #d78200;
+  }
+  .prose-blog .btn-cta-green,
+  .tiptap-editor .ProseMirror .btn-cta-green {
+    background-color: #16a34a;
+    color: #ffffff !important;
+  }
+  .prose-blog .btn-cta-green:hover {
+    background-color: #15803d;
+  }
+  .prose-blog .btn-cta-blue,
+  .tiptap-editor .ProseMirror .btn-cta-blue {
+    background-color: #2563eb;
+    color: #ffffff !important;
+  }
+  .prose-blog .btn-cta-blue:hover {
+    background-color: #1d4ed8;
+  }
+  .prose-blog .btn-cta-outline,
+  .tiptap-editor .ProseMirror .btn-cta-outline {
+    background-color: transparent;
+    border: 2px solid #26201a;
+    color: #26201a !important;
+  }
+  .prose-blog .btn-cta-outline:hover {
+    background-color: #26201a;
+    color: #ffffff !important;
+  }
 }
 
 @layer utilities {
