@@ -44,11 +44,19 @@ export default function FeaturedSlideshow({ blogs }) {
                   {blog.thumbnail ? (
                     <img
                       src={blog.thumbnail}
+                      srcSet={
+                        blog.thumbnail.includes('cloudfront.net')
+                          ? `${blog.thumbnail}?w=640 640w, ${blog.thumbnail} 1200w`
+                          : undefined
+                      }
+                      sizes="(max-width: 768px) 100vw, 768px"
                       alt={blog.title}
                       className="w-full h-full object-cover"
                       fetchPriority={idx === 0 ? "high" : "auto"}
                       loading={idx === 0 ? "eager" : "lazy"}
                       decoding={idx === 0 ? "sync" : "async"}
+                      width="768"
+                      height="432"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-saffron-100 to-saffron-200 flex items-center justify-center">

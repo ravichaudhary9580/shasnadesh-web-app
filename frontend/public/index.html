@@ -165,5 +165,33 @@
         deferredPrompt = null;
       });
     </script>
+
+    <!-- ✅ LCP Image Preloader: fires immediately on page load, before React boots. -->
+    <script>
+      (function() {
+        try {
+          var apiBase = 'https://shasnadesh-web-app.vercel.app/api';
+          fetch(apiBase + '/blogs?featured=true&limit=1&_fields=thumbnail', {
+            priority: 'high',
+            headers: { 'Accept': 'application/json' }
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var thumb = data && data.blogs && data.blogs[0] && data.blogs[0].thumbnail;
+            if (thumb && thumb.includes('cloudfront.net')) {
+              var link = document.createElement('link');
+              link.rel = 'preload';
+              link.as = 'image';
+              link.href = thumb;
+              link.setAttribute('fetchpriority', 'high');
+              link.setAttribute('imagesrcset', thumb + '?w=640 640w, ' + thumb + ' 1200w');
+              link.setAttribute('imagesizes', '(max-width: 768px) 100vw, 768px');
+              document.head.appendChild(link);
+            }
+          })
+          .catch(function() {});
+        } catch(e) {}
+      })();
+    </script>
   </body>
 </html>

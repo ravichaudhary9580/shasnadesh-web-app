@@ -110,14 +110,14 @@ export default function Footer({ variant = "wide" }) {
 
           <div className="space-y-1">
             <p className="font-hindi text-ink-400 text-sm">सत्यमेव जयते · Satyameva Jayate</p>
-            <p className="font-ui text-xs text-ink-300">© {year} Shasnadeshupdates.com</p>
-            <p className="font-ui text-xs text-ink-300">
+            <p className="font-ui text-xs text-ink-600">© {year} Shasnadeshupdates.com</p>
+            <p className="font-ui text-xs text-ink-600">
               Designed by{" "}
               <a
                 href="https://bharatwebservices.live/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-saffron-500 font-medium hover:text-saffron-600 transition-colors"
+                className="text-saffron-600 font-medium hover:text-saffron-700 transition-colors"
               >
                 dev
               </a>
@@ -126,7 +126,7 @@ export default function Footer({ variant = "wide" }) {
                 href="https://ravichaudhary9580.github.io/Portfolio-New/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-saffron-500 font-medium hover:text-saffron-600 transition-colors"
+                className="text-saffron-600 font-medium hover:text-saffron-700 transition-colors"
               >
                 ravi
               </a>
