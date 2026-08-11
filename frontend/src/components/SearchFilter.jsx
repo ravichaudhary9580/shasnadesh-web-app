@@ -42,13 +42,20 @@ export default function SearchFilter({
     let direction = -1;
     let frameId = 0;
     let paused = false;
+    // Cache maxScroll — only re-read on resize, NOT inside the rAF loop
+    let maxScroll = el.scrollWidth - el.clientWidth;
 
     const handleEnter = () => { paused = true; };
     const handleLeave = () => { paused = false; };
 
+    // Re-read maxScroll only when element size changes (avoids forced reflow per frame)
+    const ro = new ResizeObserver(() => {
+      maxScroll = el.scrollWidth - el.clientWidth;
+    });
+    ro.observe(el);
+
     const step = () => {
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return;
+      if (maxScroll <= 0) { frameId = window.requestAnimationFrame(step); return; }
       if (!paused) {
         const speed = Math.min(1.5, 0.4 + categories.length * 0.03);
         el.scrollLeft += speed * direction;
@@ -65,6 +72,7 @@ export default function SearchFilter({
       el.removeEventListener("mouseenter", handleEnter);
       el.removeEventListener("mouseleave", handleLeave);
       window.cancelAnimationFrame(frameId);
+      ro.disconnect();
     };
   }, [categories.length]);
 

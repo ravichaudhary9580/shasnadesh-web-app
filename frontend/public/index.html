@@ -103,17 +103,31 @@
     <!-- ✅ Manifest (keep %PUBLIC_URL% here — React replaces this correctly at build time) -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-    <!-- ✅ Preconnect to critical domains for faster LCP -->
+    <!-- ✅ Preconnect — establish connections early to reduce LCP critical path latency -->
+    <!-- CloudFront & backend API -->
     <link rel="preconnect" href="https://dz01rck8k86ma.cloudfront.net" />
     <link rel="preconnect" href="https://shasnadesh-web-app.vercel.app" />
 
-    <!-- ✅ Google Fonts with performance optimization -->
+    <!-- Google Fonts — two-hop chain: preconnect BOTH to avoid 370ms delay on woff2 discovery -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+Devanagari:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Mukta:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
+
+    <!-- Google Ads — preconnect saves 400–2000ms on AdSense LCP -->
+    <link rel="preconnect" href="https://www.google.com" />
+    <link rel="preconnect" href="https://googleads.g.doubleclick.net" />
+    <link rel="dns-prefetch" href="https://ep2.adtrafficquality.google" />
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+
+    <!-- ✅ Google Fonts — non-blocking async load (eliminates render-blocking delay) -->
+    <link rel="preload" as="style"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Tiro+Devanagari+Hindi&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <noscript>
+      <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Tiro+Devanagari+Hindi&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      />
+    </noscript>
 
     <!-- ✅ Google AdSense Verification & Script -->
     <meta name="google-adsense-account" content="ca-pub-8129172226402333" />

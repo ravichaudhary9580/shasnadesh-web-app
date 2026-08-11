@@ -65,10 +65,10 @@ export default function Navbar({ onSearch }) {
     };
   }, []);
 
-  // Scroll shadow
+  // Scroll shadow — passive listener avoids blocking scroll thread
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", fn);
+    window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
@@ -162,8 +162,10 @@ export default function Navbar({ onSearch }) {
             <img
               src={`${process.env.PUBLIC_URL}/logo192.png`}
               alt="Shasnadesh Updates"
-              className="w-9 h-9  rounded-lg shadow-sm group-hover:scale-110 transition-transform"
+              className="w-9 h-9 rounded-lg shadow-sm group-hover:scale-110 transition-transform"
               loading="eager"
+              width="36"
+              height="36"
             />
 
           </Link>

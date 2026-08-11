@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { getImageUrl } from "../utils/imageUtils";
+import { getImageUrl, getCloudFrontSrcSet } from "../utils/imageUtils";
 import { shareBlog } from "../utils/shareUtils";
 import { Share2 } from "lucide-react";
 
@@ -36,11 +36,15 @@ export default function BlogCard({ blog, featured = false, priority = false }) {
         {blog.thumbnail ? (
           <img
             src={getImageUrl(blog.thumbnail)}
+            srcSet={getCloudFrontSrcSet(getImageUrl(blog.thumbnail))}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
             alt={blog.title}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             fetchPriority={priority ? "high" : "auto"}
             loading={priority ? "eager" : "lazy"}
             decoding={priority ? "sync" : "async"}
+            width="1200"
+            height="675"
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-ink-700 to-ink-900" />
@@ -84,11 +88,15 @@ export default function BlogCard({ blog, featured = false, priority = false }) {
         {blog.thumbnail ? (
           <img
             src={getImageUrl(blog.thumbnail)}
+            srcSet={getCloudFrontSrcSet(getImageUrl(blog.thumbnail))}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
             alt={blog.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             fetchPriority={priority ? "high" : "auto"}
             loading={priority ? "eager" : "lazy"}
             decoding={priority ? "sync" : "async"}
+            width="600"
+            height="338"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-ink-100 to-ink-200 flex items-center justify-center">

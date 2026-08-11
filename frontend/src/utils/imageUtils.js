@@ -36,3 +36,32 @@ export function getImageUrl(imagePath) {
 export function isS3Url(url) {
   return url && url.includes('.s3.') && url.includes('amazonaws.com');
 }
+
+/**
+ * Generate a CloudFront image URL with a query param to request a specific width.
+ * CloudFront + Lambda@Edge (or a future image resize layer) can use ?w= to serve resized images.
+ * If no resize layer is configured, this still returns a valid URL (falls back to original size).
+ * @param {string} url - The CloudFront image URL
+ * @param {number} width - Desired width in pixels
+ * @returns {string}
+ */
+export function getResizedUrl(url, width) {
+  if (!url || !url.includes('cloudfront.net')) return url;
+  return `${url}?w=${width}`;
+}
+
+/**
+ * Build a srcset string for a CloudFront image.
+ * Serves 400w, 640w, and 900w variants for responsive layout.
+ * @param {string} url - The CloudFront image URL
+ * @returns {string} srcset attribute value
+ */
+export function getCloudFrontSrcSet(url) {
+  if (!url || !url.includes('cloudfront.net')) return undefined;
+  return [
+    `${url}?w=400 400w`,
+    `${url}?w=640 640w`,
+    `${url}?w=900 900w`,
+    `${url} 1200w`,
+  ].join(', ');
+}
