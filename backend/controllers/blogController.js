@@ -6,6 +6,34 @@ const { generateSitemap, generateSitemapIndex } = require('../utils/sitemapGener
 const { notifyAllIndexing } = require('../services/indexingService')
 const { S3Client, DeleteObjectsCommand } = require('@aws-sdk/client-s3')
 
+/**
+ * Helper to get Hindi transliteration from English text using Google Input Tools API.
+ * Converts "police" -> "(police|पुलिस|पोलिस|पोलीस)" for robust regex searching.
+ */
+async function getSearchRegexString(search) {
+  if (!search) return '';
+  const query = search.trim();
+  const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  
+  // Only attempt transliteration if the query contains english alphabets
+  if (!/[a-zA-Z]/.test(query)) return escapeRegExp(query);
+  
+  try {
+    const url = `https://inputtools.google.com/request?text=${encodeURIComponent(query)}&itc=hi-t-i0-und&num=3`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(1500) });
+    const data = await res.json();
+    if (data && data[1] && data[1][0] && data[1][0][1]) {
+      const predictions = data[1][0][1];
+      const terms = [query, ...predictions].map(escapeRegExp);
+      return `(${terms.join('|')})`;
+    }
+  } catch (error) {
+    console.error("Transliteration API error:", error.message);
+  }
+  // Fallback
+  return escapeRegExp(query);
+}
+
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {
@@ -26,10 +54,12 @@ exports.getBlogs = async (req, res) => {
 
     const query = { status }
     if (search) {
+      const searchRegexStr = await getSearchRegexString(search)
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { excerpt: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
+        { title: { $regex: searchRegexStr, $options: 'i' } },
+        { excerpt: { $regex: searchRegexStr, $options: 'i' } },
+        { content: { $regex: searchRegexStr, $options: 'i' } },
+        { slug: { $regex: searchRegexStr, $options: 'i' } },
       ]
     }
     if (category) query.category = category
@@ -63,8 +93,15 @@ exports.getSuggestions = async (req, res) => {
     const query = (q || '').trim()
     if (!query) return res.json([])
 
-    const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
-    const suggestions = await Blog.find({ status: 'published', title: { $regex: regex } })
+    const searchRegexStr = await getSearchRegexString(query)
+    const regex = new RegExp(searchRegexStr, 'i')
+    const suggestions = await Blog.find({ 
+      status: 'published', 
+      $or: [
+        { title: { $regex: regex } },
+        { slug: { $regex: regex } }
+      ]
+    })
       .sort({ views: -1, createdAt: -1 })
       .limit(Number(limit))
       .select('title slug category')
@@ -271,7 +308,13 @@ exports.adminGetBlogs = async (req, res) => {
   try {
     const { search, status, category, sort = '-createdAt', page = 1, limit = 20 } = req.query
     const query = {}
-    if (search) query.title = { $regex: search, $options: 'i' }
+    if (search) {
+      const searchRegexStr = await getSearchRegexString(search)
+      query.$or = [
+        { title: { $regex: searchRegexStr, $options: 'i' } },
+        { slug: { $regex: searchRegexStr, $options: 'i' } }
+      ]
+    }
     if (status) query.status = status
     if (category) query.category = category
     const total = await Blog.countDocuments(query)
