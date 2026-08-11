@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { adminGetBlogs, deleteBlog, toggleStatus, toggleFeatured, getCategories, requestInstantIndexing } from "../../services/api";
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
 
 const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "अवकाश कैलेंडर", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
 
@@ -12,6 +13,7 @@ export default function ManageBlogs() {
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState(CATEGORIES);
+  const [actionLoading, setActionLoading] = useState(null);
   const lastPageBeforeSearch = useRef(1);
   const limit = 15;
 
@@ -24,8 +26,8 @@ export default function ManageBlogs() {
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "");
 
-  const fetchBlogs = useCallback(async () => {
-    setLoading(true);
+  const fetchBlogs = useCallback(async (showSkeleton = true) => {
+    if (showSkeleton) setLoading(true);
     try {
       const { data } = await adminGetBlogs({ search, status: statusFilter, category: categoryFilter, page, limit });
       setBlogs(data.blogs);
@@ -33,7 +35,7 @@ export default function ManageBlogs() {
     } catch {
       toast.error("Failed to load posts");
     } finally {
-      setLoading(false);
+      if (showSkeleton) setLoading(false);
     }
   }, [search, statusFilter, categoryFilter, page]);
 
@@ -54,44 +56,61 @@ export default function ManageBlogs() {
     setSearchParams(params, { replace: true });
   }, [search, statusFilter, categoryFilter, page, setSearchParams]);
 
-  const handleDelete = async (id, title) => {
+  const handleDelete = async (e, id, title) => {
+    e.preventDefault();
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    setActionLoading(`delete-${id}`);
     try {
       await deleteBlog(id);
       toast.success("Post deleted");
-      fetchBlogs();
+      setBlogs((prev) => prev.filter((b) => b._id !== id));
+      setTotal((prev) => prev - 1);
     } catch {
       toast.error("Delete failed");
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  const handleToggle = async (id) => {
+  const handleToggle = async (e, id) => {
+    e.preventDefault();
+    setActionLoading(`toggle-${id}`);
     try {
       const { data } = await toggleStatus(id);
       toast.success(`Blog ${data.status === "published" ? "published" : "unpublished"}`);
-      fetchBlogs();
+      setBlogs((prev) => prev.map((b) => (b._id === id ? { ...b, status: data.status } : b)));
     } catch {
       toast.error("Failed to update status");
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  const handleToggleFeatured = async (id) => {
+  const handleToggleFeatured = async (e, id) => {
+    e.preventDefault();
+    setActionLoading(`featured-${id}`);
     try {
       const { data } = await toggleFeatured(id);
-      setBlogs((prev) => prev.map((b) => (b._id === id ? { ...b, featured: data.featured } : b)));
       toast.success(data.featured ? "Marked as featured" : "Removed from featured");
+      setBlogs((prev) => prev.map((b) => (b._id === id ? { ...b, featured: data.featured } : b)));
     } catch {
       toast.error("Failed to update featured status");
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  const handleInstantIndex = async (blogId) => {
+  const handleInstantIndex = async (e, blogId) => {
+    e.preventDefault();
+    setActionLoading(`index-${blogId}`);
     try {
       toast.loading("Sending Instant Indexing request...", { id: "indexing" });
       const { data } = await requestInstantIndexing({ blogId });
       toast.success(data.message || "Indexing request sent to Google & IndexNow!", { id: "indexing" });
     } catch (err) {
       toast.error(err.response?.data?.message || "Indexing request failed", { id: "indexing" });
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -203,11 +222,10 @@ export default function ManageBlogs() {
                     </p>
                     {/* Badges row — wraps naturally */}
                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                      <span className={`badge text-xs ${
-                        blog.status === "published"
+                      <span className={`badge text-xs ${blog.status === "published"
                           ? "bg-green-100 text-green-700"
                           : "bg-ink-100 text-ink-500"
-                      }`}>
+                        }`}>
                         {blog.status}
                       </span>
                       {blog.featured && (
@@ -233,43 +251,49 @@ export default function ManageBlogs() {
                           get pushed offscreen or cause overflow on narrow phones */}
                 <div className="flex items-center gap-1.5 mt-2.5 justify-end flex-wrap">
                   <button
-                    onClick={() => handleToggleFeatured(blog._id)}
-                    className={`px-3 py-1.5 rounded-lg font-ui text-xs font-medium transition-all ${
-                      blog.featured
+                    type="button"
+                    disabled={actionLoading === `featured-${blog._id}`}
+                    onClick={(e) => handleToggleFeatured(e, blog._id)}
+                    className={`px-3 py-1.5 rounded-lg font-ui text-xs font-medium transition-all min-w-[100px] flex justify-center items-center ${blog.featured
                         ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
                         : "bg-ink-100 text-ink-600 hover:bg-ink-200"
-                    }`}
+                      } disabled:opacity-50`}
                   >
-                    {blog.featured ? "⭐ Featured" : "Mark Featured"}
+                    {actionLoading === `featured-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : blog.featured ? "⭐ Featured" : "Mark Featured"}
                   </button>
                   <button
-                    onClick={() => handleToggle(blog._id)}
-                    className={`px-3 py-1.5 rounded-lg font-ui text-xs font-medium transition-all ${
-                      blog.status === "published"
+                    type="button"
+                    disabled={actionLoading === `toggle-${blog._id}`}
+                    onClick={(e) => handleToggle(e, blog._id)}
+                    className={`px-3 py-1.5 rounded-lg font-ui text-xs font-medium transition-all min-w-[80px] flex justify-center items-center ${blog.status === "published"
                         ? "bg-ink-100 text-ink-600 hover:bg-ink-200"
                         : "bg-green-100 text-green-700 hover:bg-green-200"
-                    }`}
+                      } disabled:opacity-50`}
                   >
-                    {blog.status === "published" ? "Unpublish" : "Publish"}
+                    {actionLoading === `toggle-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : blog.status === "published" ? "Unpublish" : "Publish"}
                   </button>
                   <button
-                    onClick={() => handleInstantIndex(blog._id)}
-                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all flex items-center gap-1"
+                    type="button"
+                    disabled={actionLoading === `index-${blog._id}`}
+                    onClick={(e) => handleInstantIndex(e, blog._id)}
+                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all flex items-center justify-center gap-1 min-w-[110px] disabled:opacity-50"
                     title="Send Instant Indexing request to Google & IndexNow"
                   >
-                    ⚡ Instant Index
+                    {actionLoading === `index-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "⚡ Instant Index"}
                   </button>
                   <Link
                     to={`/admin/blogs/edit/${blog._id}`}
-                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 transition-all"
+                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 transition-all flex justify-center items-center"
                   >
                     Edit
                   </Link>
                   <button
-                    onClick={() => handleDelete(blog._id, blog.title)}
-                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-all"
+                    type="button"
+                    disabled={actionLoading === `delete-${blog._id}`}
+                    onClick={(e) => handleDelete(e, blog._id, blog.title)}
+                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-all flex justify-center items-center min-w-[65px] disabled:opacity-50"
                   >
-                    Delete
+                    {actionLoading === `delete-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Delete"}
                   </button>
                 </div>
               </div>
@@ -320,11 +344,10 @@ export default function ManageBlogs() {
                   <button
                     key={i}
                     onClick={() => setPage(i)}
-                    className={`w-7 h-7 rounded-lg font-ui text-xs font-medium transition-all ${
-                      page === i
+                    className={`w-7 h-7 rounded-lg font-ui text-xs font-medium transition-all ${page === i
                         ? "bg-saffron-500 text-white shadow-sm"
                         : "bg-ink-100 text-ink-600 hover:bg-ink-200"
-                    }`}
+                      }`}
                   >
                     {i}
                   </button>

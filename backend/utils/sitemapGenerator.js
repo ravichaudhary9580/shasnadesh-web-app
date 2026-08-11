@@ -40,9 +40,18 @@ async function generateSitemap() {
 
     // Save to file
     const sitemapPath = path.join(__dirname, '../../frontend/public/sitemap-blogs.xml');
-    fs.writeFileSync(sitemapPath, xml);
+    try {
+      // Only write to frontend folder in production to avoid triggering full page reloads in local dev server
+      if (process.env.NODE_ENV === 'production') {
+        fs.writeFileSync(sitemapPath, xml);
+      } else {
+        console.log(`[Dev Mode] Skipped writing to ${sitemapPath} to prevent React dev server refresh.`);
+      }
+    } catch (e) {
+      console.warn('Could not write sitemap file:', e.message);
+    }
     
-    console.log(`✅ Generated sitemap with ${blogs.length} blog posts at ${sitemapPath}`);
+    console.log(`✅ Generated sitemap with ${blogs.length} blog posts (Path: ${sitemapPath})`);
     
     return {
       success: true,
@@ -83,9 +92,15 @@ function generateSitemapIndex() {
 </sitemapindex>`;
 
   const indexPath = path.join(__dirname, '../../frontend/public/sitemap-index.xml');
-  fs.writeFileSync(indexPath, xml);
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      fs.writeFileSync(indexPath, xml);
+    }
+  } catch (e) {
+    console.warn('Could not write sitemap index file:', e.message);
+  }
   
-  console.log(`✅ Generated sitemap index at ${indexPath}`);
+  console.log(`✅ Generated sitemap index (Path: ${indexPath})`);
   
   return indexPath;
 }
