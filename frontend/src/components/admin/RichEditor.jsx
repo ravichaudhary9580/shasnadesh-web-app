@@ -836,7 +836,7 @@ function MediaModal({ type, onClose, onConfirm }) {
             className="btn-primary text-sm disabled:opacity-50"
           >
             <Check size={14} />
-            Insert Table
+            Insert
           </button>
         </div>
       </div>
