@@ -7,40 +7,39 @@ const SITE_DOMAIN = process.env.SITE_URL || 'https://shasnadeshupdates.com';
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY || 'shasnadesh2026indexnowkey';
 
 /**
- * Initialize Google Auth JWT Client from environment variables
+ * Build a GoogleAuth instance from environment variables.
+ * Uses the credentials object approach — confirmed working with googleapis v174+.
+ * google.auth.JWT (old approach) has a bug with "No key or keyFile set."
  */
-function getGoogleAuthClient() {
-  const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-  let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+function getGoogleAuth() {
+  let credentials = null;
 
-  if (!clientEmail || !privateKey) {
-    // Check if full JSON string is provided in GOOGLE_SERVICE_ACCOUNT_JSON
-    if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-      try {
-        const parsed = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-        return new google.auth.JWT(
-          parsed.client_email,
-          null,
-          parsed.private_key,
-          ['https://www.googleapis.com/auth/indexing']
-        );
-      } catch (err) {
-        console.warn('⚠️ Invalid GOOGLE_SERVICE_ACCOUNT_JSON env variable format.');
-        return null;
-      }
+  // Method 1: Full service account JSON string (preferred)
+  if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+    try {
+      credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+    } catch (err) {
+      console.warn('⚠️ [Google Indexing] Failed to parse GOOGLE_SERVICE_ACCOUNT_JSON:', err.message);
     }
+  }
+
+  // Method 2: Separate GOOGLE_CLIENT_EMAIL + GOOGLE_PRIVATE_KEY env vars
+  if (!credentials && process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+    credentials = {
+      client_email: process.env.GOOGLE_CLIENT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY,
+    };
+  }
+
+  if (!credentials) {
+    console.log('ℹ️ [Google Indexing skipped]: No credentials configured in environment variables.');
     return null;
   }
 
-  // Replace escaped newlines if passed in env string
-  privateKey = privateKey.replace(/\\n/g, '\n');
-
-  return new google.auth.JWT(
-    clientEmail,
-    null,
-    privateKey,
-    ['https://www.googleapis.com/auth/indexing']
-  );
+  return new google.auth.GoogleAuth({
+    credentials,
+    scopes: ['https://www.googleapis.com/auth/indexing'],
+  });
 }
 
 /**
@@ -50,23 +49,19 @@ function getGoogleAuthClient() {
  */
 async function notifyGoogleIndexing(targetUrl, type = 'URL_UPDATED') {
   try {
-    const authClient = getGoogleAuthClient();
-    if (!authClient) {
-      console.log(`ℹ️ [Google Indexing skipped]: GOOGLE_CLIENT_EMAIL / GOOGLE_PRIVATE_KEY not configured in .env`);
+    const auth = getGoogleAuth();
+    if (!auth) {
       return { success: false, message: 'Google credentials not configured' };
     }
 
-    const tokens = await authClient.authorize();
-    const indexing = google.indexing({ version: 'v3', auth: authClient });
+    const client = await auth.getClient();
+    const indexing = google.indexing({ version: 'v3', auth: client });
 
     const response = await indexing.urlNotifications.publish({
-      requestBody: {
-        url: targetUrl,
-        type: type
-      }
+      requestBody: { url: targetUrl, type }
     });
 
-    console.log(`⚡ [Google Instant Indexing OK] (${type}): ${targetUrl}`, response.data);
+    console.log(`⚡ [Google Instant Indexing OK] (${type}): ${targetUrl}`);
     return { success: true, data: response.data };
   } catch (error) {
     console.error(`❌ [Google Instant Indexing Error]: ${error.message}`);
@@ -82,7 +77,7 @@ async function notifyIndexNow(targetUrl) {
   try {
     const host = new URL(SITE_DOMAIN).hostname;
     const bodyData = {
-      host: host,
+      host,
       key: INDEXNOW_KEY,
       keyLocation: `${SITE_DOMAIN}/${INDEXNOW_KEY}.txt`,
       urlList: [targetUrl]
@@ -113,8 +108,8 @@ async function notifyIndexNow(targetUrl) {
  * @param {string} type - 'URL_UPDATED' or 'URL_DELETED'
  */
 async function notifyAllIndexing(urlOrSlug, type = 'URL_UPDATED') {
-  const targetUrl = urlOrSlug.startsWith('http') 
-    ? urlOrSlug 
+  const targetUrl = urlOrSlug.startsWith('http')
+    ? urlOrSlug
     : `${SITE_DOMAIN}/blog/${urlOrSlug}`;
 
   const [googleRes, indexNowRes] = await Promise.allSettled([
