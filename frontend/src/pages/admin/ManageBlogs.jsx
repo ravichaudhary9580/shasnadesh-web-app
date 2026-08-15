@@ -274,7 +274,7 @@ export default function ManageBlogs() {
                         className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-ui text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all flex items-center justify-center gap-1 flex-shrink-0 disabled:opacity-50 whitespace-nowrap"
                         title="Send Instant Indexing request to Google & IndexNow"
                       >
-                        {actionLoading === `index-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "⚡ Instant Index"}
+                        {actionLoading === `index-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Instant Index"}
                       </button>
 
                       <button
@@ -311,7 +311,7 @@ export default function ManageBlogs() {
 
                 {/* Mobile Section: Action buttons in ONE horizontal line */}
                 <div className="flex sm:hidden items-center gap-1.5 mt-2 pt-2 border-t border-ink-100/70 overflow-x-auto no-scrollbar flex-nowrap">
-                  <a
+                  {/* <a
                     href={`/blog/${blog.slug || blog._id}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -319,7 +319,7 @@ export default function ManageBlogs() {
                     title="View published blog on website"
                   >
                     <Eye size={12} /> View
-                  </a>
+                  </a> */}
 
                   <button
                     type="button"
@@ -340,7 +340,7 @@ export default function ManageBlogs() {
                     className="px-2.5 py-1 rounded-lg font-ui text-[11px] font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all flex items-center justify-center gap-1 flex-shrink-0 disabled:opacity-50 whitespace-nowrap"
                     title="Send Instant Indexing request to Google & IndexNow"
                   >
-                    {actionLoading === `index-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "⚡ Instant Index"}
+                    {actionLoading === `index-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Instant Index"}
                   </button>
 
                   <button

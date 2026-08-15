@@ -587,26 +587,26 @@ export default function Home() {
                             className="hover:bg-saffron-50/40 transition-colors group cursor-pointer"
                             onClick={() => navigate(`/blog/${blog.slug}`)}
                           >
-                            <td className="hidden sm:table-cell py-2.5 px-3.5 text-center text-xs text-ink-400 font-mono">
+                            <td className="hidden sm:table-cell py-3 px-3.5 text-center text-xs text-ink-400 font-mono">
                               {serialNum}
                             </td>
-                            <td className="py-2.5 px-3.5 sm:px-4">
+                            <td className="py-2.5 sm:py-3 px-3.5 sm:px-4">
                               <Link
                                 to={`/blog/${blog.slug}`}
-                                className="blog-card-title font-display font-medium text-ink-900 text-xs sm:text-sm hover:text-saffron-600 transition-colors flex items-start gap-2 leading-relaxed"
+                                className="blog-card-title font-display font-medium text-ink-900 text-sm sm:text-base hover:text-saffron-600 transition-colors flex items-start gap-2 leading-snug sm:leading-relaxed"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <span className="text-saffron-500 font-bold mt-0.5 text-xs select-none flex-shrink-0 sm:hidden">›</span>
+                                <span className="text-saffron-500 font-bold mt-0.5 text-sm select-none flex-shrink-0 sm:hidden">›</span>
                                 <span className="flex-1">{blog.title}</span>
                               </Link>
                             </td>
-                            <td className="hidden sm:table-cell py-2.5 px-4 text-xs text-ink-500 whitespace-nowrap">
+                            <td className="hidden sm:table-cell py-3 px-4 text-xs sm:text-sm text-ink-500 whitespace-nowrap">
                               {timeAgo}
                             </td>
-                            <td className="hidden sm:table-cell py-2.5 px-4 text-xs text-ink-600 text-center font-mono whitespace-nowrap">
+                            <td className="hidden sm:table-cell py-3 px-4 text-xs sm:text-sm text-ink-600 text-center font-mono whitespace-nowrap">
                               {blog.views ? blog.views.toLocaleString() : 0}
                             </td>
-                            <td className="hidden sm:table-cell py-2.5 px-4 text-center">
+                            <td className="hidden sm:table-cell py-3 px-4 text-center">
                               <button
                                 onClick={(e) => handleSharePost(e, blog)}
                                 className="p-1.5 rounded-lg hover:bg-saffron-50 hover:text-saffron-600 text-ink-500 transition-colors inline-flex items-center justify-center"
@@ -632,7 +632,7 @@ export default function Home() {
                   >
                     {/* Category Box Header with Share Button */}
                     <div className="bg-gradient-to-r from-saffron-500 to-saffron-600 px-4 py-2.5 text-white flex items-center justify-between shadow-sm">
-                      <h3 className="font-hindi font-bold text-sm sm:text-base tracking-wide flex items-center gap-1.5 line-clamp-1">
+                      <h3 className="font-hindi font-bold text-base sm:text-lg tracking-wide flex items-center gap-1.5 line-clamp-1">
                         <span>{category}</span>
                       </h3>
                       <button
@@ -642,7 +642,7 @@ export default function Home() {
                         title={`${category} शेयर करें`}
                         aria-label={`Share ${category}`}
                       >
-                        <Share2 size={14} />
+                        <Share2 size={15} />
                       </button>
                     </div>
 
@@ -653,15 +653,15 @@ export default function Home() {
                           <li key={blog._id}>
                             <Link
                               to={`/blog/${blog.slug}`}
-                              className="blog-card-title group px-3.5 py-2 font-display font-medium text-ink-900 text-xs sm:text-sm hover:text-saffron-600 hover:bg-saffron-50/50 transition-colors flex items-start gap-2 leading-relaxed"
+                              className="blog-card-title group px-3.5 py-2.5 font-display font-medium text-ink-900 text-[14.5px] sm:text-[15.5px] hover:text-saffron-600 hover:bg-saffron-50/50 transition-colors flex items-start gap-2 leading-snug sm:leading-relaxed"
                             >
-                              <span className="text-saffron-500 font-bold mt-0.5 text-xs select-none flex-shrink-0">›</span>
+                              <span className="text-saffron-500 font-bold mt-0.5 text-sm select-none flex-shrink-0">›</span>
                               <span className="flex-1 line-clamp-2">{blog.title}</span>
                             </Link>
                           </li>
                         ))
                       ) : (
-                        <li className="px-3.5 py-6 text-center text-xs text-ink-400 font-hindi">
+                        <li className="px-3.5 py-6 text-center text-sm text-ink-400 font-hindi">
                           कोई आदेश उपलब्ध नहीं है
                         </li>
                       )}
@@ -672,7 +672,7 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={() => updateFilter("category", category)}
-                        className="w-full py-1.5 px-3 rounded-lg text-xs font-ui font-semibold text-saffron-600 hover:text-saffron-700 hover:bg-saffron-50 transition-colors flex items-center justify-center gap-1"
+                        className="w-full py-1.5 px-3 rounded-lg text-xs sm:text-sm font-ui font-semibold text-saffron-600 hover:text-saffron-700 hover:bg-saffron-50 transition-colors flex items-center justify-center gap-1"
                         title={`${category} के सभी आदेश देखें`}
                       >
                         <span>और देखें (View More)</span>

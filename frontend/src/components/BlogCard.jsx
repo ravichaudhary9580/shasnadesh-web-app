@@ -109,7 +109,7 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
         <div className="flex flex-col flex-1 min-w-0 justify-center gap-1 sm:gap-1.5">
           {blog.category && (
             <div className="flex items-center gap-2">
-              <span className="badge bg-saffron-50 text-saffron-700 text-[10px] sm:text-[11px] font-medium border border-saffron-200/60 px-1.5 py-0.5 rounded-md">
+              <span className="badge bg-saffron-50 text-saffron-700 text-xs sm:text-xs font-medium border border-saffron-200/60 px-2 py-0.5 rounded-md">
                 {blog.category}
               </span>
             </div>
@@ -117,7 +117,7 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
 
           {/* blog-card-title → CSS changes color on :visited */}
           <h3
-            className={`blog-card-title font-display font-bold text-ink-900 text-xs sm:text-sm md:text-base leading-snug group-hover:text-saffron-600 transition-colors line-clamp-2 ${blog.category === "hindi" ? "font-hindi" : ""
+            className={`blog-card-title font-display font-bold text-ink-900 text-sm sm:text-base md:text-lg leading-snug group-hover:text-saffron-600 transition-colors line-clamp-2 ${blog.category === "hindi" ? "font-hindi" : ""
               }`}
           >
             {blog.title}
@@ -125,13 +125,13 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
 
           {/* Short summary / excerpt */}
           {blog.excerpt && (
-            <p className="text-ink-500 text-[11px] sm:text-xs font-body leading-relaxed line-clamp-1 sm:line-clamp-2">
+            <p className="text-ink-500 text-xs sm:text-sm font-body leading-relaxed line-clamp-1 sm:line-clamp-2">
               {blog.excerpt}
             </p>
           )}
 
           {/* Bottom metadata */}
-          <div className="flex items-center justify-between pt-1 border-t border-ink-100/60 text-[11px] sm:text-xs text-ink-500 font-ui mt-0.5">
+          <div className="flex items-center justify-between pt-1 border-t border-ink-100/60 text-xs sm:text-sm text-ink-500 font-ui mt-0.5">
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <span>{timeAgo}</span>
               {blog.views > 0 && (
@@ -148,7 +148,7 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
               title="Share"
               aria-label="Share post"
             >
-              <Share2 size={14} />
+              <Share2 size={15} />
             </button>
           </div>
         </div>

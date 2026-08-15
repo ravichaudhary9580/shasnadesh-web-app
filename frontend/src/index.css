@@ -398,8 +398,8 @@
   .animate-delay-300 { animation-delay: 300ms; }
   .animate-delay-400 { animation-delay: 400ms; }
   .text-balance { text-wrap: balance; }
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar, .no-scrollbar::-webkit-scrollbar { display: none; }
+  .scrollbar-hide, .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   
   /* PWA animations */
   @keyframes fade-in {

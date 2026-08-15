@@ -538,7 +538,7 @@ export default function BlogEditor() {
   return (
     <div className="max-w-5xl space-y-4 animate-fade-in">
       {/* Top bar */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-ink-900 flex items-center gap-2">
             {isEditing ? <><PenSquare size={22} className="text-saffron-500" /> Edit Blog</> : <><PenSquare size={22} className="text-saffron-500" /> New Blog</>}
@@ -547,11 +547,11 @@ export default function BlogEditor() {
             {isEditing ? "Update your post" : "Write and publish a new post"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar flex-nowrap w-full sm:w-auto pb-0.5 sm:pb-0">
           <button
             type="button"
             onClick={() => setHindiMode(!hindiMode)}
-            className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all ${hindiMode ? "bg-saffron-100 text-saffron-700" : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+            className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all flex-shrink-0 whitespace-nowrap ${hindiMode ? "bg-saffron-100 text-saffron-700" : "bg-ink-100 text-ink-600 hover:bg-ink-200"
               }`}
             title="Toggle Hindi/English mode"
           >
@@ -560,7 +560,7 @@ export default function BlogEditor() {
           <button
             type="button"
             onClick={() => setPreviewOpen(true)}
-            className="btn-ghost border border-ink-200 gap-1.5 text-xs sm:text-sm font-medium hover:border-saffron-300 hover:text-saffron-700 transition-all"
+            className="btn-ghost px-2.5 py-1.5 sm:px-3 sm:py-2 border border-ink-200 gap-1.5 text-xs sm:text-sm font-medium hover:border-saffron-300 hover:text-saffron-700 transition-all flex-shrink-0 whitespace-nowrap"
             title="Preview how this blog looks on live site"
           >
             <Eye size={14} />
@@ -569,7 +569,7 @@ export default function BlogEditor() {
           <button
             onClick={() => handleSave("draft")}
             disabled={saving}
-            className="btn-ghost border border-ink-200 disabled:opacity-50 gap-1.5 text-xs sm:text-sm"
+            className="btn-ghost px-2.5 py-1.5 sm:px-3 sm:py-2 border border-ink-200 disabled:opacity-50 gap-1.5 text-xs sm:text-sm flex-shrink-0 whitespace-nowrap"
           >
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
             Save Draft
@@ -577,7 +577,7 @@ export default function BlogEditor() {
           <button
             onClick={() => handleSave("published")}
             disabled={saving}
-            className="btn-primary disabled:opacity-50 text-xs sm:text-sm"
+            className="btn-primary px-3 py-1.5 sm:px-4 sm:py-2 disabled:opacity-50 text-xs sm:text-sm flex-shrink-0 whitespace-nowrap"
           >
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
             {isEditing ? "Update" : "Publish"}
@@ -599,16 +599,16 @@ export default function BlogEditor() {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 bg-ink-100 rounded-xl p-1 w-full sm:w-fit">
+      <div className="flex items-center gap-1 bg-ink-100 rounded-xl p-1 w-full sm:w-fit overflow-x-auto no-scrollbar flex-nowrap">
         {TABS.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all flex-1 sm:flex-initial ${activeTab === id ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-700"
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-ui text-xs sm:text-sm font-medium transition-all flex-1 sm:flex-initial flex-shrink-0 whitespace-nowrap ${activeTab === id ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-700"
               }`}
           >
-            <Icon size={14} strokeWidth={activeTab === id ? 2.5 : 2} />
-            {label}
+            <Icon size={14} strokeWidth={activeTab === id ? 2.5 : 2} className="flex-shrink-0" />
+            <span>{label}</span>
           </button>
         ))}
       </div>
