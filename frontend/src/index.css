@@ -204,7 +204,7 @@
   .tiptap-editor .ProseMirror table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1.5rem 0;
+    margin: 1rem 0;
     font-size: 0.875rem;
     border-radius: 0 !important;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
@@ -216,14 +216,38 @@
     color: #1e293b;
     font-weight: 600;
     text-align: left;
-    padding: 0.75rem 1rem;
+    padding: 6px 10px !important;
     border: 1px solid #cbd5e1;
+    vertical-align: middle;
   }
   .prose-blog td,
   .tiptap-editor .ProseMirror td {
-    padding: 0.75rem 1rem;
+    padding: 6px 10px !important;
     border: 1px solid #cbd5e1;
     color: #334155;
+    vertical-align: middle;
+  }
+  .prose-blog td p,
+  .prose-blog th p,
+  .tiptap-editor .ProseMirror td p,
+  .tiptap-editor .ProseMirror th p {
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    line-height: 1.45 !important;
+  }
+  .prose-blog td p + p,
+  .tiptap-editor .ProseMirror td p + p {
+    margin-top: 0.25rem !important;
+  }
+  .prose-blog td h1, .prose-blog td h2, .prose-blog td h3, .prose-blog td h4,
+  .prose-blog th h1, .prose-blog th h2, .prose-blog th h3, .prose-blog th h4,
+  .tiptap-editor .ProseMirror td h1, .tiptap-editor .ProseMirror td h2, .tiptap-editor .ProseMirror td h3, .tiptap-editor .ProseMirror td h4,
+  .tiptap-editor .ProseMirror th h1, .tiptap-editor .ProseMirror th h2, .tiptap-editor .ProseMirror th h3, .tiptap-editor .ProseMirror th h4 {
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    line-height: 1.3 !important;
   }
   .prose-blog tr:nth-child(even),
   .tiptap-editor .ProseMirror tr:nth-child(even) {
@@ -275,15 +299,22 @@
     z-index: 20;
   }
 
+
+
   /* ── Callout Boxes ── */
   .prose-blog .callout-box,
   .tiptap-editor .ProseMirror .callout-box {
-    padding: 1rem 1.25rem;
+    padding: 0.875rem 1.15rem;
     border-radius: 0.875rem;
-    margin: 1.5rem 0;
+    margin: 1.25rem 0;
     border-left-width: 4px;
     font-size: 0.9375rem;
-    line-height: 1.6;
+    line-height: 1.55;
+  }
+  .prose-blog .callout-box p,
+  .tiptap-editor .ProseMirror .callout-box p {
+    margin: 0 !important;
+    margin-bottom: 0 !important;
   }
   .prose-blog .callout-notice,
   .tiptap-editor .ProseMirror .callout-notice {

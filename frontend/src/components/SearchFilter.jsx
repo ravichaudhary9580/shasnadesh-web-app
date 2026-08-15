@@ -18,7 +18,7 @@ export default function SearchFilter({
   }, [initialCategory]);
 
   useEffect(() => {
-    const MENU_ORDER = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "अवकाश कैलेंडर", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
+    const MENU_ORDER = ["उत्तर प्रदेश शासनादेश", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "शिक्षा विभाग", "अवकाश कैलेंडर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
     getCategories()
       .then(({ data }) => {
         const sortedData = [...data].sort((a, b) => {
@@ -96,9 +96,9 @@ export default function SearchFilter({
         </div>
       )}
 
-      {/* Category pills — horizontal scroll on mobile, wrap on desktop */}
-      <div ref={scrollRef} className="overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-2 w-max">
+      {/* Category pills — centered navigation */}
+      <div ref={scrollRef} className="overflow-x-auto scrollbar-hide py-1">
+        <div className="flex items-center justify-center gap-2 min-w-full w-max mx-auto px-2">
           {categories.map((cat) => (
             <button
               key={cat}

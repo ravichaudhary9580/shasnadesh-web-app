@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ImageResize } from "./ImageResizeExtension";
+import BlogWatermarkOverlay from "../BlogWatermarkOverlay";
 import {
   Undo2,
   Redo2,
@@ -57,6 +58,7 @@ import {
   Pin,
   PinOff,
   BookOpen,
+  Loader2,
 } from "lucide-react";
 
 /* ─── Font options ─────────────────────────────────────────────────── */
@@ -158,6 +160,16 @@ function isImageUrl(url) {
   return /\.(jpg|jpeg|png|gif|webp|svg|avif)(\?|$)/i.test(url);
 }
 
+function getBgStyleString(attrs) {
+  if (!attrs.backgroundImage) return '';
+  const op = attrs.backgroundOpacity !== null && attrs.backgroundOpacity !== undefined ? Number(attrs.backgroundOpacity) : 0.2;
+  const overlay = `linear-gradient(rgba(255,255,255,${(1 - op).toFixed(2)}), rgba(255,255,255,${(1 - op).toFixed(2)}))`;
+  const bgSize = attrs.backgroundSize || 'cover';
+  const bgPos = attrs.backgroundPosition || 'center';
+  const bgRep = attrs.backgroundRepeat || (bgSize === 'repeat' ? 'repeat' : 'no-repeat');
+  return `background-image: ${overlay}, url('${attrs.backgroundImage}') !important; background-size: ${bgSize === 'repeat' ? 'auto' : bgSize} !important; background-position: ${bgPos} !important; background-repeat: ${bgRep} !important;`;
+}
+
 /* ─── Custom Extensions for Table Background, Border & Row Height ──── */
 const CustomTable = Table.extend({
   addAttributes() {
@@ -187,6 +199,27 @@ const CustomTable = Table.extend({
           return { style: `border-style: ${attributes.borderStyle} !important` };
         },
       },
+      backgroundImage: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-bg-image') || null,
+        renderHTML: attributes => {
+          if (!attributes.backgroundImage) return {};
+          return {
+            'data-bg-image': attributes.backgroundImage,
+            'data-bg-opacity': attributes.backgroundOpacity || '0.2',
+            'data-bg-size': attributes.backgroundSize || 'cover',
+            style: getBgStyleString(attributes),
+          };
+        },
+      },
+      backgroundOpacity: {
+        default: '0.2',
+        parseHTML: element => element.getAttribute('data-bg-opacity') || '0.2',
+      },
+      backgroundSize: {
+        default: 'cover',
+        parseHTML: element => element.getAttribute('data-bg-size') || 'cover',
+      },
     };
   },
 }).configure({ resizable: true });
@@ -197,10 +230,13 @@ const CustomTableRow = TableRow.extend({
       ...this.parent?.(),
       height: {
         default: null,
-        parseHTML: element => element.style.height || null,
+        parseHTML: element => element.style.height || element.getAttribute('data-row-height') || null,
         renderHTML: attributes => {
           if (!attributes.height) return {};
-          return { style: `height: ${attributes.height} !important` };
+          return {
+            style: `height: ${attributes.height} !important; min-height: ${attributes.height} !important`,
+            'data-row-height': attributes.height,
+          };
         },
       },
     };
@@ -245,11 +281,35 @@ const CustomTableCell = TableCell.extend({
       },
       height: {
         default: null,
-        parseHTML: element => element.style.height || null,
+        parseHTML: element => element.style.height || element.getAttribute('data-row-height') || null,
         renderHTML: attributes => {
           if (!attributes.height) return {};
-          return { style: `height: ${attributes.height} !important` };
+          return {
+            style: `height: ${attributes.height} !important; min-height: ${attributes.height} !important`,
+            'data-row-height': attributes.height,
+          };
         },
+      },
+      backgroundImage: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-bg-image') || null,
+        renderHTML: attributes => {
+          if (!attributes.backgroundImage) return {};
+          return {
+            'data-bg-image': attributes.backgroundImage,
+            'data-bg-opacity': attributes.backgroundOpacity || '0.2',
+            'data-bg-size': attributes.backgroundSize || 'cover',
+            style: getBgStyleString(attributes),
+          };
+        },
+      },
+      backgroundOpacity: {
+        default: '0.2',
+        parseHTML: element => element.getAttribute('data-bg-opacity') || '0.2',
+      },
+      backgroundSize: {
+        default: 'cover',
+        parseHTML: element => element.getAttribute('data-bg-size') || 'cover',
       },
     };
   },
@@ -293,18 +353,42 @@ const CustomTableHeader = TableHeader.extend({
       },
       height: {
         default: null,
-        parseHTML: element => element.style.height || null,
+        parseHTML: element => element.style.height || element.getAttribute('data-row-height') || null,
         renderHTML: attributes => {
           if (!attributes.height) return {};
-          return { style: `height: ${attributes.height} !important` };
+          return {
+            style: `height: ${attributes.height} !important; min-height: ${attributes.height} !important`,
+            'data-row-height': attributes.height,
+          };
         },
+      },
+      backgroundImage: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-bg-image') || null,
+        renderHTML: attributes => {
+          if (!attributes.backgroundImage) return {};
+          return {
+            'data-bg-image': attributes.backgroundImage,
+            'data-bg-opacity': attributes.backgroundOpacity || '0.2',
+            'data-bg-size': attributes.backgroundSize || 'cover',
+            style: getBgStyleString(attributes),
+          };
+        },
+      },
+      backgroundOpacity: {
+        default: '0.2',
+        parseHTML: element => element.getAttribute('data-bg-opacity') || '0.2',
+      },
+      backgroundSize: {
+        default: 'cover',
+        parseHTML: element => element.getAttribute('data-bg-size') || 'cover',
       },
     };
   },
 });
 
 /* ─── Dropdown wrapper with Portal ─────────────────────────────────── */
-function ToolbarDropdown({ trigger, children, width = "w-44" }) {
+function ToolbarDropdown({ trigger, children, width = "w-44", autoClose = true }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -316,7 +400,7 @@ function ToolbarDropdown({ trigger, children, width = "w-44" }) {
         const rect = triggerRef.current.getBoundingClientRect();
         setPosition({
           top: rect.bottom + 4,
-          left: Math.min(rect.left, window.innerWidth - 240)
+          left: Math.min(rect.left, window.innerWidth - 300)
         });
       };
       updatePosition();
@@ -353,14 +437,14 @@ function ToolbarDropdown({ trigger, children, width = "w-44" }) {
       {open && createPortal(
         <div
           ref={dropdownRef}
-          className={`${width} bg-white border border-ink-100 rounded-xl shadow-xl overflow-hidden py-1 max-h-[360px] overflow-y-auto z-[9999]`}
+          className={`${width} bg-white border border-ink-100 rounded-xl shadow-xl overflow-hidden py-1 max-h-[420px] overflow-y-auto z-[99999]`}
           style={{
             position: 'fixed',
             top: `${position.top}px`,
             left: `${position.left}px`,
           }}
           onClick={(e) => {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
+            if (autoClose && e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL' && e.target.tagName !== 'SELECT') {
               setOpen(false);
             }
           }}
@@ -370,6 +454,189 @@ function ToolbarDropdown({ trigger, children, width = "w-44" }) {
         document.body
       )}
     </>
+  );
+}
+
+/* ─── Table Background / Watermark Dropdown Component ─────────────── */
+function TableBgDropdown({ onApply, onRemove, onUpload }) {
+  const [imageUrl, setImageUrl] = useState("");
+  const [opacity, setOpacity] = useState("0.15");
+  const [size, setSize] = useState("cover");
+  const [target, setTarget] = useState("table"); // "table" | "cell"
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploading(true);
+      const res = await onUpload(file);
+      const url = res.url || res.data?.url || res;
+      setImageUrl(url);
+      onApply({ imageUrl: url, opacity, size, target });
+      toast.success("Background image applied!");
+    } catch {
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <ToolbarDropdown
+      width="w-72"
+      autoClose={false}
+      trigger={
+        <button
+          type="button"
+          className="px-2 py-1 rounded bg-white border border-saffron-300 text-saffron-800 font-medium hover:bg-saffron-100 flex items-center gap-1 shadow-2xs"
+          title="Insert Table Background Image or Watermark"
+        >
+          <ImageIcon size={12} className="text-saffron-600" /> Table BG / Watermark <ChevronDown size={10} />
+        </button>
+      }
+    >
+      <div className="p-3 space-y-2.5">
+        <div className="flex items-center justify-between border-b border-ink-100 pb-1.5">
+          <span className="text-xs font-bold text-ink-900 flex items-center gap-1">
+            <span>🖼️</span> Background & Watermark
+          </span>
+          <span className="text-[10px] text-saffron-700 bg-saffron-50 px-1.5 py-0.5 rounded font-ui font-semibold">Table Tool</span>
+        </div>
+
+        {/* Target: Table vs Cell */}
+        <div>
+          <label className="text-[11px] font-semibold text-ink-700 block mb-1">Apply To</label>
+          <div className="grid grid-cols-2 gap-1 bg-ink-100 p-0.5 rounded-lg text-xs font-medium">
+            <button
+              type="button"
+              onClick={() => setTarget("table")}
+              className={`py-1 rounded-md transition-all ${target === "table" ? "bg-white text-ink-900 shadow-2xs font-semibold" : "text-ink-600 hover:text-ink-900"}`}
+            >
+              Entire Table
+            </button>
+            <button
+              type="button"
+              onClick={() => setTarget("cell")}
+              className={`py-1 rounded-md transition-all ${target === "cell" ? "bg-white text-ink-900 shadow-2xs font-semibold" : "text-ink-600 hover:text-ink-900"}`}
+            >
+              Selected Cell
+            </button>
+          </div>
+        </div>
+
+        {/* Upload / Image URL */}
+        <div>
+          <label className="text-[11px] font-semibold text-ink-700 block mb-1">Image Source</label>
+          <div className="flex gap-1">
+            <input
+              type="text"
+              placeholder="Paste Image URL..."
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="flex-1 px-2 py-1 text-xs border border-ink-200 rounded-md focus:outline-none focus:border-saffron-500"
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="px-2 py-1 text-xs font-medium rounded-md bg-saffron-50 text-saffron-700 border border-saffron-200 hover:bg-saffron-100 flex items-center gap-1"
+            >
+              {uploading ? <Loader2 size={11} className="animate-spin" /> : <Upload size={11} />}
+              Upload
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+          </div>
+        </div>
+
+        {/* Opacity / Watermark Presets */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-ink-700">Watermark Opacity</label>
+            <span className="text-[11px] font-bold text-saffron-600">{Math.round(Number(opacity) * 100)}%</span>
+          </div>
+          <div className="grid grid-cols-4 gap-1 mb-1.5">
+            {[
+              { val: "0.12", label: "Subtle 12%" },
+              { val: "0.25", label: "Light 25%" },
+              { val: "0.50", label: "Med 50%" },
+              { val: "1.00", label: "Full 100%" },
+            ].map((p) => (
+              <button
+                key={p.val}
+                type="button"
+                onClick={() => {
+                  setOpacity(p.val);
+                  if (imageUrl) onApply({ imageUrl, opacity: p.val, size, target });
+                }}
+                className={`text-[10px] py-0.5 rounded border ${
+                  opacity === p.val
+                    ? "bg-saffron-500 text-white border-saffron-500 font-semibold"
+                    : "bg-ink-50 text-ink-700 border-ink-200 hover:bg-ink-100"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <input
+            type="range"
+            min="0.05"
+            max="1.0"
+            step="0.05"
+            value={opacity}
+            onChange={(e) => {
+              setOpacity(e.target.value);
+              if (imageUrl) onApply({ imageUrl, opacity: e.target.value, size, target });
+            }}
+            className="w-full h-1.5 bg-ink-200 rounded-lg appearance-none cursor-pointer accent-saffron-500"
+          />
+        </div>
+
+        {/* Size / Fit */}
+        <div>
+          <label className="text-[11px] font-semibold text-ink-700 block mb-1">Background Fit</label>
+          <select
+            value={size}
+            onChange={(e) => {
+              setSize(e.target.value);
+              if (imageUrl) onApply({ imageUrl, opacity, size: e.target.value, target });
+            }}
+            className="w-full px-2 py-1 text-xs border border-ink-200 rounded-md bg-ink-50 text-ink-800"
+          >
+            <option value="cover">Cover (Fill / Center)</option>
+            <option value="contain">Contain (Keep aspect)</option>
+            <option value="repeat">Repeat (Tiled Pattern)</option>
+          </select>
+        </div>
+
+        {/* Apply & Remove Action Buttons */}
+        <div className="pt-2 border-t border-ink-100 flex items-center justify-between gap-1.5">
+          <button
+            type="button"
+            onClick={() => onRemove({ target })}
+            className="px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
+          >
+            Remove BG
+          </button>
+          <button
+            type="button"
+            disabled={!imageUrl}
+            onClick={() => onApply({ imageUrl, opacity, size, target })}
+            className="px-3 py-1 text-[11px] font-semibold text-white bg-saffron-600 hover:bg-saffron-700 rounded-md shadow-2xs disabled:opacity-40"
+          >
+            Apply Background
+          </button>
+        </div>
+      </div>
+    </ToolbarDropdown>
   );
 }
 
@@ -845,7 +1112,7 @@ function MediaModal({ type, onClose, onConfirm }) {
 }
 
 /* ─── Main RichEditor ──────────────────────────────────────────────── */
-export default function RichEditor({ content, onChange }) {
+export default function RichEditor({ content, onChange, watermark = null }) {
   const [modal, setModal] = useState(null); // null | 'link' | 'image' | 'video' | 'cta' | 'table' | 'internal-link'
   const [uploading, setUploading] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -976,16 +1243,136 @@ export default function RichEditor({ content, onChange }) {
         if (rowEl && rowEl.tagName === 'TR') {
           if (!heightVal || heightVal === 'auto') {
             rowEl.style.removeProperty('height');
-            rowEl.querySelectorAll('th, td').forEach((cell) => cell.style.removeProperty('height'));
+            rowEl.style.removeProperty('min-height');
+            rowEl.querySelectorAll('th, td').forEach((cell) => {
+              cell.style.removeProperty('height');
+              cell.style.removeProperty('min-height');
+            });
           } else {
             rowEl.style.setProperty('height', heightVal, 'important');
-            rowEl.querySelectorAll('th, td').forEach((cell) => cell.style.setProperty('height', heightVal, 'important'));
+            rowEl.style.setProperty('min-height', heightVal, 'important');
+            rowEl.querySelectorAll('th, td').forEach((cell) => {
+              cell.style.setProperty('height', heightVal, 'important');
+              cell.style.setProperty('min-height', heightVal, 'important');
+            });
           }
           onChange?.(editor.getHTML());
         }
         break;
       }
     }
+  };
+
+  const adjustCurrentRowHeight = (delta) => {
+    if (!editor) return;
+    const { $anchor } = editor.state.selection;
+    for (let d = $anchor.depth; d > 0; d--) {
+      if ($anchor.node(d).type.name === 'tableRow') {
+        const rowPos = $anchor.before(d);
+        const rowEl = editor.view.nodeDOM(rowPos);
+        if (rowEl && rowEl.tagName === 'TR') {
+          const currentHeight = rowEl.offsetHeight || 38;
+          const newHeight = Math.max(26, currentHeight + delta);
+          const heightVal = `${newHeight}px`;
+          rowEl.style.setProperty('height', heightVal, 'important');
+          rowEl.style.setProperty('min-height', heightVal, 'important');
+          rowEl.setAttribute('data-row-height', heightVal);
+          rowEl.querySelectorAll('th, td').forEach((cell) => {
+            cell.style.setProperty('height', heightVal, 'important');
+            cell.style.setProperty('min-height', heightVal, 'important');
+            cell.setAttribute('data-row-height', heightVal);
+          });
+          editor.chain().focus().setCellAttribute('height', heightVal).run();
+          onChange?.(editor.getHTML());
+        }
+        break;
+      }
+    }
+  };
+
+  /* ── Dynamic Table Background Image & Watermark ── */
+  const updateTableBackgroundImage = ({ imageUrl, opacity = '0.15', size = 'cover', target = 'table' }) => {
+    if (!editor) return;
+    const opNum = Number(opacity) || 0.15;
+    const overlay = imageUrl ? `linear-gradient(rgba(255,255,255,${(1 - opNum).toFixed(2)}), rgba(255,255,255,${(1 - opNum).toFixed(2)}))` : '';
+    const bgVal = imageUrl ? `${overlay}, url('${imageUrl}')` : null;
+
+    if (target === 'cell') {
+      editor.chain().focus()
+        .setCellAttribute('backgroundImage', imageUrl || null)
+        .setCellAttribute('backgroundOpacity', opacity)
+        .setCellAttribute('backgroundSize', size)
+        .run();
+
+      const selectedCells = editor.view.dom.querySelectorAll(
+        '.ProseMirror table .selectedCell, .ProseMirror table td:focus-within, .ProseMirror table th:focus-within, .ProseMirror table td.has-focus, .ProseMirror table th.has-focus'
+      );
+      selectedCells.forEach((cell) => {
+        if (!imageUrl) {
+          cell.style.removeProperty('background-image');
+          cell.style.removeProperty('background-size');
+          cell.style.removeProperty('background-position');
+          cell.style.removeProperty('background-repeat');
+          cell.removeAttribute('data-bg-image');
+          cell.removeAttribute('data-bg-opacity');
+          cell.removeAttribute('data-bg-size');
+        } else {
+          cell.style.setProperty('background-image', bgVal, 'important');
+          cell.style.setProperty('background-size', size === 'repeat' ? 'auto' : size, 'important');
+          cell.style.setProperty('background-position', 'center', 'important');
+          cell.style.setProperty('background-repeat', size === 'repeat' ? 'repeat' : 'no-repeat', 'important');
+          cell.setAttribute('data-bg-image', imageUrl);
+          cell.setAttribute('data-bg-opacity', opacity);
+          cell.setAttribute('data-bg-size', size);
+        }
+      });
+    } else {
+      // Entire Table
+      const { $anchor } = editor.state.selection;
+      for (let d = $anchor.depth; d > 0; d--) {
+        if ($anchor.node(d).type.name === 'table') {
+          const pos = $anchor.before(d);
+          const tableNode = $anchor.node(d);
+          const tr = editor.state.tr;
+          tr.setNodeMarkup(pos, null, {
+            ...tableNode.attrs,
+            backgroundImage: imageUrl || null,
+            backgroundOpacity: opacity,
+            backgroundSize: size,
+          });
+          editor.view.dispatch(tr);
+
+          const tableEl = editor.view.nodeDOM(pos);
+          if (tableEl && tableEl.tagName === 'TABLE') {
+            if (!imageUrl) {
+              tableEl.style.removeProperty('background-image');
+              tableEl.style.removeProperty('background-size');
+              tableEl.style.removeProperty('background-position');
+              tableEl.style.removeProperty('background-repeat');
+              tableEl.removeAttribute('data-bg-image');
+              tableEl.removeAttribute('data-bg-opacity');
+              tableEl.removeAttribute('data-bg-size');
+            } else {
+              tableEl.style.setProperty('background-image', bgVal, 'important');
+              tableEl.style.setProperty('background-size', size === 'repeat' ? 'auto' : size, 'important');
+              tableEl.style.setProperty('background-position', 'center', 'important');
+              tableEl.style.setProperty('background-repeat', size === 'repeat' ? 'repeat' : 'no-repeat', 'important');
+              tableEl.setAttribute('data-bg-image', imageUrl);
+              tableEl.setAttribute('data-bg-opacity', opacity);
+              tableEl.setAttribute('data-bg-size', size);
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    onChange?.(editor.getHTML());
+  };
+
+  const removeTableBackgroundImage = ({ target = 'table' }) => {
+    updateTableBackgroundImage({ imageUrl: null, target });
+    toast.success("Background removed");
   };
 
   /* ── get current font ── */
@@ -1720,22 +2107,51 @@ export default function RichEditor({ content, onChange }) {
               </div>
             </ToolbarDropdown>
 
-            <div className="h-4 w-px bg-saffron-200 mx-0.5" />
+            {/* TABLE / CELL BACKGROUND IMAGE & WATERMARK */}
+            <TableBgDropdown
+              onApply={updateTableBackgroundImage}
+              onRemove={removeTableBackgroundImage}
+              onUpload={uploadFile}
+            />
 
-            {/* ROW HEIGHT SELECTOR */}
-            <select
-              onChange={(e) => updateRowHeight(e.target.value)}
-              className="px-2 py-1 rounded bg-white border border-saffron-300 text-saffron-800 text-xs font-medium focus:outline-none cursor-pointer shadow-2xs"
-              defaultValue="auto"
-              title="Row Height Customization"
-            >
-              <option value="auto">Auto Height</option>
-              <option value="35px">Compact (35px)</option>
-              <option value="50px">Normal (50px)</option>
-              <option value="65px">Medium (65px)</option>
-              <option value="85px">Tall (85px)</option>
-              <option value="110px">Extra Tall (110px)</option>
-            </select>
+            {/* ROW HEIGHT CONTROLS */}
+            <div className="flex items-center gap-1 bg-saffron-50 border border-saffron-300 rounded px-1 py-0.5 shadow-2xs">
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  adjustCurrentRowHeight(-6);
+                }}
+                className="px-1.5 py-0.5 rounded bg-white hover:bg-saffron-100 text-saffron-900 text-xs font-bold border border-saffron-200"
+                title="Decrease Row Height (-6px)"
+              >
+                ↕ -
+              </button>
+              <select
+                onChange={(e) => updateRowHeight(e.target.value)}
+                className="px-1.5 py-0.5 rounded bg-white border border-saffron-200 text-saffron-900 text-xs font-medium focus:outline-none cursor-pointer"
+                defaultValue="auto"
+                title="Row Height Presets"
+              >
+                <option value="auto">Auto</option>
+                <option value="35px">35px</option>
+                <option value="50px">50px</option>
+                <option value="65px">65px</option>
+                <option value="85px">85px</option>
+                <option value="110px">110px</option>
+              </select>
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  adjustCurrentRowHeight(6);
+                }}
+                className="px-1.5 py-0.5 rounded bg-white hover:bg-saffron-100 text-saffron-900 text-xs font-bold border border-saffron-200"
+                title="Increase Row Height (+6px)"
+              >
+                ↕ +
+              </button>
+            </div>
 
             {/* CELL MERGING & SPLITTING */}
             <button
@@ -1829,8 +2245,11 @@ export default function RichEditor({ content, onChange }) {
           </div>
         )}
 
-        {/* ── EDITOR AREA ── */}
-        <EditorContent editor={editor} className="flex-1" />
+        {/* ── EDITOR AREA WITH LIVE WATERMARK ── */}
+        <div className="relative flex-1 overflow-hidden min-h-[500px]">
+          <BlogWatermarkOverlay watermark={watermark} />
+          <EditorContent editor={editor} className="relative z-10 flex-1" />
+        </div>
       </div>
     </>
   );

@@ -190,6 +190,7 @@ exports.updateBlog = async (req, res) => {
       ...(pdfs !== undefined && { pdfs }),
       ...(videoUrl !== undefined && { videoUrl }),
       ...(links !== undefined && { links }),
+      ...(req.body.watermark !== undefined && { watermark: req.body.watermark }),
     }
 
     const blog = await Blog.findByIdAndUpdate(

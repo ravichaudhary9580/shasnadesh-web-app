@@ -52,7 +52,7 @@ export default function FeaturedSlideshow({ blogs }) {
                       sizes="(max-width: 768px) 100vw, 768px"
                       alt={blog.title}
                       className="w-full h-full object-cover"
-                      fetchPriority={idx === 0 ? "high" : "auto"}
+                      fetchpriority={idx === 0 ? "high" : "auto"}
                       loading={idx === 0 ? "eager" : "lazy"}
                       decoding={idx === 0 ? "sync" : "async"}
                       width="768"

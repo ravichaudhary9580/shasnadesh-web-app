@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { getSearchSuggestions } from "../services/api";
-import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award, LayoutGrid, FileText, CalendarDays, GraduationCap } from "lucide-react";
+import { Search, Menu, X, Home as HomeIcon, Landmark, BookOpen, Briefcase, Award, LayoutGrid, FileText, CalendarDays, GraduationCap, Share2, Star } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "होम", to: "/", icon: HomeIcon },
@@ -126,6 +127,52 @@ export default function Navbar({ onSearch }) {
     document.body.style.overflow = sidebarOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [sidebarOpen]);
+
+  const [copiedShare, setCopiedShare] = useState(false);
+
+  const fallbackCopy = async (url) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const input = document.createElement("textarea");
+        input.value = url;
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.appendChild(input);
+        input.focus();
+        input.select();
+        document.execCommand("copy");
+        document.body.removeChild(input);
+      }
+      setCopiedShare(true);
+      toast.success("App link copied to clipboard!");
+      setTimeout(() => setCopiedShare(false), 2500);
+    } catch (e) {
+      toast.error("Could not copy link");
+    }
+  };
+
+  const handleShareApp = async () => {
+    const playStoreUrl = "https://play.google.com/store/apps/details?id=app.vercel.shasnadeshupdates.twa";
+    const shareData = {
+      title: "Shasnadesh Tracker: Info App",
+      text: "उत्तर प्रदेश के सभी शासनादेश (Government Orders), शिक्षा विभाग व अन्य महत्वपूर्ण अपडेट्स पाने के लिए Shasnadesh Updates ऐप डाउनलोड करें:\n",
+      url: playStoreUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          fallbackCopy(playStoreUrl);
+        }
+      }
+    } else {
+      fallbackCopy(playStoreUrl);
+    }
+  };
 
   const handleChange = (val) => {
     setSearchVal(val);
@@ -356,7 +403,31 @@ export default function Navbar({ onSearch }) {
             </nav>
 
             {/* Footer */}
-            <div className="px-5 py-4 border-t border-ink-100 space-y-3">
+            <div className="px-5 py-3.5 border-t border-ink-100 space-y-2.5">
+              {/* Share & Feedback Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleShareApp}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-ink-50 hover:bg-saffron-50 text-ink-700 hover:text-saffron-700 border border-ink-200/80 hover:border-saffron-300 font-ui text-xs font-semibold transition-all group active:scale-95 shadow-sm"
+                  title="Share App"
+                >
+                  <Share2 size={14} className="text-saffron-600 group-hover:scale-110 transition-transform flex-shrink-0" />
+                  <span className="truncate">{copiedShare ? "Copied!" : "Share App"}</span>
+                </button>
+
+                <a
+                  href="https://play.google.com/store/apps/details?id=app.vercel.shasnadeshupdates.twa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-ink-50 hover:bg-saffron-50 text-ink-700 hover:text-saffron-700 border border-ink-200/80 hover:border-saffron-300 font-ui text-xs font-semibold transition-all group active:scale-95 shadow-sm text-center"
+                  title="Review on Google Play Store"
+                >
+                  <Star size={14} className="text-saffron-500 fill-saffron-400 group-hover:scale-110 transition-transform flex-shrink-0" />
+                  <span className="truncate">Feedback</span>
+                </a>
+              </div>
+
               <Link
                 to="/login"
                 onClick={() => setSidebarOpen(false)}

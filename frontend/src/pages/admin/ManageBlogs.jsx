@@ -3,7 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { adminGetBlogs, deleteBlog, toggleStatus, toggleFeatured, getCategories, requestInstantIndexing } from "../../services/api";
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye } from "lucide-react";
+import { getImageUrl } from "../../utils/imageUtils";
 
 const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "अवकाश कैलेंडर", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
 
@@ -117,7 +118,6 @@ export default function ManageBlogs() {
   const pages = Math.ceil(total / limit);
 
   return (
-    // ── FIX: w-full + max-w-full replaces max-w-5xl which pushed content offscreen
     <div className="w-full max-w-full space-y-4 animate-fade-in">
 
       {/* Header */}
@@ -131,7 +131,7 @@ export default function ManageBlogs() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-        {/* Search — takes remaining width */}
+        {/* Search */}
         <div className="relative flex-1 min-w-0">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-sm">🔍</span>
           <input
@@ -141,10 +141,8 @@ export default function ManageBlogs() {
             onChange={(e) => {
               const val = e.target.value;
               if (val && !search) {
-                // Starting a search - save current page
                 lastPageBeforeSearch.current = page;
               } else if (!val && search) {
-                // Clearing search - restore previous page
                 setPage(lastPageBeforeSearch.current);
                 setSearch(val);
                 return;
@@ -185,8 +183,8 @@ export default function ManageBlogs() {
         {loading ? (
           <div className="divide-y divide-ink-100">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="flex gap-3 p-4 animate-pulse">
-                <div className="w-12 h-12 bg-ink-100 rounded-xl flex-shrink-0" />
+              <div key={i} className="flex items-center sm:items-start gap-3 p-3 sm:p-4 animate-pulse">
+                <div className="w-20 sm:w-28 md:w-32 aspect-video bg-ink-100 rounded-lg sm:rounded-xl flex-shrink-0" />
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="h-4 bg-ink-100 rounded w-3/4" />
                   <div className="h-3 bg-ink-100 rounded w-1/2" />
@@ -202,99 +200,167 @@ export default function ManageBlogs() {
         ) : (
           <div className="divide-y divide-ink-100">
             {blogs.map((blog) => (
-              <div key={blog._id} className="p-3 sm:p-4 hover:bg-ink-50 transition-colors">
+              <div key={blog._id} className="p-3 sm:p-4 hover:bg-ink-50/70 transition-colors">
+                {/* Top Section: Left (Thumbnail + Delete) & Right (Title + Badges) */}
+                <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+                  {/* Left Column: 16:9 Thumbnail + Delete button right under it */}
+                  <div className="w-24 sm:w-32 md:w-36 flex-shrink-0 flex flex-col gap-1.5">
+                    <div className="w-full aspect-video rounded-lg sm:rounded-xl overflow-hidden bg-ink-100 flex-shrink-0">
+                      {blog.thumbnail ? (
+                        <img
+                          src={getImageUrl(blog.thumbnail)}
+                          alt={blog.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-ink-300 font-display text-base sm:text-lg">श</div>
+                      )}
+                    </div>
 
-                {/* Top row: thumbnail + info */}
-                <div className="flex items-start gap-3 min-w-0">
-                  {/* Thumbnail */}
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-ink-100 flex-shrink-0">
-                    {blog.thumbnail ? (
-                      <img src={blog.thumbnail} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-ink-300 font-display text-lg">श</div>
-                    )}
+                    {/* Delete button under thumbnail */}
+                    <button
+                      type="button"
+                      disabled={actionLoading === `delete-${blog._id}`}
+                      onClick={(e) => handleDelete(e, blog._id, blog.title)}
+                      className="w-full py-1 px-1.5 rounded-lg font-ui text-[11px] sm:text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-all flex justify-center items-center disabled:opacity-50"
+                    >
+                      {actionLoading === `delete-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Delete"}
+                    </button>
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-ui text-sm font-semibold text-ink-900 truncate leading-snug">
-                      {blog.title}
-                    </p>
-                    {/* Badges row — wraps naturally */}
-                    <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                      <span className={`badge text-xs ${blog.status === "published"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-ink-100 text-ink-500"
-                        }`}>
-                        {blog.status}
-                      </span>
-                      {blog.featured && (
-                        <span className="badge bg-yellow-100 text-yellow-700 text-xs">
-                          ⭐ Featured
+                  {/* Right Column: Title + Badges + Desktop Action Buttons */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch gap-2">
+                    <div>
+                      <p className="font-ui text-xs sm:text-sm md:text-base font-semibold text-ink-900 line-clamp-2 leading-snug">
+                        {blog.title}
+                      </p>
+                      {/* Badges row */}
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-1 sm:mt-1.5">
+                        <span className={`badge text-[10px] sm:text-xs font-medium px-1.5 py-0.5 rounded ${blog.status === "published"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-ink-100 text-ink-500"
+                          }`}>
+                          {blog.status}
                         </span>
-                      )}
-                      {blog.category && (
-                        <span className="badge bg-saffron-100 text-saffron-700 text-xs">
+                        <span className="badge bg-saffron-50 text-saffron-700 border border-saffron-200/60 text-[10px] sm:text-xs font-medium px-1.5 py-0.5 rounded">
                           {blog.category}
                         </span>
-                      )}
-                      <span className="font-ui text-xs text-ink-400">
-                        {formatDistanceToNow(new Date(blog.createdAt), { addSuffix: true })}
-                      </span>
-                      <span className="font-ui text-xs text-ink-400">· 👁 {blog.views}</span>
+                        <span className="font-ui text-[11px] sm:text-xs text-ink-400">
+                          {formatDistanceToNow(new Date(blog.createdAt), { addSuffix: true })}
+                        </span>
+                        <span className="font-ui text-[11px] sm:text-xs text-ink-400">· 👁 {blog.views || 0}</span>
+                      </div>
+                    </div>
+
+                    {/* Desktop Action Buttons: Placed inside right column to fill space */}
+                    <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 flex-wrap pt-0.5">
+                      <button
+                        type="button"
+                        disabled={actionLoading === `featured-${blog._id}`}
+                        onClick={(e) => handleToggleFeatured(e, blog._id)}
+                        className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-ui text-xs font-medium transition-all flex justify-center items-center flex-shrink-0 whitespace-nowrap ${blog.featured
+                            ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+                            : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+                          } disabled:opacity-50`}
+                      >
+                        {actionLoading === `featured-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : blog.featured ? "⭐ Featured" : "Mark Featured"}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={actionLoading === `index-${blog._id}`}
+                        onClick={(e) => handleInstantIndex(e, blog._id)}
+                        className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-ui text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all flex items-center justify-center gap-1 flex-shrink-0 disabled:opacity-50 whitespace-nowrap"
+                        title="Send Instant Indexing request to Google & IndexNow"
+                      >
+                        {actionLoading === `index-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "⚡ Instant Index"}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={actionLoading === `toggle-${blog._id}`}
+                        onClick={(e) => handleToggle(e, blog._id)}
+                        className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-ui text-xs font-medium transition-all flex justify-center items-center flex-shrink-0 whitespace-nowrap ${blog.status === "published"
+                            ? "bg-ink-100 text-ink-600 hover:bg-ink-200"
+                            : "bg-green-100 text-green-700 hover:bg-green-200"
+                          } disabled:opacity-50`}
+                      >
+                        {actionLoading === `toggle-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : blog.status === "published" ? "Unpublish" : "Publish"}
+                      </button>
+
+                      <a
+                        href={`/blog/${blog.slug || blog._id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-ui text-xs font-medium bg-saffron-50 text-saffron-700 hover:bg-saffron-100 transition-all flex items-center justify-center gap-1 flex-shrink-0"
+                        title="View published blog on website"
+                      >
+                        <Eye size={13} /> View
+                      </a>
+
+                      <Link
+                        to={`/admin/blogs/edit/${blog._id}`}
+                        className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-ui text-xs font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 transition-all flex justify-center items-center flex-shrink-0"
+                      >
+                        Edit Post
+                      </Link>
                     </div>
                   </div>
                 </div>
 
-                {/* Action buttons — always on their own row, right-aligned */}
-                {/* ── FIX: moved actions to a separate full-width row so they never
-                          get pushed offscreen or cause overflow on narrow phones */}
-                <div className="flex items-center gap-1.5 mt-2.5 justify-end flex-wrap">
+                {/* Mobile Section: Action buttons in ONE horizontal line */}
+                <div className="flex sm:hidden items-center gap-1.5 mt-2 pt-2 border-t border-ink-100/70 overflow-x-auto no-scrollbar flex-nowrap">
+                  <a
+                    href={`/blog/${blog.slug || blog._id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-lg font-ui text-[11px] font-medium bg-saffron-50 text-saffron-700 hover:bg-saffron-100 transition-all flex items-center justify-center gap-1 flex-shrink-0 whitespace-nowrap"
+                    title="View published blog on website"
+                  >
+                    <Eye size={12} /> View
+                  </a>
+
                   <button
                     type="button"
                     disabled={actionLoading === `featured-${blog._id}`}
                     onClick={(e) => handleToggleFeatured(e, blog._id)}
-                    className={`px-3 py-1.5 rounded-lg font-ui text-xs font-medium transition-all min-w-[100px] flex justify-center items-center ${blog.featured
+                    className={`px-2.5 py-1 rounded-lg font-ui text-[11px] font-medium transition-all flex justify-center items-center flex-shrink-0 whitespace-nowrap ${blog.featured
                         ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
                         : "bg-ink-100 text-ink-600 hover:bg-ink-200"
                       } disabled:opacity-50`}
                   >
                     {actionLoading === `featured-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : blog.featured ? "⭐ Featured" : "Mark Featured"}
                   </button>
+
+                  <button
+                    type="button"
+                    disabled={actionLoading === `index-${blog._id}`}
+                    onClick={(e) => handleInstantIndex(e, blog._id)}
+                    className="px-2.5 py-1 rounded-lg font-ui text-[11px] font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all flex items-center justify-center gap-1 flex-shrink-0 disabled:opacity-50 whitespace-nowrap"
+                    title="Send Instant Indexing request to Google & IndexNow"
+                  >
+                    {actionLoading === `index-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "⚡ Instant Index"}
+                  </button>
+
                   <button
                     type="button"
                     disabled={actionLoading === `toggle-${blog._id}`}
                     onClick={(e) => handleToggle(e, blog._id)}
-                    className={`px-3 py-1.5 rounded-lg font-ui text-xs font-medium transition-all min-w-[80px] flex justify-center items-center ${blog.status === "published"
+                    className={`px-2.5 py-1 rounded-lg font-ui text-[11px] font-medium transition-all flex justify-center items-center flex-shrink-0 whitespace-nowrap ${blog.status === "published"
                         ? "bg-ink-100 text-ink-600 hover:bg-ink-200"
                         : "bg-green-100 text-green-700 hover:bg-green-200"
                       } disabled:opacity-50`}
                   >
                     {actionLoading === `toggle-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : blog.status === "published" ? "Unpublish" : "Publish"}
                   </button>
-                  <button
-                    type="button"
-                    disabled={actionLoading === `index-${blog._id}`}
-                    onClick={(e) => handleInstantIndex(e, blog._id)}
-                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all flex items-center justify-center gap-1 min-w-[110px] disabled:opacity-50"
-                    title="Send Instant Indexing request to Google & IndexNow"
-                  >
-                    {actionLoading === `index-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "⚡ Instant Index"}
-                  </button>
+
                   <Link
                     to={`/admin/blogs/edit/${blog._id}`}
-                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 transition-all flex justify-center items-center"
+                    className="px-2.5 py-1 rounded-lg font-ui text-[11px] font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 transition-all flex justify-center items-center flex-shrink-0 whitespace-nowrap"
                   >
-                    Edit
+                    Edit Post
                   </Link>
-                  <button
-                    type="button"
-                    disabled={actionLoading === `delete-${blog._id}`}
-                    onClick={(e) => handleDelete(e, blog._id, blog.title)}
-                    className="px-3 py-1.5 rounded-lg font-ui text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-all flex justify-center items-center min-w-[65px] disabled:opacity-50"
-                  >
-                    {actionLoading === `delete-${blog._id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Delete"}
-                  </button>
                 </div>
               </div>
             ))}
@@ -345,8 +411,8 @@ export default function ManageBlogs() {
                     key={i}
                     onClick={() => setPage(i)}
                     className={`w-7 h-7 rounded-lg font-ui text-xs font-medium transition-all ${page === i
-                        ? "bg-saffron-500 text-white shadow-sm"
-                        : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+                      ? "bg-saffron-500 text-white shadow-sm"
+                      : "bg-ink-100 text-ink-600 hover:bg-ink-200"
                       }`}
                   >
                     {i}

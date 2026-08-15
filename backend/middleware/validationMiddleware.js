@@ -32,7 +32,15 @@ const createBlogSchema = z.object({
   images: z.array(z.string().url()).optional(),
   pdfs: z.array(z.object({ title: z.string(), url: z.string().url() })).optional(),
   videoUrl: z.string().url('Video URL must be valid').optional().or(z.literal('')),
-  links: z.array(z.object({ title: z.string(), url: z.string().url() })).optional()
+  links: z.array(z.object({ title: z.string(), url: z.string().url() })).optional(),
+  watermark: z.object({
+    enabled: z.boolean().optional(),
+    type: z.enum(['preset', 'image', 'text']).optional(),
+    text: z.string().optional(),
+    imageUrl: z.string().optional().or(z.literal('')),
+    opacity: z.number().optional(),
+    pattern: z.enum(['diagonal', 'center', 'tiled']).optional()
+  }).optional()
 })
 
 const updateBlogSchema = createBlogSchema.partial() // all fields optional on update

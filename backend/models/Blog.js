@@ -19,6 +19,14 @@ const blogSchema = new mongoose.Schema({
   videoUrl: { type: String },
   links: [{ title: String, url: String }],
   views: { type: Number, default: 0 },
+  watermark: {
+    enabled: { type: Boolean, default: true },
+    type: { type: String, enum: ['preset', 'image', 'text'], default: 'preset' },
+    text: { type: String, default: 'शासनादेश अपडेट्स' },
+    imageUrl: { type: String, default: '' },
+    opacity: { type: Number, default: 0.12 },
+    pattern: { type: String, enum: ['diagonal', 'center', 'tiled'], default: 'diagonal' }
+  },
 }, { timestamps: true })
 
 module.exports = mongoose.model('Blog', blogSchema)
