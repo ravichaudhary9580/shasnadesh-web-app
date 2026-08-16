@@ -80,8 +80,10 @@
   .prose-blog h2 { @apply text-3xl mt-6 mb-3; }
   .prose-blog h3 { @apply text-2xl mt-5 mb-2; }
   .prose-blog h4 { @apply text-xl mt-4 mb-2; }
-  .prose-blog ul { @apply list-disc list-inside mb-4 space-y-1; }
-  .prose-blog ol { @apply list-decimal list-inside mb-4 space-y-1; }
+  .prose-blog ul { @apply list-disc list-outside pl-6 mb-4 space-y-1; }
+  .prose-blog ol { @apply list-decimal list-outside pl-6 mb-4 space-y-1; }
+  .prose-blog li { @apply my-1; }
+  .prose-blog li > p { @apply m-0 inline; }
   .prose-blog a { @apply text-saffron-600 underline underline-offset-2 hover:text-saffron-500; }
   .prose-blog a:visited { color: #8a7055; }
   .prose-blog blockquote {
@@ -128,8 +130,10 @@
   .tiptap-editor .ProseMirror h2 { @apply font-display text-3xl font-bold text-ink-900 mb-2 mt-5; }
   .tiptap-editor .ProseMirror h3 { @apply font-display text-2xl font-semibold text-ink-900 mb-2 mt-4; }
   .tiptap-editor .ProseMirror h4 { @apply font-display text-xl font-semibold text-ink-900 mb-2 mt-3; }
-  .tiptap-editor .ProseMirror ul { @apply list-disc list-inside mb-3 space-y-1; }
-  .tiptap-editor .ProseMirror ol { @apply list-decimal list-inside mb-3 space-y-1; }
+  .tiptap-editor .ProseMirror ul { @apply list-disc list-outside pl-6 mb-3 space-y-1; }
+  .tiptap-editor .ProseMirror ol { @apply list-decimal list-outside pl-6 mb-3 space-y-1; }
+  .tiptap-editor .ProseMirror li { @apply my-1; }
+  .tiptap-editor .ProseMirror li > p { @apply m-0 inline; }
   .tiptap-editor .ProseMirror blockquote {
     @apply border-l-4 border-saffron-400 pl-4 italic text-ink-600 my-4;
   }

@@ -1631,14 +1631,16 @@ export default function RichEditor({ content, onChange, watermark = null }) {
       <div className={`border border-ink-200 rounded-xl bg-white tiptap-editor shadow-sm relative transition-all ${
         isFullScreen ? "fixed inset-0 z-[100] rounded-none flex flex-col p-4 bg-white overflow-y-auto" : ""
       }`}>
-        {/* ── MAIN TOOLBAR ── */}
+        {/* ── COMBINED STICKY TOOLBAR HEADER (Main Toolbar + Table Tools naturally stacked) ── */}
         <div
-          className={`border-b border-ink-100 bg-white/98 backdrop-blur-md px-1.5 sm:px-2 py-1.5 flex flex-wrap items-center gap-0.5 overflow-x-auto scrollbar-hide transition-all ${
+          className={`bg-white transition-all ${
             isFrozen
-              ? "sticky top-0 z-30 shadow-md border-b-2 border-saffron-300"
+              ? "sticky top-0 z-30 shadow-md border-b border-saffron-200"
               : "relative z-10"
           }`}
         >
+          {/* ── MAIN TOOLBAR ── */}
+          <div className="border-b border-ink-100 bg-white/98 backdrop-blur-md px-1.5 sm:px-2 py-1.5 flex flex-wrap items-center gap-0.5 overflow-x-auto scrollbar-hide">
 
           {/* History */}
           <TB onClick={() => editor.chain().focus().undo().run()} title="Undo (Ctrl+Z)">
@@ -2003,13 +2005,7 @@ export default function RichEditor({ content, onChange, watermark = null }) {
 
         {/* ── DYNAMIC TABLE DESIGN & EDITING TOOLBAR ── */}
         {editor.isActive("table") && (
-          <div
-            className={`bg-saffron-50/98 backdrop-blur-md border-b border-saffron-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs text-saffron-900 animate-fade-in shadow-sm transition-all ${
-              isFrozen
-                ? "sticky top-[43px] z-30 shadow-md"
-                : "relative z-10"
-            }`}
-          >
+          <div className="bg-saffron-50/98 backdrop-blur-md border-t border-saffron-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs text-saffron-900 animate-fade-in shadow-2xs">
             <div className="flex items-center gap-1.5 font-bold text-saffron-800 pr-2 border-r border-saffron-200 flex-shrink-0">
               <TableIcon size={14} className="text-saffron-600" />
               <span>Table Tools</span>
@@ -2319,6 +2315,7 @@ export default function RichEditor({ content, onChange, watermark = null }) {
             </button>
           </div>
         )}
+        </div>
 
         {/* ── EDITOR AREA WITH LIVE WATERMARK ── */}
         <div className="relative flex-1 overflow-hidden min-h-[500px]">
