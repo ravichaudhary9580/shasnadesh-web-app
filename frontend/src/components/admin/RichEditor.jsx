@@ -12,6 +12,7 @@ import Table from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
+import { Extension } from "@tiptap/core";
 import { uploadFile, getSearchSuggestions } from "../../services/api";
 import toast from "react-hot-toast";
 import { useState, useRef, useEffect } from "react";
@@ -61,6 +62,54 @@ import {
   Loader2,
 } from "lucide-react";
 
+/* ─── TipTap FontSize Extension ─────────────────────────────────────── */
+export const FontSize = Extension.create({
+  name: "fontSize",
+  addOptions() {
+    return {
+      types: ["textStyle"],
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (element) => element.style.fontSize?.replace(/['"]+/g, "") || null,
+            renderHTML: (attributes) => {
+              if (!attributes.fontSize) {
+                return {};
+              }
+              return {
+                style: `font-size: ${attributes.fontSize}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setFontSize:
+        (fontSize) =>
+        ({ chain }) => {
+          if (!fontSize) {
+            return chain().setMark("textStyle", { fontSize: null }).removeEmptyTextStyle().run();
+          }
+          return chain().setMark("textStyle", { fontSize }).run();
+        },
+      unsetFontSize:
+        () =>
+        ({ chain }) => {
+          return chain().setMark("textStyle", { fontSize: null }).removeEmptyTextStyle().run();
+        },
+    };
+  },
+});
+
 /* ─── Font options ─────────────────────────────────────────────────── */
 const FONT_OPTIONS = [
   { label: "Default", value: "" },
@@ -75,11 +124,15 @@ const FONT_OPTIONS = [
 
 const FONT_SIZES = [
   { label: "Default (16px)", value: "" },
+  { label: "Tiny (10px)", value: "10px" },
   { label: "Small (12px)", value: "12px" },
   { label: "Normal (14px)", value: "14px" },
   { label: "Medium (18px)", value: "18px" },
-  { label: "Large (24px)", value: "24px" },
+  { label: "Large (20px)", value: "20px" },
+  { label: "X-Large (24px)", value: "24px" },
+  { label: "2X-Large (28px)", value: "28px" },
   { label: "Huge (32px)", value: "32px" },
+  { label: "Gigantic (40px)", value: "40px" },
 ];
 
 const HEADING_OPTIONS = [
@@ -1145,6 +1198,7 @@ export default function RichEditor({ content, onChange, watermark = null }) {
       Underline,
       TextStyle,
       FontFamily,
+      FontSize,
       Color,
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
@@ -1384,9 +1438,16 @@ export default function RichEditor({ content, onChange, watermark = null }) {
   };
 
   /* ── font size ── */
+  const getCurrentFontSize = () => {
+    const fontSize = editor.getAttributes('textStyle').fontSize;
+    if (!fontSize) return "Size";
+    const found = FONT_SIZES.find(s => s.value === fontSize);
+    return found ? found.label.split(' ')[0] : fontSize;
+  };
+
   const setFontSize = (size) => {
     if (!size) {
-      editor.chain().focus().setMark('textStyle', { fontSize: null }).run();
+      editor.chain().focus().setMark('textStyle', { fontSize: null }).removeEmptyTextStyle().run();
     } else {
       editor.chain().focus().setMark('textStyle', { fontSize: size }).run();
     }
@@ -1663,29 +1724,43 @@ export default function RichEditor({ content, onChange, watermark = null }) {
               <button
                 type="button"
                 title="Font Size"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-ui text-ink-700 hover:bg-ink-100 transition-all min-w-[90px] justify-between border border-ink-200/60"
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-ui transition-all min-w-[90px] justify-between border ${
+                  editor.getAttributes('textStyle').fontSize
+                    ? "bg-saffron-50 text-saffron-900 border-saffron-300 font-semibold"
+                    : "text-ink-700 hover:bg-ink-100 border-ink-200/60"
+                }`}
               >
-                <span className="text-xs">Size</span>
+                <span className="text-xs">{getCurrentFontSize()}</span>
                 <ChevronDown size={11} />
               </button>
             }
           >
-            {FONT_SIZES.map((s) => (
-              <button
-                key={s.value}
-                type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  setFontSize(s.value);
-                }}
-                className="w-full text-left px-3.5 py-2 text-xs text-ink-700 hover:bg-saffron-50 hover:text-saffron-900 transition-colors flex items-center justify-between"
-              >
-                <span className="font-ui font-medium">{s.label.split(' ')[0]}</span>
-                <span className="text-[10px] text-ink-400 font-mono bg-ink-50 px-1.5 py-0.5 rounded border border-ink-100">
-                  {s.value || '16px'}
-                </span>
-              </button>
-            ))}
+            {FONT_SIZES.map((s) => {
+              const active = (editor.getAttributes('textStyle').fontSize || "") === s.value;
+              return (
+                <button
+                  key={s.value || 'default'}
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setFontSize(s.value);
+                  }}
+                  className={`w-full text-left px-3.5 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer ${
+                    active
+                      ? "bg-saffron-100/80 text-saffron-950 font-semibold"
+                      : "text-ink-700 hover:bg-saffron-50 hover:text-saffron-900"
+                  }`}
+                >
+                  <span className="font-ui font-medium flex items-center gap-1.5">
+                    {active && <Check size={12} className="text-saffron-600" />}
+                    {s.label.split(' ')[0]}
+                  </span>
+                  <span className="text-[10px] text-ink-400 font-mono bg-ink-50 px-1.5 py-0.5 rounded border border-ink-100">
+                    {s.value || '16px'}
+                  </span>
+                </button>
+              );
+            })}
           </ToolbarDropdown>
 
           <Sep />

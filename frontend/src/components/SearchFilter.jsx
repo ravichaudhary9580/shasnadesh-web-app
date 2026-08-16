@@ -18,7 +18,7 @@ export default function SearchFilter({
   }, [initialCategory]);
 
   useEffect(() => {
-    const MENU_ORDER = ["उत्तर प्रदेश शासनादेश", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "शिक्षा विभाग", "अवकाश कैलेंडर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
+    const MENU_ORDER = ["उत्तर प्रदेश शासनादेश", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "Document", "प्रारूप", "शिक्षा विभाग", "अवकाश कैलेंडर", "छात्रवृत्ति", "मा० न्यायालय के आदेश", "अन्य"];
     getCategories()
       .then(({ data }) => {
         const sortedData = [...data].sort((a, b) => {

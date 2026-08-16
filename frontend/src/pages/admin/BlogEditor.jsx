@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import BlogWatermarkOverlay from "../../components/BlogWatermarkOverlay";
 
-const DEFAULT_CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "अवकाश कैलेंडर", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
+const DEFAULT_CATEGORIES = ["उत्तर प्रदेश शासनादेश", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "Document", "प्रारूप", "शिक्षा विभाग", "अवकाश कैलेंडर", "छात्रवृत्ति", "मा० न्यायालय के आदेश", "अन्य"];
 
 
 function Field({ label, children, hint }) {
@@ -459,10 +459,28 @@ export default function BlogEditor() {
     if (!form.content || form.content === "<p></p>") { toast.error("Content is required"); return; }
     setSaving(true);
     try {
+      const cleanLinks = (form.links || [])
+        .filter((l) => l && (l.title?.trim() || l.url?.trim()))
+        .map((l) => ({ title: l.title?.trim() || "", url: l.url?.trim() || "" }));
+
+      const cleanPdfs = (form.pdfs || [])
+        .filter((p) => p && (p.title?.trim() || p.url?.trim()))
+        .map((p) => ({ title: p.title?.trim() || "", url: p.url?.trim() || "" }));
+
+      const cleanImages = (form.images || []).filter(Boolean);
+
       const payload = {
         ...form,
+        title: form.title.trim(),
+        links: cleanLinks,
+        pdfs: cleanPdfs,
+        images: cleanImages,
         tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
         status: status || form.status,
+        watermark: {
+          ...form.watermark,
+          opacity: Number(form.watermark?.opacity) || 0.12,
+        },
       };
       if (isEditing) {
         await updateBlog(id, payload);
@@ -473,7 +491,10 @@ export default function BlogEditor() {
         navigate("/admin/blogs");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Save failed");
+      const errorMsg = err.response?.data?.errors?.length
+        ? err.response.data.errors.map(e => `${e.field ? e.field + ': ' : ''}${e.message}`).join(', ')
+        : (err.response?.data?.message || "Save failed");
+      toast.error(errorMsg);
     } finally {
       setSaving(false);
     }

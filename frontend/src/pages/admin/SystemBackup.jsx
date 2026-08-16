@@ -17,7 +17,7 @@ import {
   Globe,
 } from "lucide-react";
 
-const DEFAULT_CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "अवकाश कैलेंडर", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
+const DEFAULT_CATEGORIES = ["उत्तर प्रदेश शासनादेश", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "Document", "प्रारूप", "शिक्षा विभाग", "अवकाश कैलेंडर", "छात्रवृत्ति", "मा० न्यायालय के आदेश", "अन्य"];
 
 // Pure helper to compute actual start & end dates based on preset filters
 function getComputedDates(currentFilters) {

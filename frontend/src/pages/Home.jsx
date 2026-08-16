@@ -23,10 +23,12 @@ const MENU_ORDER = [
   "उत्तर प्रदेश शासनादेश",
   "वैकेंसी अलर्ट",
   "स्टूडेंट कॉर्नर",
+  "Document",
+  "प्रारूप",
   "शिक्षा विभाग",
   "अवकाश कैलेंडर",
   "छात्रवृत्ति",
-  "प्रारूप",
+  "मा० न्यायालय के आदेश",
   "अन्य",
 ];
 
@@ -109,36 +111,48 @@ export default function Home() {
   // Group blogs by category for Table View - always shows ALL categories when "All" is active
   const categoryGroups = useMemo(() => {
     if (filters.category) {
+      const targetCat = filters.category.trim();
       return [
         {
-          category: filters.category,
-          blogs: blogs.filter((b) => b.category === filters.category || !b.category),
+          category: targetCat,
+          blogs: blogs.filter((b) => (b.category || "").trim() === targetCat || !b.category),
         },
       ];
     }
 
     const groups = {};
     allCategories.forEach((cat) => {
-      groups[cat] = [];
+      groups[cat.trim()] = [];
     });
 
     blogs.forEach((blog) => {
-      const cat = blog.category || "अन्य";
+      const cat = (blog.category || "अन्य").trim();
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(blog);
     });
 
-    return allCategories.map((cat) => ({
-      category: cat,
-      blogs: groups[cat] || [],
-    }));
+    return allCategories.map((cat) => {
+      const trimmedCat = cat.trim();
+      return {
+        category: trimmedCat,
+        blogs: groups[trimmedCat] || [],
+      };
+    });
   }, [blogs, allCategories, filters.category]);
 
   // Fetch all unique categories from API
   useEffect(() => {
     getCategories()
       .then(({ data }) => {
-        const sorted = Array.from(new Set([...MENU_ORDER, ...data]));
+        const raw = Array.isArray(data) ? data.map(c => (typeof c === 'string' ? c.trim() : c)).filter(Boolean) : [];
+        const merged = Array.from(new Set([...MENU_ORDER.map(c => c.trim()), ...raw]));
+        const sorted = merged.sort((a, b) => {
+          const indexA = MENU_ORDER.indexOf(a);
+          const indexB = MENU_ORDER.indexOf(b);
+          const weightA = indexA === -1 ? 999 : indexA;
+          const weightB = indexB === -1 ? 999 : indexB;
+          return weightA - weightB;
+        });
         setAllCategories(sorted);
       })
       .catch(() => setAllCategories(MENU_ORDER));
@@ -593,10 +607,10 @@ export default function Home() {
                             <td className="py-2.5 sm:py-3 px-3.5 sm:px-4">
                               <Link
                                 to={`/blog/${blog.slug}`}
-                                className="blog-card-title font-display font-medium text-ink-900 text-sm sm:text-base hover:text-saffron-600 transition-colors flex items-start gap-2 leading-snug sm:leading-relaxed"
+                                className="blog-card-title font-display font-medium text-blue-700 text-sm sm:text-base hover:text-blue-900 transition-colors flex items-start gap-2 leading-snug sm:leading-relaxed"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <span className="text-saffron-500 font-bold mt-0.5 text-sm select-none flex-shrink-0 sm:hidden">›</span>
+                                <span className="text-blue-500 font-bold mt-0.5 text-sm select-none flex-shrink-0 sm:hidden">›</span>
                                 <span className="flex-1">{blog.title}</span>
                               </Link>
                             </td>
@@ -653,9 +667,9 @@ export default function Home() {
                           <li key={blog._id}>
                             <Link
                               to={`/blog/${blog.slug}`}
-                              className="blog-card-title group px-3.5 py-2.5 font-display font-medium text-ink-900 text-[14.5px] sm:text-[15.5px] hover:text-saffron-600 hover:bg-saffron-50/50 transition-colors flex items-start gap-2 leading-snug sm:leading-relaxed"
+                              className="blog-card-title group px-3.5 py-2.5 font-display font-medium text-blue-700 text-[14.5px] sm:text-[15.5px] hover:text-blue-900 hover:bg-blue-50/50 transition-colors flex items-start gap-2 leading-snug sm:leading-relaxed"
                             >
-                              <span className="text-saffron-500 font-bold mt-0.5 text-sm select-none flex-shrink-0">›</span>
+                              <span className="text-blue-500 font-bold mt-0.5 text-sm select-none flex-shrink-0">›</span>
                               <span className="flex-1 line-clamp-2">{blog.title}</span>
                             </Link>
                           </li>

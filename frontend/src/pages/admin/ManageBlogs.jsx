@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { Loader2, Eye } from "lucide-react";
 import { getImageUrl } from "../../utils/imageUtils";
 
-const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "शिक्षा विभाग", "अवकाश कैलेंडर", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "छात्रवृत्ति", "प्रारूप", "अन्य"];
+const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "Document", "प्रारूप", "शिक्षा विभाग", "अवकाश कैलेंडर", "छात्रवृत्ति", "मा० न्यायालय के आदेश", "अन्य"];
 
 export default function ManageBlogs() {
   const [blogs, setBlogs] = useState([]);

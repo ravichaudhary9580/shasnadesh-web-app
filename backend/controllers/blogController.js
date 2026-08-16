@@ -141,7 +141,7 @@ exports.getBlog = async (req, res) => {
 // Admin
 exports.createBlog = async (req, res) => {
   try {
-    const baseSlug = slugify(req.body.title)
+    const baseSlug = slugify(req.body.title) || `post-${Date.now()}`
 
     // Handle slug collisions by appending a counter
     let slug = baseSlug
@@ -175,7 +175,7 @@ exports.updateBlog = async (req, res) => {
     // Whitelist allowed fields — prevents overwriting views, slug, etc.
     const {
       title, content, excerpt, category, tags,
-      status, thumbnail, images, pdfs, videoUrl, links
+      status, featured, thumbnail, images, pdfs, videoUrl, links
     } = req.body
 
     const allowedUpdates = {
@@ -185,6 +185,7 @@ exports.updateBlog = async (req, res) => {
       ...(category !== undefined && { category }),
       ...(tags !== undefined && { tags }),
       ...(status !== undefined && { status }),
+      ...(featured !== undefined && { featured }),
       ...(thumbnail !== undefined && { thumbnail }),
       ...(images !== undefined && { images }),
       ...(pdfs !== undefined && { pdfs }),
@@ -428,7 +429,8 @@ exports.getBlogOgMeta = async (req, res) => {
 exports.getCategories = async (req, res) => {
     try {
         const categories = await Blog.distinct('category', { status: 'published', category: { $ne: null, $ne: '' } })
-        res.json(categories.sort())
+        const cleaned = Array.from(new Set(categories.map(c => (typeof c === 'string' ? c.trim() : c)).filter(Boolean)))
+        res.json(cleaned.sort())
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
