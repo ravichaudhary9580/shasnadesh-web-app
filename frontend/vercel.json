@@ -4,9 +4,20 @@
       "source": "/blog/:slug",
       "has": [
         {
+          "type": "query",
+          "key": "ssr",
+          "value": "true"
+        }
+      ],
+      "destination": "https://shasnadesh-web-app.vercel.app/api/blogs/og/:slug"
+    },
+    {
+      "source": "/blog/:slug",
+      "has": [
+        {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(facebookexternalhit|WhatsApp|twitterbot|telegrambot|linkedinbot|slackbot|discordbot).*"
+          "value": ".*(googlebot|adsbot|mediapartners-google|feedfetcher-google|bingbot|bingpreview|yandex|baiduspider|duckduckbot|slurp|facebookexternalhit|WhatsApp|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|applebot|petalbot|semrushbot|ahrefsbot|rogerbot|exabot|screaming|lighthouse|headlesschrome|curl|wget|postman).*"
         }
       ],
       "destination": "https://shasnadesh-web-app.vercel.app/api/blogs/og/:slug"

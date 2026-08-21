@@ -1,9 +1,6 @@
 # Allow all search engines to crawl entire site
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /api
-Disallow: /login
 
 # Sitemaps (proxied from backend API)
 Sitemap: https://shasnadeshupdates.com/sitemap.xml

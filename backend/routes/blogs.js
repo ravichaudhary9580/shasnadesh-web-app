@@ -7,6 +7,7 @@ router.get('/suggestions', getSuggestions)
 router.get('/categories/list', getCategories)
 router.get('/years/list', getYears)
 router.get('/og/:slug', getBlogOgMeta)
+router.get('/ssr/:slug', getBlogOgMeta)
 router.get('/:slug', getBlog)
 
 module.exports = router

@@ -351,7 +351,7 @@ exports.requestInstantIndexing = async (req, res) => {
   }
 }
 
-// Get dynamic Open Graph meta HTML for social bot previews (WhatsApp, Facebook, Twitter, etc.)
+// Full Server-Side Rendered (SSR) HTML & Open Graph meta for search engine bots & crawlers (Googlebot, AdSense, WhatsApp, etc.)
 exports.getBlogOgMeta = async (req, res) => {
   try {
     const rawSlug = req.params.slug;
@@ -363,13 +363,44 @@ exports.getBlogOgMeta = async (req, res) => {
     });
 
     if (!blog) {
-      return res.redirect('https://shasnadeshupdates.com');
+      return res.status(404).send(`<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>पोस्ट नहीं मिली | Shasnadesh Updates</title>
+  <meta name="robots" content="noindex, follow">
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 50px;">
+  <h1>404 - पोस्ट उपलब्ध नहीं है</h1>
+  <p>यह पोस्ट हटा दी गई है या इसका लिंक बदल गया है।</p>
+  <a href="https://shasnadeshupdates.com/" style="color: #e8920a;">होमपेज पर जाएं</a>
+</body>
+</html>`);
     }
 
-    const title = (blog.title || 'Shasnadesh Updates').replace(/"/g, '&quot;');
-    const description = (blog.excerpt || blog.title).replace(/"/g, '&quot;');
-    const siteUrl = `https://shasnadeshupdates.com/blog/${blog.slug}`;
-    
+    const escapeHtml = (str) => {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+
+    const title = escapeHtml(blog.title || 'शासनादेश और सरकारी योजनाएं');
+    const description = escapeHtml(blog.excerpt || (blog.content ? blog.content.replace(/<[^>]*>?/gm, '').substring(0, 160) : blog.title));
+    const siteUrl = `https://shasnadeshupdates.com/blog/${encodeURIComponent(blog.slug)}`;
+    const category = escapeHtml(blog.category || 'सरकारी आदेश');
+    const publishedISO = blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString();
+    const modifiedISO = blog.updatedAt ? new Date(blog.updatedAt).toISOString() : publishedISO;
+
+    const formattedDate = new Date(blog.createdAt || Date.now()).toLocaleDateString('hi-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
     let imageUrl = 'https://shasnadeshupdates.com/logo512.png';
     if (blog.thumbnail) {
       const cleanThumb = blog.thumbnail.replace(/\\/g, '/');
@@ -384,15 +415,99 @@ exports.getBlogOgMeta = async (req, res) => {
       }
     }
 
+    const pdfsHtml = Array.isArray(blog.pdfs) && blog.pdfs.length > 0
+      ? `<div class="pdf-section">
+          <h3>संबंधित दस्तावेज़ / शासनादेश PDF डाउनलोड:</h3>
+          <ul>
+            ${blog.pdfs.map(pdf => {
+              const pdfUrl = typeof pdf === 'string' ? pdf : pdf?.url;
+              const pdfTitle = escapeHtml(typeof pdf === 'string' ? 'शासनादेश PDF डाउनलोड करें' : (pdf?.title || 'शासनादेश PDF'));
+              return pdfUrl ? `<li><a href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener noreferrer" class="pdf-link">📄 ${pdfTitle} (PDF)</a></li>` : '';
+            }).join('')}
+          </ul>
+        </div>`
+      : '';
+
+    const tagsHtml = Array.isArray(blog.tags) && blog.tags.length > 0
+      ? `<div class="tags-container">
+          ${blog.tags.map(t => `<span class="tag-badge">#${escapeHtml(t)}</span>`).join(' ')}
+        </div>`
+      : '';
+
+    const jsonLdArticle = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": siteUrl
+      },
+      "headline": blog.title || "Shasnadesh Updates",
+      "description": blog.excerpt || blog.title,
+      "image": [imageUrl],
+      "datePublished": publishedISO,
+      "dateModified": modifiedISO,
+      "articleSection": blog.category || "Government Schemes & Orders",
+      "inLanguage": "hi",
+      "author": {
+        "@type": "Organization",
+        "name": "शासनादेश अपडेट्स संपादकीय टीम (Shasnadesh Updates Team)",
+        "url": "https://shasnadeshupdates.com/about"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Shasnadesh Updates",
+        "url": "https://shasnadeshupdates.com/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://shasnadeshupdates.com/logo512.png",
+          "width": 512,
+          "height": 512
+        }
+      }
+    });
+
+    const jsonLdBreadcrumbs = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "होम",
+          "item": "https://shasnadeshupdates.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": blog.category || "सरकारी आदेश",
+          "item": `https://shasnadeshupdates.com/?category=${encodeURIComponent(blog.category || '')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": blog.title || "पोस्ट",
+          "item": siteUrl
+        }
+      ]
+    });
+
     const html = `<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
-  <title>${title} | Shasnadesh Updates</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title} - शासनादेश और सरकारी योजनाएं | Shasnadesh Updates</title>
   <meta name="description" content="${description}">
+  <meta name="author" content="शासनादेश अपडेट्स संपादकीय टीम">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow">
   <link rel="canonical" href="${siteUrl}">
 
-  <!-- Open Graph / WhatsApp / Facebook -->
+  <!-- Google AdSense Account Verification & Ad Script -->
+  <meta name="google-adsense-account" content="ca-pub-8129172226402333">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8129172226402333" crossorigin="anonymous"></script>
+
+  <!-- Open Graph / Facebook / WhatsApp -->
   <meta property="og:type" content="article">
   <meta property="og:url" content="${siteUrl}">
   <meta property="og:title" content="${title}">
@@ -402,25 +517,296 @@ exports.getBlogOgMeta = async (req, res) => {
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="Shasnadesh Updates">
+  <meta property="og:locale" content="hi_IN">
+  <meta property="article:published_time" content="${publishedISO}">
+  <meta property="article:modified_time" content="${modifiedISO}">
+  <meta property="article:section" content="${category}">
 
-  <!-- Twitter -->
+  <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="${siteUrl}">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
   <meta name="twitter:image" content="${imageUrl}">
 
-  <script>window.location.href = "${siteUrl}";</script>
-  <meta http-equiv="refresh" content="0;url=${siteUrl}">
+  <!-- Structured Data JSON-LD for Google Rich Results -->
+  <script type="application/ld+json">${jsonLdArticle}</script>
+  <script type="application/ld+json">${jsonLdBreadcrumbs}</script>
+
+  <style>
+    :root {
+      --primary: #e8920a;
+      --primary-dark: #b86e00;
+      --ink: #26201a;
+      --text: #333333;
+      --bg: #faf8f5;
+      --card-bg: #ffffff;
+      --border: #e2dcd5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Devanagari', Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0;
+    }
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 100%;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo img { width: 36px; height: 36px; border-radius: 6px; }
+    nav a {
+      margin-left: 15px;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    nav a:hover { color: var(--primary); }
+    .container {
+      max-width: 860px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .breadcrumbs {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    .breadcrumbs a { color: #666; text-decoration: none; }
+    .breadcrumbs a:hover { color: var(--primary); }
+    .article-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 28px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .category-badge {
+      display: inline-block;
+      background: #fff4e5;
+      color: var(--primary-dark);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 26px;
+      line-height: 1.4;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
+      color: #777;
+      border-bottom: 1px solid #f0eae1;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .featured-image {
+      width: 100%;
+      max-height: 440px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+    .article-content {
+      font-size: 17px;
+      line-height: 1.8;
+      color: #2b2b2b;
+    }
+    .article-content p { margin-bottom: 18px; }
+    .article-content h2, .article-content h3 {
+      color: var(--ink);
+      margin-top: 28px;
+      margin-bottom: 14px;
+      line-height: 1.35;
+    }
+    .article-content ul, .article-content ol {
+      margin-left: 24px;
+      margin-bottom: 18px;
+    }
+    .article-content li { margin-bottom: 8px; }
+    .article-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 15px;
+    }
+    .article-content th, .article-content td {
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    .article-content th { background: #faf5ed; }
+    .pdf-section {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 18px;
+      margin: 26px 0;
+    }
+    .pdf-section h3 { font-size: 16px; margin-bottom: 10px; color: #1e293b; }
+    .pdf-link {
+      display: inline-block;
+      background: #0284c7;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 6px;
+    }
+    .pdf-link:hover { background: #0369a1; }
+    .tags-container {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #f0eae1;
+    }
+    .tag-badge {
+      display: inline-block;
+      background: #f3f4f6;
+      color: #4b5563;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .author-box {
+      margin-top: 32px;
+      background: #fff8eb;
+      border: 1px solid #fde0b2;
+      border-radius: 8px;
+      padding: 18px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .author-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: #e8920a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .author-info h4 { font-size: 15px; color: #7c2d12; margin-bottom: 4px; }
+    .author-info p { font-size: 13px; color: #57534e; line-height: 1.5; }
+    footer {
+      background: #1f1b16;
+      color: #e5e0d8;
+      padding: 36px 20px 24px;
+      margin-top: 48px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+    .footer-links a { color: #f59e0b; text-decoration: none; }
+    .footer-links a:hover { text-decoration: underline; }
+    .copyright { color: #9ca3af; font-size: 13px; }
+  </style>
 </head>
 <body>
-  <p>Redirecting to <a href="${siteUrl}">${title}</a>...</p>
+  <header>
+    <a href="https://shasnadeshupdates.com/" class="logo">
+      <img src="https://shasnadeshupdates.com/logo192.png" alt="Shasnadesh Updates" />
+      <span>शासनादेश अपडेट्स</span>
+    </a>
+    <nav>
+      <a href="https://shasnadeshupdates.com/">होम</a>
+      <a href="https://shasnadeshupdates.com/about">About Us</a>
+      <a href="https://shasnadeshupdates.com/contact">Contact Us</a>
+      <a href="https://shasnadeshupdates.com/privacy-policy">Privacy Policy</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="breadcrumbs">
+      <a href="https://shasnadeshupdates.com/">होम</a> &rsaquo;
+      <a href="https://shasnadeshupdates.com/?category=${encodeURIComponent(blog.category || '')}">${category}</a> &rsaquo;
+      <span>${title}</span>
+    </div>
+
+    <article class="article-card">
+      <span class="category-badge">${category}</span>
+      <h1>${title}</h1>
+
+      <div class="meta-bar">
+        <span>✍️ <strong>लेखक:</strong> शासनादेश अपडेट्स संपादकीय टीम</span>
+        <span>📅 <strong>दिनांक:</strong> ${formattedDate}</span>
+        ${blog.views ? `<span>👁️ <strong>व्यूज:</strong> ${blog.views}</span>` : ''}
+      </div>
+
+      ${blog.thumbnail ? `<img src="${imageUrl}" alt="${title}" class="featured-image" />` : ''}
+
+      <div class="article-content">
+        ${blog.content || `<p>${description}</p>`}
+      </div>
+
+      ${pdfsHtml}
+      ${tagsHtml}
+
+      <div class="author-box">
+        <div class="author-avatar">श</div>
+        <div class="author-info">
+          <h4>शासनादेश अपडेट्स संपादकीय टीम (Editorial Team)</h4>
+          <p>यह जानकारी भारत सरकार एवं संबंधित राज्य सरकारों द्वारा जारी आधिकारिक अधिसूचनाओं और शासनादेशों के गहन अध्ययन और सत्यापन के बाद तैयार की गई है। हमारा उद्देश्य सरकारी योजनाओं और नियमों को नागरिकों तक सरल और सटीक रूप में पहुँचाना है।</p>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://shasnadeshupdates.com/">Home</a>
+      <a href="https://shasnadeshupdates.com/about">About Us (हमारे बारे में)</a>
+      <a href="https://shasnadeshupdates.com/contact">Contact Us (संपर्क करें)</a>
+      <a href="https://shasnadeshupdates.com/privacy-policy">Privacy Policy</a>
+      <a href="https://shasnadeshupdates.com/terms">Terms & Conditions</a>
+      <a href="https://shasnadeshupdates.com/disclaimer">Disclaimer (अस्वीकरण)</a>
+    </div>
+    <p class="copyright">&copy; ${new Date().getFullYear()} Shasnadesh Updates. All rights reserved.</p>
+  </footer>
 </body>
 </html>`;
 
-    res.set('Content-Type', 'text/html');
+    res.set('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (error) {
+    console.error('Error in getBlogOgMeta:', error);
     res.redirect('https://shasnadeshupdates.com');
   }
 };
