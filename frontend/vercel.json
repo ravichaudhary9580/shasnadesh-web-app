@@ -8,7 +8,7 @@
           "value": "www.shasnadeshupdates.com"
         }
       ],
-      "destination": "https://shasnadeshupdates.com/$1",
+      "destination": "https://www.shasnadeshupdates.com/$1",
       "permanent": true
     }
   ],
