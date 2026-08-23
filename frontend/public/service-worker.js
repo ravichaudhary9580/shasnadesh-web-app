@@ -2,7 +2,7 @@
 
 const CACHE_NAME = 'shasnadesh-v5'; // ← bumped version to force fresh install
 const OFFLINE_URL = '/offline.html';
-const BASE_URL = 'https://shasnadeshupdates.com';
+const BASE_URL = 'https://www.shasnadeshupdates.com';
 
 const STATIC_ASSETS = [
   `${BASE_URL}/`,
