@@ -1,17 +1,5 @@
 {
-  "redirects": [
-    {
-      "source": "/((?!\\.well-known/).*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.shasnadeshupdates.com"
-        }
-      ],
-      "destination": "https://www.shasnadeshupdates.com/$1",
-      "permanent": true
-    }
-  ],
+  
   "rewrites": [
     {
       "source": "/blog/:slug",
