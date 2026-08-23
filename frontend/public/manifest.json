@@ -1,10 +1,10 @@
 {
-  "id": "https://shasnadeshupdates.com/",
+  "id": "https://www.shasnadeshupdates.com/",
   "short_name": "Shasnadeshupdates.com",
   "name": "Shasnadesh Updates",
   "description": "सभी सरकारी आदेश, नियम और अधिसूचनाएं हिंदी और अंग्रेजी में | Know the governments update in blog in Hindi and English",
-  "start_url": "https://shasnadeshupdates.com/",
-  "scope": "https://shasnadeshupdates.com/",
+  "start_url": "https://www.shasnadeshupdates.com/",
+  "scope": "https://www.shasnadeshupdates.com/",
   "display": "standalone",
   "theme_color": "#e8920a",
   "background_color": "#faf8f5",
