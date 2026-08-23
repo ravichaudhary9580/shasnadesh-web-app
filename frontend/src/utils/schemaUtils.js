@@ -70,7 +70,7 @@ export function generateOrganizationSchema() {
     "sameAs": [
       "https://www.facebook.com/shasnadeshupdates",
       "https://www.instagram.com/shasnadeshupdates",
-      "https://twitter.com/shasnadeshupdates",
+      "https://x.com/shasnadeshup",
       "https://www.youtube.com/@shasnadeshupdates",
       "https://t.me/shasnadeshupdates"
     ]

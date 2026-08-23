@@ -148,31 +148,45 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// ── Push Notifications ────────────────────────────────────────────────────────
+// ── Push Notifications & App Badge ────────────────────────────────────────────
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'नया ब्लॉग पोस्ट';
+  const title = data.title || 'नया शासनादेश / अपडेट';
+  
+  // ✅ Set App Icon Badge (Red badge on home screen icon)
+  if ('setAppBadge' in navigator) {
+    const count = Number(data.badgeCount) || 1;
+    navigator.setAppBadge(count).catch((err) => console.log('Badge error:', err));
+  }
+
   const options = {
-    body: data.body || 'नया ब्लॉग उपलब्ध है',
+    body: data.body || 'नया अपडेट उपलब्ध है। देखने के लिए क्लिक करें।',
     icon: '/logo192.png',
     badge: '/logo192.png',
     image: data.image,
     data: { url: data.url || '/', timestamp: Date.now() },
-    vibrate: [100],
+    vibrate: [100, 50, 100],
     tag: data.tag || `blog-${Date.now()}`,
     requireInteraction: false,
     silent: false,
-    renotify: false,
+    renotify: true,
     actions: [
       { action: 'open', title: 'पढ़ें' },
       { action: 'close', title: 'बंद करें' },
     ],
   };
+
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+
+  // ✅ Clear App Icon Badge on notification click
+  if ('clearAppBadge' in navigator) {
+    navigator.clearAppBadge().catch(() => {});
+  }
+
   if (event.action === 'close') return;
 
   const url = event.notification.data.url || '/';

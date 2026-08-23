@@ -38,7 +38,7 @@ const SOCIAL_LINKS = [
   },
   {
     label: "X",
-    href: "https://twitter.com/shasnadeshupdates", // Replace with  actual X/Twitter
+    href: "https://x.com/shasnadeshup",
     viewBox: "0 0 24 24",
     path: "M18.2 3h2.8l-6.1 7 7.1 11h-5.6l-4.4-6.2L6.6 21H3.8l6.5-7.4L3 3h5.7l4 5.6L18.2 3Zm-1 16h1.6L8.7 5H7.1l10.1 14Z",
   },

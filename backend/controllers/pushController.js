@@ -57,6 +57,7 @@ exports.sendNotification = async (title, body, url, image, tag) => {
       url, 
       image,
       tag: tag || `notification-${Date.now()}`,
+      badgeCount: 1,
       timestamp: Date.now()
     })
     

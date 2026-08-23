@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -80,6 +80,23 @@ function AppRoutes() {
 }
 
 export default function App() {
+  // Clear App Icon Badge on home screen when user opens or focuses the app
+  useEffect(() => {
+    const clearBadge = () => {
+      if ('clearAppBadge' in navigator) {
+        navigator.clearAppBadge().catch(() => {});
+      }
+    };
+    clearBadge();
+    window.addEventListener("focus", clearBadge);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") clearBadge();
+    });
+    return () => {
+      window.removeEventListener("focus", clearBadge);
+    };
+  }, []);
+
   return (
     <AuthProvider>
       <BrowserRouter>
