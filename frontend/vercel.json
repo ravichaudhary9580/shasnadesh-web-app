@@ -1,14 +1,14 @@
 {
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/((?!\\.well-known/).*)",
       "has": [
         {
           "type": "host",
           "value": "www.shasnadeshupdates.com"
         }
       ],
-      "destination": "https://shasnadeshupdates.com/:path*",
+      "destination": "https://shasnadeshupdates.com/$1",
       "permanent": true
     }
   ],
@@ -45,6 +45,23 @@
     }
   ],
   "headers": [
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
     {
       "source": "/sitemap-blogs.xml",
       "headers": [
