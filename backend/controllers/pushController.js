@@ -40,13 +40,20 @@ exports.unsubscribe = async (req, res) => {
 
 exports.sendNotification = async (title, body, url, image, tag) => {
   try {
-    // Check last notification time (prevent spam)
+    // Allow up to 3 notifications per hour with a 10-minute minimum spacing
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+    const notificationsLastHour = await NotificationLog.countDocuments({ sentAt: { $gte: oneHourAgo } })
+    if (notificationsLastHour >= 3) {
+      throw new Error('Hourly limit reached: Maximum 3 notifications allowed per hour. Please wait a while.')
+    }
+
     const lastNotification = await NotificationLog.findOne().sort({ sentAt: -1 })
     if (lastNotification) {
       const timeDiff = Date.now() - lastNotification.sentAt.getTime()
-      const minInterval = 3600000 // 1 hour minimum
-      if (timeDiff < minInterval) {
-        throw new Error(`Please wait ${Math.ceil((minInterval - timeDiff) / 60000)} minutes before sending next notification`)
+      const minSpacing = 10 * 60 * 1000 // 10 minutes spacing between notifications
+      if (timeDiff < minSpacing) {
+        const waitMins = Math.ceil((minSpacing - timeDiff) / 60000)
+        throw new Error(`Please wait ${waitMins} minute(s) before sending the next notification.`)
       }
     }
 
