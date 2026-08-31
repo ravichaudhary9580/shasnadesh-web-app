@@ -114,9 +114,9 @@ function PdfViewer({ pdf }) {
 export default function BlogDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [shared, setShared] = useState(false);
   const [headings, setHeadings] = useState([]);
   const [relatedBlogs, setRelatedBlogs] = useState([]);
@@ -148,6 +148,8 @@ export default function BlogDetail() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setLoading(true);
+    setNotFound(false);
     getBlog(slug)
       .then(({ data }) => {
         setBlog(data);
@@ -164,9 +166,11 @@ export default function BlogDetail() {
             .catch(() => { });
         }
       })
-      .catch(() => navigate("/", { replace: true }))
+      .catch(() => {
+        setNotFound(true);
+      })
       .finally(() => setLoading(false));
-  }, [slug, navigate]);
+  }, [slug]);
 
   // Inject structured data when blog loads
   useEffect(() => {
@@ -202,7 +206,38 @@ export default function BlogDetail() {
     </div>
   );
 
-  if (!blog) return null;
+  if (notFound || !blog) return (
+    <div className="min-h-screen bg-ink-50 flex flex-col justify-between">
+      <SEO 
+        title="404 - पोस्ट नहीं मिली | Shasnadesh Updates"
+        description="The requested post could not be found."
+        noindex={true}
+      />
+      <Navbar />
+      <main className="max-w-xl mx-auto px-4 py-24 sm:py-32 text-center flex-1 flex items-center justify-center">
+        <div className="bg-white rounded-2xl p-8 sm:p-12 border border-ink-100 shadow-sm w-full">
+          <div className="w-16 h-16 bg-saffron-50 text-saffron-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 border border-saffron-200">
+            📄
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-ink-900">
+            पोस्ट उपलब्ध नहीं है
+          </h1>
+          <p className="mt-3 text-ink-600 text-sm sm:text-base leading-relaxed">
+            यह पोस्ट हटा दी गई है या इसका लिंक बदल गया है।
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link 
+              to="/" 
+              className="btn-primary w-full sm:w-auto px-6 py-2.5 text-sm justify-center"
+            >
+              ← होमपेज पर जाएं
+            </Link>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
 
   const isHindi = blog.category === "hindi";
 

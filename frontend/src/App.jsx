@@ -20,6 +20,7 @@ const Disclaimer = lazy(() => import("./pages/Disclaimer"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
 const Login = lazy(() => import("./pages/Login"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin pages (contains heavy libs like TipTap, Recharts, JSZip)
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -73,7 +74,7 @@ function AppRoutes() {
           <Route path="settings" element={<Settings />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );
