@@ -24,15 +24,18 @@ async function generateSitemap() {
 
     // Add blog URLs
     blogs.forEach(blog => {
-      const url = `${baseUrl}/blog/${blog.slug}`;
-      const lastmod = blog.updatedAt.toISOString().split('T')[0];
-      
-      xml += `    <url>
+      const cleanSlug = encodeURIComponent((blog.slug || '').trim().replace(/^\/+|\/+$/g, ''));
+      if (cleanSlug) {
+        const url = `${baseUrl}/blog/${cleanSlug}`;
+        const lastmod = blog.updatedAt ? blog.updatedAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        
+        xml += `    <url>
         <loc>${url}</loc>
         <lastmod>${lastmod}</lastmod>
-        <changefreq>hourly</changefreq>
+        <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>\n`;
+      }
     });
 
     // Close XML

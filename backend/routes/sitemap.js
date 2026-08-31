@@ -17,13 +17,16 @@ router.get('/blogs.xml', async (req, res) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
     blogs.forEach(blog => {
-      xml += `
+      const cleanSlug = encodeURIComponent((blog.slug || '').trim().replace(/^\/+|\/+$/g, ''));
+      if (cleanSlug) {
+        xml += `
     <url>
-        <loc>${baseUrl}/blog/${blog.slug}</loc>
-        <lastmod>${blog.updatedAt.toISOString().split('T')[0]}</lastmod>
-        <changefreq>hourly</changefreq>
+        <loc>${baseUrl}/blog/${cleanSlug}</loc>
+        <lastmod>${blog.updatedAt ? blog.updatedAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}</lastmod>
+        <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>`;
+      }
     });
 
     xml += '\n</urlset>';
@@ -38,7 +41,6 @@ router.get('/blogs.xml', async (req, res) => {
 // Sitemap index
 router.get('/index.xml', (req, res) => {
   const baseUrl = process.env.FRONTEND_URL || 'https://shasnadeshupdates.com';
-  const backendUrl = process.env.BACKEND_URL || 'https://shasnadesh-web-app.vercel.app';
   const today = new Date().toISOString().split('T')[0];
   
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -48,7 +50,7 @@ router.get('/index.xml', (req, res) => {
         <lastmod>${today}</lastmod>
     </sitemap>
     <sitemap>
-        <loc>${backendUrl}/api/sitemap/blogs.xml</loc>
+        <loc>${baseUrl}/sitemap-blogs.xml</loc>
         <lastmod>${today}</lastmod>
     </sitemap>
 </sitemapindex>`;

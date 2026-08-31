@@ -390,7 +390,8 @@ exports.getBlogOgMeta = async (req, res) => {
 
     const title = escapeHtml(blog.title || 'शासनादेश और सरकारी योजनाएं');
     const description = escapeHtml(blog.excerpt || (blog.content ? blog.content.replace(/<[^>]*>?/gm, '').substring(0, 160) : blog.title));
-    const siteUrl = `https://shasnadeshupdates.com/blog/${encodeURIComponent(blog.slug)}`;
+    const cleanSlug = encodeURIComponent((blog.slug || '').trim().replace(/^\/+|\/+$/g, ''));
+    const siteUrl = `https://shasnadeshupdates.com/blog/${cleanSlug}`;
     const category = escapeHtml(blog.category || 'सरकारी आदेश');
     const publishedISO = blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString();
     const modifiedISO = blog.updatedAt ? new Date(blog.updatedAt).toISOString() : publishedISO;

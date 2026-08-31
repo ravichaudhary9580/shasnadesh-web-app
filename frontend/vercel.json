@@ -1,5 +1,12 @@
 {
-  
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/terms-and-conditions",
+      "destination": "/terms",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/blog/:slug",

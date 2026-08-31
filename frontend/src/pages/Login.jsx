@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { login } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import SEO from "../components/SEO";
 
 export default function Login() {
   const { admin, loginAdmin } = useAuth();
@@ -31,6 +32,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-ink-900 flex items-center justify-center p-4">
+      <SEO title="Admin Login - Shasnadesh Updates" noindex={true} />
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-5"
         style={{ backgroundImage: "repeating-linear-gradient(45deg, #e8920a 0, #e8920a 1px, transparent 0, transparent 50%)", backgroundSize: "20px 20px" }} />

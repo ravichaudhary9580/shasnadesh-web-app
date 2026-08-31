@@ -59,7 +59,7 @@ function AppRoutes() {
         <Route path="/disclaimer" element={<Disclaimer />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/terms-and-conditions" element={<Navigate to="/terms" replace />} />
         <Route path="/login" element={<Login />} />
 
         {/* Admin */}

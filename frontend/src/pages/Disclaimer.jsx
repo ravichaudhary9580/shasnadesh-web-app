@@ -1,9 +1,15 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SEO from "../components/SEO";
 
 export default function Disclaimer() {
   return (
     <div className="min-h-screen bg-ink-50">
+      <SEO 
+        title="Disclaimer (अस्वीकरण) - Shasnadesh Updates"
+        description="Disclaimer and source notices for Shasnadeshupdates.com. Shasnadesh Updates is an independent informational portal and not affiliated with any government body."
+        url="https://shasnadeshupdates.com/disclaimer"
+      />
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-24 pb-16">
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink-900">
