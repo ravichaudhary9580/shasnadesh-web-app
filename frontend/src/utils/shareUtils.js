@@ -16,22 +16,20 @@ export function canShareFiles() {
 export async function shareBlog(blog, origin = typeof window !== 'undefined' ? window.location.origin : '') {
   if (!blog) return false;
 
-  const shareUrl = decodeURIComponent(`${origin}/blog/${blog.slug}`);
-  const shareTitle = blog.title || 'Shasnadesh Updates';
-  const rawExcerpt = blog.excerpt || blog.title || 'Check out this post on Shasnadesh Updates';
-  const shareText = rawExcerpt.length > 120 ? rawExcerpt.substring(0, 120) + '...' : rawExcerpt;
+  const siteOrigin = (origin || 'https://shasnadeshupdates.com').replace(/^https?:\/\/www\./i, 'https://');
+  const cleanSlug = encodeURIComponent((blog.slug || '').trim().replace(/^\/+|\/+$/g, ''));
+  const shareUrl = `${siteOrigin}/blog/${cleanSlug}`;
+  const fullTitle = (blog.title || 'Shasnadesh Updates').trim();
 
+  // Only share title & url without extra text
+  // WhatsApp, Telegram, etc. will show the rich preview card automatically from the link
   const shareData = {
-    title: shareTitle,
-    text: shareText,
+    title: fullTitle,
     url: shareUrl
   };
 
   if (typeof navigator !== 'undefined' && navigator.share) {
     try {
-      // Native Web Share API with Title, Text & URL.
-      // Mobile OS share sheet & apps (WhatsApp, Telegram, Twitter, iMessage, Facebook)
-      // automatically fetch and render the thumbnail image preview from the page's og:image meta tag.
       await navigator.share(shareData);
       return true;
     } catch (err) {

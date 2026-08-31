@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import BlogCard from "../components/BlogCard";
 import SEO from "../components/SEO";
-import { formatDistanceToNow } from "date-fns";
+import { formatDateTime, getTimeAgo } from "../utils/dateUtils";
 import { getImageUrl } from "../utils/imageUtils";
 import { shareBlog } from "../utils/shareUtils";
 import { Download, ExternalLink, Share2 } from "lucide-react";
@@ -335,9 +335,13 @@ export default function BlogDetail() {
           </div>
 
           {/* Meta row */}
-          <div className="flex items-center justify-between py-4 border-y border-ink-100">
-            <div className="flex items-center gap-3 text-sm font-ui text-ink-400">
-              <span>{formatDistanceToNow(new Date(blog.createdAt), { addSuffix: true })}</span>
+          <div className="flex items-center justify-between py-4 border-y border-ink-100 flex-wrap gap-3">
+            <div className="flex items-center gap-3 text-xs sm:text-sm font-ui text-ink-600 flex-wrap">
+              <span className="flex items-center gap-1.5 font-medium text-ink-700">
+                <span>📅</span> {formatDateTime(blog.createdAt)} {getTimeAgo(blog.createdAt) && (
+                  <span className="text-ink-400 font-normal">({getTimeAgo(blog.createdAt)})</span>
+                )}
+              </span>
               {blog.views > 0 && (
                 <><span>·</span><span>👁 {blog.views.toLocaleString()} views</span></>
               )}

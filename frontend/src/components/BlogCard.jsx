@@ -1,12 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 import { getImageUrl, getCloudFrontSrcSet } from "../utils/imageUtils";
 import { shareBlog } from "../utils/shareUtils";
+import { formatDateTime, getTimeAgo } from "../utils/dateUtils";
 import { Share2 } from "lucide-react";
 
 export default function BlogCard({ blog, featured = false, priority = false, viewMode = "card" }) {
-  const timeAgo = formatDistanceToNow(new Date(blog.createdAt), { addSuffix: true });
+  const formattedDateTime = formatDateTime(blog.createdAt);
+  const timeAgo = getTimeAgo(blog.createdAt);
   const location = useLocation();
 
   const handleShare = async (e) => {
@@ -65,8 +66,8 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
           {blog.excerpt && (
             <p className="text-ink-200 font-body text-sm line-clamp-2 mb-3">{blog.excerpt}</p>
           )}
-          <div className="flex items-center gap-3 text-ink-300 text-xs font-ui">
-            <span>{timeAgo}</span>
+          <div className="flex items-center gap-3 text-ink-300 text-xs font-ui flex-wrap">
+            <span>📅 {formattedDateTime} {timeAgo && <span className="text-ink-400">({timeAgo})</span>}</span>
             {blog.views > 0 && (
               <><span>·</span><span>{blog.views.toLocaleString()} views</span></>
             )}
@@ -117,7 +118,7 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
 
           {/* blog-card-title → CSS changes color on :visited */}
           <h3
-            className={`blog-card-title font-display font-bold text-ink-900 text-sm sm:text-base md:text-lg leading-snug group-hover:text-saffron-600 transition-colors line-clamp-2 ${blog.category === "hindi" ? "font-hindi" : ""
+            className={`blog-card-title font-display font-bold text-ink-900 text-sm sm:text-base md:text-lg leading-snug group-hover:text-saffron-600 transition-colors ${blog.category === "hindi" ? "font-hindi" : ""
               }`}
           >
             {blog.title}
@@ -133,7 +134,7 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
           {/* Bottom metadata */}
           <div className="flex items-center justify-between pt-1 border-t border-ink-100/60 text-xs sm:text-sm text-ink-500 font-ui mt-0.5">
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-              <span>{timeAgo}</span>
+              <span>📅 {formattedDateTime} {timeAgo && <span className="text-ink-400 font-normal">({timeAgo})</span>}</span>
               {blog.views > 0 && (
                 <>
                   <span>·</span>
@@ -190,7 +191,7 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
       <div className="flex flex-col flex-1 p-5">
         {/* blog-card-title → CSS changes color on :visited */}
         <h3
-          className={`blog-card-title font-display font-bold text-ink-900 text-lg leading-snug mb-2 group-hover:text-saffron-600 transition-colors line-clamp-2 ${blog.category === "hindi" ? "font-hindi text-xl" : ""
+          className={`blog-card-title font-display font-bold text-ink-900 text-lg leading-snug mb-2 group-hover:text-saffron-600 transition-colors ${blog.category === "hindi" ? "font-hindi text-xl" : ""
             }`}
         >
           {blog.title}
@@ -200,8 +201,10 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
             {blog.excerpt}
           </p>
         )}
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-ink-100">
-          <span className="text-xs text-ink-600 font-ui">{timeAgo}</span>
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-ink-100 flex-wrap gap-2">
+          <span className="text-xs text-ink-600 font-ui font-medium">
+            📅 {formattedDateTime} {timeAgo && <span className="text-ink-400 font-normal">({timeAgo})</span>}
+          </span>
           <div className="flex items-center gap-2 text-xs text-ink-600 font-ui">
             {blog.views > 0 && <span>👁 {blog.views.toLocaleString()}</span>}
             <button
@@ -214,11 +217,13 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
             </button>
           </div>
         </div>
-        {/* Tags */}
+        {/* Tags - Single line only */}
         {blog.tags?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {blog.tags.slice(0, 3).map((t) => (
-              <span key={t} className="badge bg-ink-100 text-ink-600">#{t}</span>
+          <div className="flex items-center gap-1.5 mt-3 overflow-hidden whitespace-nowrap">
+            {blog.tags.map((t) => (
+              <span key={t} className="badge bg-ink-100 text-ink-600 flex-shrink-0 text-xs">
+                #{t}
+              </span>
             ))}
           </div>
         )}

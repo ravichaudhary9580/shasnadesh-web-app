@@ -58,7 +58,7 @@ const NotificationPrompt = () => {
       if (granted) {
         const success = await subscribeToPush();
         if (success) {
-          toast.success('✅ नोटिफिकेशन सफलतापूर्वक चालू हो गया!', {
+          toast.success('नोटिफिकेशन सफलतापूर्वक चालू हो गया!', {
             duration: 3500,
             style: {
               background: '#26201a',

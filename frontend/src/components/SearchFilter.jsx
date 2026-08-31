@@ -88,7 +88,7 @@ export default function SearchFilter({
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400">🔍</span>
           <input
             type="text"
-            placeholder="Search blogs... / ब्लॉग खोजें..."
+            placeholder="Search posts... / पोस्ट खोजें..."
             value={search}
             onChange={handleSearch}
             className="input pl-11 text-base"

@@ -610,7 +610,7 @@ export default function BlogEditor() {
       <div className="card p-3 sm:p-4">
         <input
           type="text"
-          placeholder={hindiMode ? "ब्लॉग का शीर्षक यहां लिखें…" : "Blog Title..."}
+          placeholder={hindiMode ? " पोस्ट का शीर्षक यहाँ लिखें…" : "Blog Title..."}
           value={form.title}
           onChange={(e) => set("title", e.target.value)}
           className="w-full font-display text-xl sm:text-2xl md:text-3xl font-bold text-ink-900 bg-transparent outline-none placeholder:text-ink-200 border-none"
@@ -769,7 +769,7 @@ export default function BlogEditor() {
           <div className="flex items-center justify-between border-b border-ink-100 pb-4">
             <div>
               <h2 className="font-display text-lg font-bold text-ink-900 flex items-center gap-2">
-                <span>🛡️</span> ब्लॉग वॉटरमार्क सेटिंग्स (Blog Watermark)
+                <span>🛡️</span> पोस्ट वॉटरमार्क सेटिंग्स (Post Watermark)
               </h2>
               <p className="font-ui text-xs text-ink-400 mt-0.5">
                 Protect your content by displaying a subtle background watermark on the entire article
@@ -985,7 +985,7 @@ export default function BlogEditor() {
                   <div className="relative z-10 text-ink-800 space-y-1.5">
                     <h4 className="font-display font-bold text-sm text-ink-900">शासनादेश संख्या / Circular Order 2026</h4>
                     <p className="font-ui text-xs text-ink-600 leading-relaxed">
-                      यह एक नमूना पाठ (Sample Text) है जो यह दर्शाता है कि ब्लॉग पोस्ट पर वॉटरमार्क कैसा दिखाई देगा। पाठक पाठ को आसानी से पढ़ सकते हैं।
+                      यह एक नमूना पाठ (Sample Text) है जो यह दर्शाता है कि पोस्ट पर वॉटरमार्क कैसा दिखाई देगा। पाठक पाठ को आसानी से पढ़ सकते हैं।
                     </p>
                   </div>
                 </div>

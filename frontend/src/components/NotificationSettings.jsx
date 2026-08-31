@@ -56,12 +56,12 @@ const NotificationSettings = () => {
           </div>
           <div>
             <h3 className="font-ui font-semibold text-ink-900 mb-1">
-              ब्लॉग सूचनाएं
+              सूचनाएं
             </h3>
             <p className="text-sm text-ink-600 mb-2">
               {isSubscribed 
-                ? 'आप नए ब्लॉग की सूचनाएं प्राप्त कर रहे हैं'
-                : 'नए ब्लॉग की सूचनाएं प्राप्त करने के लिए सक्षम करें'
+                ? 'आप नए अपडेट की सूचनाएं प्राप्त कर रहे हैं'
+                : 'नए अपडेट की सूचनाएं प्राप्त करने के लिए सक्षम करें'
               }
             </p>
             {permission === 'denied' && (

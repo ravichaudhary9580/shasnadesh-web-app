@@ -117,9 +117,6 @@ export default function BlogWatermarkOverlay({ watermark }) {
               <div className="font-display font-black text-base sm:text-xl text-ink-900 tracking-wider leading-tight">
                 {displayText}
               </div>
-              <div className="font-ui font-semibold text-[10px] sm:text-xs text-ink-700 tracking-widest uppercase mt-0.5">
-                Official Circulars
-              </div>
             </div>
           )}
 

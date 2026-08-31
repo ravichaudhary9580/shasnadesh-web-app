@@ -157,7 +157,7 @@ exports.createBlog = async (req, res) => {
       generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
       notifyAllIndexing(blog.slug, 'URL_UPDATED').catch(err => console.error('Indexing failed:', err))
       sendNotification(
-        'नया ब्लॉग पोस्ट',
+        'नया पोस्ट',
         blog.title,
         `/blog/${blog.slug}`,
         blog.thumbnail || '/logo512.png'
