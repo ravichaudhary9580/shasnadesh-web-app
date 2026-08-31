@@ -114,6 +114,7 @@ function PdfViewer({ pdf }) {
 export default function BlogDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
