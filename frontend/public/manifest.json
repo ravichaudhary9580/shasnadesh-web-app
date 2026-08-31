@@ -9,7 +9,11 @@
   "theme_color": "#e8920a",
   "background_color": "#faf8f5",
   "orientation": "portrait-primary",
-  "categories": ["news", "education", "government"],
+  "categories": [
+    "news",
+    "education",
+    "government"
+  ],
   "lang": "hi",
   "dir": "ltr",
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
@@ -33,22 +37,26 @@
       "short_name": "Latest",
       "description": "View the latest government orders",
       "url": "https://www.shasnadeshupdates.com/?sort=-createdAt",
-      "icons": [{ 
-        "src": "https://www.shasnadeshupdates.com/logo192.png", 
-        "sizes": "192x192", 
-        "type": "image/png" 
-      }]
+      "icons": [
+        {
+          "src": "https://www.shasnadeshupdates.com/logo192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Hindi Orders",
       "short_name": "हिंदी",
       "description": "View Hindi government orders",
       "url": "https://www.shasnadeshupdates.com/?category=hindi",
-      "icons": [{ 
-        "src": "https://www.shasnadeshupdates.com/logo192.png", 
-        "sizes": "192x192", 
-        "type": "image/png" 
-      }]
+      "icons": [
+        {
+          "src": "https://www.shasnadeshupdates.com/logo192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ],
   "prefer_related_applications": false
