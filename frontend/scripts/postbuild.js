@@ -1,22 +1,11 @@
-const { spawnSync } = require("child_process");
+const path = require("path");
 
-// Skip react-snap in Vercel build environment.
-if (process.env.VERCEL) {
-  console.log("Skipping react-snap on Vercel.");
-  process.exit(0);
-}
-
+// Generate static pre-rendered HTML for trust/policy pages (About, Contact, Terms, Privacy, Disclaimer)
 try {
-  const result = spawnSync("npx", ["react-snap"], {
-    stdio: "inherit",
-    shell: true,
-  });
-  if (result.error) {
-    console.warn("react-snap warning:", result.error.message);
-  }
+  console.log("Generating static HTML files for static trust pages...");
+  require("./generateStaticPages");
 } catch (err) {
-  console.warn("react-snap execution skipped:", err.message);
+  console.warn("Static page generation warning:", err.message);
 }
 
 process.exit(0);
-

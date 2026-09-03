@@ -66,11 +66,26 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
           {blog.excerpt && (
             <p className="text-ink-200 font-body text-sm line-clamp-2 mb-3">{blog.excerpt}</p>
           )}
-          <div className="flex items-center gap-3 text-ink-300 text-xs font-ui flex-wrap">
-            <span>📅 {formattedDateTime} {timeAgo && <span className="text-ink-400">({timeAgo})</span>}</span>
-            {blog.views > 0 && (
-              <><span>·</span><span>{blog.views.toLocaleString()} views</span></>
-            )}
+          <div className="flex items-center justify-between text-ink-300 text-xs font-ui flex-nowrap gap-2 pt-2 border-t border-white/10 mt-2">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1 truncate">
+              <span className="flex-shrink-0">📅</span>
+              <span className="truncate font-medium text-[11px] sm:text-xs text-white/90">{formattedDateTime}</span>
+              {timeAgo && <span className="text-ink-300 hidden sm:inline flex-shrink-0">({timeAgo})</span>}
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="flex items-center gap-1 text-[11px] sm:text-xs text-white/90 whitespace-nowrap bg-white/10 px-2 py-0.5 rounded-md backdrop-blur-sm">
+                <span>👁</span>
+                <span>{(blog.views || 0).toLocaleString()}</span>
+              </span>
+              <button
+                onClick={handleShare}
+                className="p-1.5 rounded-full hover:bg-white/20 hover:text-white text-white/80 transition-colors flex items-center justify-center flex-shrink-0"
+                title="Share"
+                aria-label="Share post"
+              >
+                <Share2 size={15} />
+              </button>
+            </div>
           </div>
         </div>
       </Link>
@@ -132,25 +147,34 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
           )}
 
           {/* Bottom metadata */}
-          <div className="flex items-center justify-between pt-1 border-t border-ink-100/60 text-xs sm:text-sm text-ink-500 font-ui mt-0.5">
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-              <span>📅 {formattedDateTime} {timeAgo && <span className="text-ink-400 font-normal">({timeAgo})</span>}</span>
-              {blog.views > 0 && (
-                <>
-                  <span>·</span>
-                  <span>👁 {blog.views.toLocaleString()}</span>
-                </>
+          <div className="flex items-center justify-between pt-1 border-t border-ink-100/60 text-xs sm:text-sm text-ink-500 font-ui mt-0.5 flex-nowrap gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 truncate">
+              <span className="text-ink-400 flex-shrink-0">📅</span>
+              <span className="truncate text-[11px] sm:text-xs text-ink-600 font-medium">
+                {formattedDateTime}
+              </span>
+              {timeAgo && (
+                <span className="text-ink-400 font-normal text-[11px] hidden sm:inline flex-shrink-0">
+                  ({timeAgo})
+                </span>
               )}
             </div>
 
-            <button
-              onClick={handleShare}
-              className="p-1 -mr-1 rounded-full hover:bg-ink-100 hover:text-saffron-600 transition-colors flex items-center justify-center"
-              title="Share"
-              aria-label="Share post"
-            >
-              <Share2 size={15} />
-            </button>
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              <span className="flex items-center gap-1 text-[11px] sm:text-xs text-ink-600 whitespace-nowrap bg-ink-50 px-1.5 sm:px-2 py-0.5 rounded border border-ink-100/60 font-medium">
+                <span>👁</span>
+                <span>{(blog.views || 0).toLocaleString()}</span>
+              </span>
+
+              <button
+                onClick={handleShare}
+                className="p-1.5 -mr-1 rounded-full hover:bg-saffron-50 hover:text-saffron-600 text-ink-500 transition-colors flex items-center justify-center flex-shrink-0"
+                title="Share"
+                aria-label="Share post"
+              >
+                <Share2 size={15} />
+              </button>
+            </div>
           </div>
         </div>
       </Link>
@@ -188,7 +212,7 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 p-5">
+      <div className="flex flex-col flex-1 p-4 sm:p-5">
         {/* blog-card-title → CSS changes color on :visited */}
         <h3
           className={`blog-card-title font-display font-bold text-ink-900 text-lg leading-snug mb-2 group-hover:text-saffron-600 transition-colors ${blog.category === "hindi" ? "font-hindi text-xl" : ""
@@ -201,19 +225,30 @@ export default function BlogCard({ blog, featured = false, priority = false, vie
             {blog.excerpt}
           </p>
         )}
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-ink-100 flex-wrap gap-2">
-          <span className="text-xs text-ink-600 font-ui font-medium">
-            📅 {formattedDateTime} {timeAgo && <span className="text-ink-400 font-normal">({timeAgo})</span>}
-          </span>
-          <div className="flex items-center gap-2 text-xs text-ink-600 font-ui">
-            {blog.views > 0 && <span>👁 {blog.views.toLocaleString()}</span>}
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-ink-100 flex-nowrap gap-1.5 text-xs text-ink-600 font-ui">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1 truncate">
+            <span className="text-ink-400 flex-shrink-0">📅</span>
+            <span className="truncate font-medium text-[11px] sm:text-xs text-ink-600">
+              {formattedDateTime}
+            </span>
+            {timeAgo && (
+              <span className="text-ink-400 font-normal text-[11px] hidden sm:inline flex-shrink-0">
+                ({timeAgo})
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            <span className="flex items-center gap-1 text-[11px] sm:text-xs text-ink-600 whitespace-nowrap bg-ink-50 px-1.5 sm:px-2 py-0.5 rounded-md border border-ink-100 font-medium">
+              <span>👁</span>
+              <span>{(blog.views || 0).toLocaleString()}</span>
+            </span>
             <button
               onClick={handleShare}
-              className="p-2 -mr-1 rounded-full hover:bg-ink-100 hover:text-saffron-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-1.5 rounded-full hover:bg-saffron-50 hover:text-saffron-600 text-ink-500 border border-transparent hover:border-saffron-200 transition-colors flex items-center justify-center flex-shrink-0"
               title="Share"
               aria-label="Share post"
             >
-              <Share2 size={16} />
+              <Share2 size={15} />
             </button>
           </div>
         </div>

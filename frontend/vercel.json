@@ -2,7 +2,23 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.shasnadeshupdates.com"
+        }
+      ],
+      "destination": "https://shasnadeshupdates.com/:path*",
+      "permanent": true
+    },
+    {
       "source": "/terms-and-conditions",
+      "destination": "/terms",
+      "permanent": true
+    },
+    {
+      "source": "/terms-and-conditions/",
       "destination": "/terms",
       "permanent": true
     }
