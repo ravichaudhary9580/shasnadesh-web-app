@@ -378,6 +378,13 @@ exports.getBlogOgMeta = async (req, res) => {
 </html>`);
     }
 
+    // Increment views for real human visitors (skip search bots & crawlers)
+    const ua = (req.headers['user-agent'] || '').toLowerCase();
+    const isBot = /bot|crawler|spider|google|bing|facebook|whatsapp|preview|lighthouse|curl|wget/i.test(ua);
+    if (!isBot) {
+      Blog.findByIdAndUpdate(blog._id, { $inc: { views: 1 } }).catch(() => {});
+    }
+
     const escapeHtml = (str) => {
       if (!str) return '';
       return String(str)
@@ -808,6 +815,9 @@ exports.getBlogOgMeta = async (req, res) => {
         <span>✍️ <strong>लेखक:</strong> शासनादेश अपडेट्स संपादकीय टीम</span>
         <span>📅 <strong>दिनांक:</strong> ${formattedDate}</span>
         ${blog.views ? `<span>👁️ <strong>व्यूज:</strong> ${blog.views}</span>` : ''}
+        <button onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href);alert('लिंक कॉपी हो गया!')}" style="margin-left:auto;background:#fff4e5;color:#b86e00;border:1px solid #fde0b2;padding:4px 12px;border-radius:16px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-weight:600;">
+          📤 शेयर करें
+        </button>
       </div>
 
       ${blog.thumbnail ? `<img src="${imageUrl}" alt="${title}" class="featured-image" />` : ''}

@@ -26,24 +26,6 @@
   "rewrites": [
     {
       "source": "/blog/:slug",
-      "has": [
-        {
-          "type": "query",
-          "key": "ssr",
-          "value": "true"
-        }
-      ],
-      "destination": "https://shasnadesh-web-app.vercel.app/api/blogs/og/:slug"
-    },
-    {
-      "source": "/blog/:slug",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*(googlebot|google-inspectiontool|google-extended|google-other|adsbot|mediapartners-google|feedfetcher-google|storebot-google|bingbot|bingpreview|msnbot|copilot|yandex|baiduspider|duckduckbot|slurp|sogou|naver|coccoc|petalbot|qwantify|seznambot|facebookexternalhit|facebookcatalog|meta-externalagent|meta-externalfetcher|whatsapp|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|pinterest|quora|reddit|applebot|applebot-extended|chatgpt|chatgpt-user|gptbot|oai-searchbot|openai|claudebot|claude-web|anthropic|perplexity|perplexitybot|bytespider|cohere-ai|diffbot|ccbot|ia_archiver|archive\\.org_bot|semrushbot|ahrefsbot|rogerbot|exabot|screaming|lighthouse|headlesschrome|curl|wget|postman|python|axios|bot|crawler|spider).*"
-        }
-      ],
       "destination": "https://shasnadesh-web-app.vercel.app/api/blogs/og/:slug"
     },
     {
