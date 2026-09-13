@@ -351,7 +351,33 @@ exports.requestInstantIndexing = async (req, res) => {
   }
 }
 
-// Full Server-Side Rendered (SSR) HTML & Open Graph meta for search engine bots & crawlers (Googlebot, AdSense, WhatsApp, etc.)
+// Asset cache for dynamic frontend css and js hashes
+let cachedFrontendAssets = {
+  css: '/static/css/main.12661ceb.css',
+  js: '/static/js/main.8fa330d6.js',
+  lastFetched: 0
+};
+
+async function getFrontendAssets() {
+  const now = Date.now();
+  if (now - cachedFrontendAssets.lastFetched < 5 * 60 * 1000) {
+    return cachedFrontendAssets;
+  }
+  try {
+    const res = await fetch('https://shasnadeshupdates.com/asset-manifest.json', { signal: AbortSignal.timeout(2000) });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.files) {
+        if (data.files['main.css']) cachedFrontendAssets.css = data.files['main.css'];
+        if (data.files['main.js']) cachedFrontendAssets.js = data.files['main.js'];
+        cachedFrontendAssets.lastFetched = now;
+      }
+    }
+  } catch (e) {}
+  return cachedFrontendAssets;
+}
+
+// Full Server-Side Rendered (SSR) HTML matching the exact React BlogDetail design
 exports.getBlogOgMeta = async (req, res) => {
   try {
     const rawSlug = req.params.slug;
@@ -423,63 +449,37 @@ exports.getBlogOgMeta = async (req, res) => {
       }
     }
 
-    const pdfsHtml = Array.isArray(blog.pdfs) && blog.pdfs.length > 0
-      ? `<div class="pdf-section">
-          <h3>संबंधित दस्तावेज़ / शासनादेश PDF डाउनलोड:</h3>
-          <ul>
-            ${blog.pdfs.map(pdf => {
-              const pdfUrl = typeof pdf === 'string' ? pdf : pdf?.url;
-              const pdfTitle = escapeHtml(typeof pdf === 'string' ? 'शासनादेश PDF डाउनलोड करें' : (pdf?.title || 'शासनादेश PDF'));
-              return pdfUrl ? `<li><a href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener noreferrer" class="pdf-link">📄 ${pdfTitle} (PDF)</a></li>` : '';
-            }).join('')}
-          </ul>
-        </div>`
-      : '';
+    // Extract headings for Table of Contents and inject IDs into content
+    let contentWithHeadingIds = blog.content || `<p>${description}</p>`;
+    const headings = [];
+    let headingIdx = 0;
+    contentWithHeadingIds = contentWithHeadingIds.replace(/<h([2-4])([^>]*)>(.*?)<\/h\1>/gi, (match, level, attrs, text) => {
+      const cleanText = text.replace(/<[^>]+>/g, '').trim();
+      const id = `heading-${headingIdx++}`;
+      headings.push({ level: parseInt(level), text: cleanText, id });
+      return `<h${level}${attrs} id="${id}">${text}</h${level}>`;
+    });
 
-    const tagsHtml = Array.isArray(blog.tags) && blog.tags.length > 0
-      ? `<div class="tags-container">
-          ${blog.tags.map(t => `<span class="tag-badge">#${escapeHtml(t)}</span>`).join(' ')}
-        </div>`
-      : '';
-
-    let relatedHtml = '';
+    // Fetch related blogs in the same category
+    let relatedBlogs = [];
     try {
       if (blog.category) {
-        const related = await Blog.find({
+        relatedBlogs = await Blog.find({
           category: blog.category,
           _id: { $ne: blog._id },
           status: 'published'
         })
-        .select('title slug thumbnail createdAt')
+        .select('title slug thumbnail createdAt category excerpt views')
         .sort({ createdAt: -1 })
         .limit(3)
         .lean();
-
-        if (related && related.length > 0) {
-          relatedHtml = `
-          <div class="related-section" style="margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--border);">
-            <h3 style="font-size: 20px; color: var(--ink); margin-bottom: 16px;">संबंधित लेख (Related Posts)</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
-              ${related.map(r => {
-                const rSlug = encodeURIComponent((r.slug || '').trim().replace(/^\/+|\/+$/g, ''));
-                const rTitle = escapeHtml(r.title);
-                const rDate = new Date(r.createdAt || Date.now()).toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-                return `
-                <a href="https://shasnadeshupdates.com/blog/${rSlug}" style="text-decoration: none; color: inherit; display: block; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
-                  ${r.thumbnail ? `<img src="${escapeHtml(r.thumbnail)}" alt="${rTitle}" style="width: 100%; height: 130px; object-fit: cover;" />` : ''}
-                  <div style="padding: 12px;">
-                    <h4 style="font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.4; margin-bottom: 8px;">${rTitle}</h4>
-                    <span style="font-size: 12px; color: #888;">📅 ${rDate}</span>
-                  </div>
-                </a>`;
-              }).join('')}
-            </div>
-          </div>`;
-        }
       }
     } catch (e) {
       console.error('Error fetching related for SSR:', e);
     }
+
+    const assets = await getFrontendAssets();
+    const isHindi = blog.category === 'hindi' || /[\u0900-\u097F]/.test(title);
 
     const jsonLdArticle = JSON.stringify({
       "@context": "https://schema.org",
@@ -543,24 +543,28 @@ exports.getBlogOgMeta = async (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} - शासनादेश और सरकारी योजनाएं | Shasnadesh Updates</title>
+  <title>${title} | Shasnadesh Updates</title>
   <meta name="description" content="${description}">
-  <meta name="author" content="शासनादेश अपडेट्स संपादकीय टीम">
+  <meta name="author" content="Shasnadesh Updates">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="googlebot" content="index, follow">
   <link rel="canonical" href="${siteUrl}">
+  <meta name="theme-color" content="#e8920a">
 
-  <!-- Google AdSense Account Verification & Ad Script -->
+  <link rel="icon" type="image/png" sizes="192x192" href="https://shasnadeshupdates.com/logo192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="https://shasnadeshupdates.com/logo512.png" />
+  <link rel="shortcut icon" href="https://shasnadeshupdates.com/logo192.png" />
+
+  <!-- Google AdSense -->
   <meta name="google-adsense-account" content="ca-pub-8129172226402333">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8129172226402333" crossorigin="anonymous"></script>
 
-  <!-- Open Graph / Facebook / WhatsApp -->
+  <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:url" content="${siteUrl}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
   <meta property="og:image" content="${imageUrl}">
-  <meta property="og:image:secure_url" content="${imageUrl}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="Shasnadesh Updates">
@@ -569,288 +573,401 @@ exports.getBlogOgMeta = async (req, res) => {
   <meta property="article:modified_time" content="${modifiedISO}">
   <meta property="article:section" content="${category}">
 
-  <!-- Twitter Cards -->
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="${siteUrl}">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
   <meta name="twitter:image" content="${imageUrl}">
 
-  <!-- Structured Data JSON-LD for Google Rich Results -->
+  <!-- Structured Data JSON-LD -->
   <script type="application/ld+json">${jsonLdArticle}</script>
   <script type="application/ld+json">${jsonLdBreadcrumbs}</script>
 
+  <!-- Preconnect & Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Tiro+Devanagari+Hindi&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+  <!-- Production Tailwind Stylesheet from Frontend -->
+  <link rel="stylesheet" href="https://shasnadeshupdates.com${assets.css}" />
+
   <style>
+    /* Inline CSS Design Tokens matching index.css exactly */
     :root {
-      --primary: #e8920a;
-      --primary-dark: #b86e00;
-      --ink: #26201a;
-      --text: #333333;
-      --bg: #faf8f5;
-      --card-bg: #ffffff;
-      --border: #e2dcd5;
+      --ink-50: #faf8f5;
+      --ink-100: #f2ede4;
+      --ink-200: #e2dcd5;
+      --ink-300: #c8b99a;
+      --ink-400: #a89070;
+      --ink-500: #7a6850;
+      --ink-600: #574432;
+      --ink-700: #423223;
+      --ink-800: #33261a;
+      --ink-900: #26201a;
+      --ink-950: #14100c;
+      --saffron-50: #fff8eb;
+      --saffron-100: #feecc8;
+      --saffron-500: #e8920a;
+      --saffron-600: #c87600;
+      --saffron-700: #a05900;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Devanagari', Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      background-color: var(--ink-50);
+      color: var(--ink-900);
+      font-family: 'Lora', Georgia, serif;
       line-height: 1.7;
-      padding: 0;
+      -webkit-font-smoothing: antialiased;
     }
-    header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
+    .font-display { font-family: 'Playfair Display', Georgia, serif; }
+    .font-hindi { font-family: 'Noto Sans Devanagari', 'Tiro Devanagari Hindi', 'Poppins', sans-serif !important; }
+    .font-body { font-family: 'Lora', Georgia, serif; }
+    .font-ui { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .badge {
+      display: inline-flex;
       align-items: center;
-      max-width: 100%;
-    }
-    .logo {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--primary);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo img { width: 36px; height: 36px; border-radius: 6px; }
-    nav a {
-      margin-left: 15px;
-      color: var(--ink);
-      text-decoration: none;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
       font-weight: 500;
-      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
     }
-    nav a:hover { color: var(--primary); }
-    .container {
-      max-width: 860px;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-    .breadcrumbs {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 16px;
-    }
-    .breadcrumbs a { color: #666; text-decoration: none; }
-    .breadcrumbs a:hover { color: var(--primary); }
-    .article-card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      padding: 28px 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .category-badge {
-      display: inline-block;
-      background: #fff4e5;
-      color: var(--primary-dark);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 26px;
-      line-height: 1.4;
-      color: var(--ink);
-      margin-bottom: 14px;
-    }
-    .meta-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      font-size: 13px;
-      color: #777;
-      border-bottom: 1px solid #f0eae1;
-      padding-bottom: 14px;
-      margin-bottom: 20px;
-    }
-    .featured-image {
-      width: 100%;
-      max-height: 440px;
-      object-fit: cover;
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
       border-radius: 8px;
-      margin-bottom: 24px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
     }
-    .article-content {
-      font-size: 17px;
-      line-height: 1.8;
-      color: #2b2b2b;
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      background: var(--saffron-500);
+      color: #fff;
+      border-radius: 8px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      text-decoration: none;
+      transition: all 0.2s;
     }
-    .article-content p { margin-bottom: 18px; }
-    .article-content h2, .article-content h3 {
-      color: var(--ink);
-      margin-top: 28px;
-      margin-bottom: 14px;
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--ink-100);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .prose-blog {
+      font-family: 'Lora', Georgia, serif;
+      color: #37302a;
+      line-height: 1.85;
+      font-size: 1.0625rem;
+    }
+    .prose-blog h1, .prose-blog h2, .prose-blog h3, .prose-blog h4 {
+      font-family: 'Playfair Display', Georgia, serif;
+      color: var(--ink-900);
+      font-weight: 700;
       line-height: 1.35;
     }
-    .article-content ul, .article-content ol {
-      margin-left: 24px;
-      margin-bottom: 18px;
+    .prose-blog h1 { font-size: 2rem; margin: 2rem 0 1rem; }
+    .prose-blog h2 { font-size: 1.625rem; margin: 1.75rem 0 0.75rem; }
+    .prose-blog h3 { font-size: 1.375rem; margin: 1.5rem 0 0.5rem; }
+    .prose-blog h4 { font-size: 1.15rem; margin: 1.25rem 0 0.5rem; }
+    .prose-blog p { margin-bottom: 1.25rem; }
+    .prose-blog ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; }
+    .prose-blog ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1.25rem; }
+    .prose-blog li { margin-bottom: 0.35rem; }
+    .prose-blog a { color: var(--saffron-600); text-decoration: underline; text-underline-offset: 3px; }
+    .prose-blog blockquote {
+      border-left: 4px solid var(--saffron-500);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--ink-600);
+      margin: 1.5rem 0;
     }
-    .article-content li { margin-bottom: 8px; }
-    .article-content table {
+    .prose-blog img {
+      border-radius: 12px;
+      margin: 1.5rem 0;
+      width: 100%;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .prose-blog table {
       width: 100%;
       border-collapse: collapse;
-      margin: 20px 0;
-      font-size: 15px;
+      margin: 1.5rem 0;
+      font-size: 0.9375rem;
     }
-    .article-content th, .article-content td {
-      border: 1px solid var(--border);
+    .prose-blog th, .prose-blog td {
+      border: 1px solid var(--ink-200);
       padding: 10px 14px;
       text-align: left;
     }
-    .article-content th { background: #faf5ed; }
-    .pdf-section {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 18px;
-      margin: 26px 0;
-    }
-    .pdf-section h3 { font-size: 16px; margin-bottom: 10px; color: #1e293b; }
-    .pdf-link {
-      display: inline-block;
-      background: #0284c7;
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      margin-top: 6px;
-    }
-    .pdf-link:hover { background: #0369a1; }
-    .tags-container {
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid #f0eae1;
-    }
-    .tag-badge {
-      display: inline-block;
-      background: #f3f4f6;
-      color: #4b5563;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      margin-right: 6px;
-      margin-bottom: 6px;
-    }
-    .author-box {
-      margin-top: 32px;
-      background: #fff8eb;
-      border: 1px solid #fde0b2;
-      border-radius: 8px;
-      padding: 18px;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-    .author-avatar {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      background: #e8920a;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-    .author-info h4 { font-size: 15px; color: #7c2d12; margin-bottom: 4px; }
-    .author-info p { font-size: 13px; color: #57534e; line-height: 1.5; }
-    footer {
-      background: #1f1b16;
-      color: #e5e0d8;
-      padding: 36px 20px 24px;
-      margin-top: 48px;
-      text-align: center;
-      font-size: 14px;
-    }
-    .footer-links {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 18px;
-      margin-bottom: 16px;
-    }
-    .footer-links a { color: #f59e0b; text-decoration: none; }
-    .footer-links a:hover { text-decoration: underline; }
-    .copyright { color: #9ca3af; font-size: 13px; }
+    .prose-blog th { background: #faf5ed; font-weight: 600; color: var(--ink-900); }
   </style>
 </head>
 <body>
-  <header>
-    <a href="https://shasnadeshupdates.com/" class="logo">
-      <img src="https://shasnadeshupdates.com/logo192.png" alt="Shasnadesh Updates" />
-      <span>शासनादेश अपडेट्स</span>
-    </a>
-    <nav>
-      <a href="https://shasnadeshupdates.com/">होम</a>
-      <a href="https://shasnadeshupdates.com/about">About Us</a>
-      <a href="https://shasnadeshupdates.com/contact">Contact Us</a>
-      <a href="https://shasnadeshupdates.com/privacy-policy">Privacy Policy</a>
-    </nav>
-  </header>
-
-  <main class="container">
-    <div class="breadcrumbs">
-      <a href="https://shasnadeshupdates.com/">होम</a> &rsaquo;
-      <a href="https://shasnadeshupdates.com/?category=${encodeURIComponent(blog.category || '')}">${category}</a> &rsaquo;
-      <span>${title}</span>
-    </div>
-
-    <article class="article-card">
-      <span class="category-badge">${category}</span>
-      <h1>${title}</h1>
-
-      <div class="meta-bar">
-        <span>✍️ <strong>लेखक:</strong> शासनादेश अपडेट्स संपादकीय टीम</span>
-        <span>📅 <strong>दिनांक:</strong> ${formattedDate}</span>
-        ${blog.views ? `<span>👁️ <strong>व्यूज:</strong> ${blog.views}</span>` : ''}
-        <button onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href);alert('लिंक कॉपी हो गया!')}" style="margin-left:auto;background:#fff4e5;color:#b86e00;border:1px solid #fde0b2;padding:4px 12px;border-radius:16px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-weight:600;">
-          📤 शेयर करें
-        </button>
-      </div>
-
-      ${blog.thumbnail ? `<img src="${imageUrl}" alt="${title}" class="featured-image" />` : ''}
-
-      <div class="article-content">
-        ${blog.content || `<p>${description}</p>`}
-      </div>
-
-      ${pdfsHtml}
-      ${tagsHtml}
-      ${relatedHtml}
-
-      <div class="author-box">
-        <div class="author-avatar">श</div>
-        <div class="author-info">
-          <h4>शासनादेश अपडेट्स संपादकीय टीम (Editorial Team)</h4>
-          <p>यह जानकारी भारत सरकार एवं संबंधित राज्य सरकारों द्वारा जारी आधिकारिक अधिसूचनाओं और शासनादेशों के गहन अध्ययन और सत्यापन के बाद तैयार की गई है। हमारा उद्देश्य सरकारी योजनाओं और नियमों को नागरिकों तक सरल और सटीक रूप में पहुँचाना है।</p>
+  <div id="root">
+    <div class="min-h-screen bg-ink-50">
+      
+      <!-- Navbar (Fixed Header matching React Navbar exactly) -->
+      <header class="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-ink-100" style="position:fixed;top:0;left:0;right:0;z-index:40;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-bottom:1px solid #f2ede4;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3" style="max-width:1280px;margin:0 auto;padding:0 16px;height:60px;display:flex;align-items:center;justify-content:space-between;">
+          <a href="https://shasnadeshupdates.com/" class="flex items-center gap-2.5 group" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+            <img src="https://shasnadeshupdates.com/logo192.png" alt="Shasnadesh Updates Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" />
+            <div style="display:flex;flex-direction:column;">
+              <span class="font-display font-bold text-base sm:text-lg text-ink-900" style="font-size:18px;font-weight:700;color:#26201a;line-height:1.2;">शासनादेश अपडेट्स</span>
+              <span class="font-hindi" style="font-size:10px;color:#a89070;line-height:1;">shasnadeshupdates.com</span>
+            </div>
+          </a>
+          <nav class="hidden md:flex items-center gap-1" style="display:flex;align-items:center;gap:8px;">
+            <a href="https://shasnadeshupdates.com/" class="px-3 py-1.5 rounded-lg text-sm font-ui font-medium text-ink-700 hover:text-saffron-600 transition-colors" style="padding:6px 12px;border-radius:8px;font-size:14px;color:#423223;text-decoration:none;font-weight:500;">होम</a>
+            <a href="https://shasnadeshupdates.com/?category=उत्तर प्रदेश शासनादेश" class="px-3 py-1.5 rounded-lg text-sm font-ui font-medium text-ink-700 hover:text-saffron-600 transition-colors" style="padding:6px 12px;border-radius:8px;font-size:14px;color:#423223;text-decoration:none;font-weight:500;">उत्तर प्रदेश शासनादेश</a>
+            <a href="https://shasnadeshupdates.com/?category=वैकेंसी अलर्ट" class="px-3 py-1.5 rounded-lg text-sm font-ui font-medium text-ink-700 hover:text-saffron-600 transition-colors" style="padding:6px 12px;border-radius:8px;font-size:14px;color:#423223;text-decoration:none;font-weight:500;">वैकेंसी अलर्ट</a>
+            <a href="https://shasnadeshupdates.com/?category=शिक्षा विभाग" class="px-3 py-1.5 rounded-lg text-sm font-ui font-medium text-ink-700 hover:text-saffron-600 transition-colors" style="padding:6px 12px;border-radius:8px;font-size:14px;color:#423223;text-decoration:none;font-weight:500;">शिक्षा विभाग</a>
+            <a href="https://shasnadeshupdates.com/about" class="px-3 py-1.5 rounded-lg text-sm font-ui font-medium text-ink-700 hover:text-saffron-600 transition-colors" style="padding:6px 12px;border-radius:8px;font-size:14px;color:#423223;text-decoration:none;font-weight:500;">About Us</a>
+          </nav>
         </div>
-      </div>
-    </article>
-  </main>
+      </header>
 
-  <footer>
-    <div class="footer-links">
-      <a href="https://shasnadeshupdates.com/">Home</a>
-      <a href="https://shasnadeshupdates.com/about">About Us (हमारे बारे में)</a>
-      <a href="https://shasnadeshupdates.com/contact">Contact Us (संपर्क करें)</a>
-      <a href="https://shasnadeshupdates.com/privacy-policy">Privacy Policy</a>
-      <a href="https://shasnadeshupdates.com/terms">Terms & Conditions</a>
-      <a href="https://shasnadeshupdates.com/disclaimer">Disclaimer (अस्वीकरण)</a>
+      <!-- Thumbnail Hero Section (Exact matching BlogDetail.jsx) -->
+      <div style="padding-top:60px;">
+        ${blog.thumbnail ? `
+          <div class="relative w-full overflow-hidden bg-ink-950 flex justify-center items-center" style="position:relative;width:100%;height:48vh;max-height:600px;overflow:hidden;background:#14100c;display:flex;justify-content:center;align-items:center;">
+            <!-- Blurred background -->
+            <div
+              class="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl scale-110"
+              style="position:absolute;inset:0;background-image:url('${imageUrl}');background-size:cover;background-position:center;opacity:0.4;filter:blur(36px);transform:scale(1.1);"
+            ></div>
+            <!-- Foreground image -->
+            <img
+              src="${imageUrl}"
+              alt="${title}"
+              class="relative z-10 w-full h-full object-contain drop-shadow-2xl"
+              style="position:relative;z-index:10;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 25px 25px rgba(0,0,0,0.5));"
+            />
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- Main Container (Exact matching BlogDetail.jsx) -->
+      <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10 relative" style="max-width:820px;margin:0 auto;padding:36px 20px;">
+        <div class="space-y-8">
+          
+          <!-- Breadcrumbs -->
+          <nav class="flex items-center gap-2 text-sm font-ui text-ink-400" style="display:flex;align-items:center;gap:8px;font-size:14px;color:#a89070;margin-bottom:20px;">
+            <a href="https://shasnadeshupdates.com/" style="color:#a89070;text-decoration:none;">Home</a>
+            <span>/</span>
+            ${blog.category ? `
+              <a href="https://shasnadeshupdates.com/?category=${encodeURIComponent(blog.category)}" style="color:#a89070;text-decoration:none;text-transform:capitalize;">${category}</a>
+              <span>/</span>
+            ` : ''}
+            <span class="text-ink-600 truncate" style="color:#574432;max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title}</span>
+          </nav>
+
+          <!-- Badges & Title Header -->
+          <div style="margin-bottom:24px;">
+            <div class="mb-4 flex flex-wrap gap-2" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+              ${blog.category ? `<span class="badge" style="background:#feecc8;color:#a05900;font-weight:600;padding:4px 12px;border-radius:9999px;">${category}</span>` : ''}
+              ${Array.isArray(blog.tags) ? blog.tags.map(t => `<span class="badge" style="background:#f2ede4;color:#574432;padding:4px 10px;border-radius:9999px;">#${escapeHtml(t)}</span>`).join(' ') : ''}
+            </div>
+
+            <!-- Title -->
+            <h1 class="font-display font-bold text-ink-900 leading-tight mb-4 ${isHindi ? 'font-hindi' : ''}" style="font-size:28px;font-weight:800;color:#26201a;line-height:1.35;margin-bottom:16px;">
+              ${title}
+            </h1>
+
+            ${blog.excerpt ? `
+              <p class="text-xl text-ink-500 font-body leading-relaxed ${isHindi ? 'font-hindi' : ''}" style="font-size:18px;color:#7a6850;line-height:1.65;margin-bottom:16px;">
+                ${escapeHtml(blog.excerpt)}
+              </p>
+            ` : ''}
+          </div>
+
+          <!-- Meta row -->
+          <div class="flex items-center justify-between py-4 border-y border-ink-100 flex-wrap gap-3" style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid #f2ede4;border-bottom:1px solid #f2ede4;margin-bottom:24px;">
+            <div class="flex items-center gap-3 text-xs sm:text-sm font-ui text-ink-600 flex-wrap" style="display:flex;align-items:center;gap:12px;font-size:13px;color:#574432;">
+              <span class="flex items-center gap-1.5 font-medium text-ink-700" style="display:flex;align-items:center;gap:6px;font-weight:600;color:#423223;">
+                <span>📅</span> ${formattedDate}
+              </span>
+              ${blog.views ? `<span>·</span><span>👁 ${Number(blog.views).toLocaleString()} views</span>` : ''}
+            </div>
+            <button onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href})}else{navigator.clipboard.writeText(window.location.href);alert('लिंक कॉपी हो गया!')}" class="btn-ghost" style="background:#fff;border:1px solid #e2dcd5;color:#423223;font-size:13px;padding:6px 14px;border-radius:8px;">
+              🔗 Share
+            </button>
+          </div>
+
+          <!-- Table of Contents -->
+          ${headings.length > 0 ? `
+            <div class="p-5 sm:p-6 bg-white/90 backdrop-blur-xs border border-ink-100 rounded-2xl shadow-sm" style="background:rgba(255,255,255,0.92);border:1px solid #f2ede4;border-radius:16px;padding:24px;margin-bottom:28px;box-shadow:0 1px 4px rgba(0,0,0,0.03);">
+              <h3 class="font-display text-lg font-bold text-ink-900 mb-4 flex items-center gap-2" style="font-size:18px;font-weight:700;color:#26201a;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:20px;">📑</span> विषय सूची (Table of Contents)
+              </h3>
+              <ul class="space-y-3" style="list-style:none;padding:0;">
+                ${headings.map(h => `
+                  <li style="margin-bottom:10px;padding-left:${h.level === 3 ? '20px' : (h.level === 4 ? '32px' : '0')};">
+                    <a href="#${h.id}" class="group flex items-start gap-2.5 text-ink-600 hover:text-saffron-600 font-ui text-sm sm:text-base transition-colors" style="display:flex;align-items:flex-start;gap:8px;color:#574432;text-decoration:none;font-size:14px;">
+                      <span style="color:#c8b99a;margin-top:2px;">•</span>
+                      <span style="line-height:1.4;">${escapeHtml(h.text)}</span>
+                    </a>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          ` : ''}
+
+          <!-- Article Body -->
+          <article class="prose-blog ${isHindi ? 'font-hindi' : ''}">
+            ${contentWithHeadingIds}
+          </article>
+
+          <!-- Documents / PDFs (Inline Google Viewer + Download) -->
+          ${Array.isArray(blog.pdfs) && blog.pdfs.length > 0 ? `
+            <div id="documents" class="mt-10 scroll-mt-24" style="margin-top:40px;">
+              <div style="text-align:center;margin:24px 0;"><span style="background:#fff;padding:0 12px;font-size:20px;">📄</span></div>
+              <h3 class="font-display text-xl font-bold text-ink-900 mb-4" style="font-size:20px;font-weight:700;color:#26201a;margin-bottom:16px;">Documents (शासनादेश पीडीएफ)</h3>
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                ${blog.pdfs.map(pdf => {
+                  const pdfUrl = typeof pdf === 'string' ? pdf : pdf?.url;
+                  const pdfTitle = escapeHtml(typeof pdf === 'string' ? 'शासनादेश PDF' : (pdf?.title || 'शासनादेश PDF'));
+                  if (!pdfUrl) return '';
+                  return `
+                  <div style="border:1px solid #e2dcd5;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#fff;border-bottom:1px solid #f2ede4;">
+                      <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                        <span style="font-size:20px;">📑</span>
+                        <span class="font-ui font-medium text-sm text-ink-800" style="font-size:14px;font-weight:600;color:#33261a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${pdfTitle}</span>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <a href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener noreferrer" download class="btn-primary" style="padding:6px 14px;font-size:13px;border-radius:8px;">
+                          ⬇ Download PDF
+                        </a>
+                        <a href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener noreferrer" style="color:#7a6850;text-decoration:none;font-size:16px;padding:4px 8px;" title="Open directly">
+                          ↗
+                        </a>
+                      </div>
+                    </div>
+                    <div>
+                      <iframe
+                        src="https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true"
+                        title="${pdfTitle}"
+                        style="width:100%;height:65vh;min-height:440px;border:none;"
+                        loading="lazy"
+                      ></iframe>
+                    </div>
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Editorial Trust & Fact Check Box -->
+          <div class="mt-12 bg-white border border-ink-100 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style="margin-top:40px;background:#fff;border:1px solid #f2ede4;border-radius:16px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+            <div class="flex items-center gap-3" style="display:flex;align-items:center;gap:12px;">
+              <div class="w-10 h-10 rounded-full bg-saffron-500 text-white font-bold flex items-center justify-center text-sm shadow-sm" style="width:40px;height:40px;border-radius:50%;background:#e8920a;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px;">
+                SU
+              </div>
+              <div>
+                <h4 class="font-ui font-bold text-sm text-ink-900" style="font-size:14px;font-weight:700;color:#26201a;">
+                  Shasnadesh Updates Editorial Team
+                </h4>
+                <p class="font-hindi text-xs text-ink-500" style="font-size:12px;color:#7a6850;">
+                  सत्यापित शासनादेश एवं आधिकारिक सूचना पोर्टल · Verified Information
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://shasnadeshupdates.com/about"
+              class="text-xs font-semibold text-saffron-600 hover:text-saffron-700 underline font-ui"
+              style="font-size:12px;font-weight:600;color:#c87600;text-decoration:underline;"
+            >
+              Editorial Policy & Fact-Checking →
+            </a>
+          </div>
+
+          <!-- Related Posts (Exact BlogCard styling) -->
+          ${Array.isArray(relatedBlogs) && relatedBlogs.length > 0 ? `
+            <div class="mt-16 pt-8 border-t border-ink-200" style="margin-top:48px;padding-top:32px;border-top:1px solid #e2dcd5;">
+              <div class="flex items-center gap-3 mb-6" style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+                <span style="font-size:24px;">🔥</span>
+                <h3 class="font-display text-2xl font-bold text-ink-900" style="font-size:22px;font-weight:700;color:#26201a;">
+                  सम्बंधित खबरें (Related Posts)
+                </h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:20px;">
+                ${relatedBlogs.map(r => {
+                  const rSlug = encodeURIComponent((r.slug || '').trim().replace(/^\/+|\/+$/g, ''));
+                  const rTitle = escapeHtml(r.title);
+                  const rThumb = r.thumbnail || 'https://shasnadeshupdates.com/logo512.png';
+                  const rDate = new Date(r.createdAt || Date.now()).toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                  return `
+                  <div class="card" style="border-radius:16px;overflow:hidden;background:#fff;border:1px solid #e2dcd5;display:flex;flex-direction:column;">
+                    <a href="https://shasnadeshupdates.com/blog/${rSlug}" style="display:block;aspect-ratio:16/9;overflow:hidden;background:#f2ede4;text-decoration:none;">
+                      <img src="${escapeHtml(rThumb)}" alt="${rTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />
+                    </a>
+                    <div style="padding:16px;display:flex;flex-direction:column;flex:1;">
+                      ${r.category ? `<span class="badge" style="align-self:flex-start;background:#feecc8;color:#a05900;font-size:11px;padding:2px 8px;border-radius:6px;margin-bottom:8px;font-weight:600;">${escapeHtml(r.category)}</span>` : ''}
+                      <a href="https://shasnadeshupdates.com/blog/${rSlug}" class="font-display font-bold text-base text-ink-900 leading-snug" style="color:#26201a;font-weight:700;font-size:15px;line-height:1.4;text-decoration:none;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                        ${rTitle}
+                      </a>
+                      <div style="margin-top:auto;padding-top:10px;border-top:1px solid #f2ede4;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#7a6850;">
+                        <span>📅 ${rDate}</span>
+                        <span style="color:#e8920a;font-weight:600;">Read →</span>
+                      </div>
+                    </div>
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Back button -->
+          <div class="mt-8 pt-6 border-t border-ink-100 flex items-center justify-between" style="margin-top:32px;padding-top:24px;border-top:1px solid #f2ede4;display:flex;align-items:center;justify-content:space-between;">
+            <a href="https://shasnadeshupdates.com/" class="btn-ghost text-xs sm:text-sm" style="color:#574432;text-decoration:none;font-size:14px;">
+              ← Back to all posts
+            </a>
+            <a href="https://shasnadeshupdates.com/contact" class="text-xs text-ink-400 hover:text-ink-600 underline" style="font-size:12px;color:#a89070;text-decoration:underline;">
+              Report an issue with this post
+            </a>
+          </div>
+
+        </div>
+      </main>
+
+      <!-- Footer (Exact matching React Footer) -->
+      <footer class="border-t border-ink-100 py-8" style="border-top:1px solid #f2ede4;padding:36px 0;margin-top:60px;background:#fff;">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6" style="max-width:820px;margin:0 auto;padding:0 20px;text-align:center;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px;font-size:13px;">
+              <a href="https://shasnadeshupdates.com/about" style="color:#7a6850;text-decoration:none;">About Us</a>
+              <a href="https://shasnadeshupdates.com/contact" style="color:#7a6850;text-decoration:none;">Contact</a>
+              <a href="https://shasnadeshupdates.com/privacy-policy" style="color:#7a6850;text-decoration:none;">Privacy Policy</a>
+              <a href="https://shasnadeshupdates.com/terms" style="color:#7a6850;text-decoration:none;">Terms & Conditions</a>
+              <a href="https://shasnadeshupdates.com/disclaimer" style="color:#7a6850;text-decoration:none;">Disclaimer</a>
+            </div>
+            <p style="font-size:12px;color:#a89070;">
+              &copy; ${new Date().getFullYear()} Shasnadesh Updates. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+
     </div>
-    <p class="copyright">&copy; ${new Date().getFullYear()} Shasnadesh Updates. All rights reserved.</p>
-  </footer>
+  </div>
+
+  <!-- React Client Hydration Script -->
+  <script defer="defer" src="https://shasnadeshupdates.com${assets.js}"></script>
 </body>
 </html>`;
 
