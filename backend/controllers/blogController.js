@@ -435,6 +435,45 @@ exports.getBlogOgMeta = async (req, res) => {
         </div>`
       : '';
 
+    let relatedHtml = '';
+    try {
+      if (blog.category) {
+        const related = await Blog.find({
+          category: blog.category,
+          _id: { $ne: blog._id },
+          status: 'published'
+        })
+        .select('title slug thumbnail createdAt')
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .lean();
+
+        if (related && related.length > 0) {
+          relatedHtml = `
+          <div class="related-section" style="margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--border);">
+            <h3 style="font-size: 20px; color: var(--ink); margin-bottom: 16px;">संबंधित लेख (Related Posts)</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+              ${related.map(r => {
+                const rSlug = encodeURIComponent((r.slug || '').trim().replace(/^\/+|\/+$/g, ''));
+                const rTitle = escapeHtml(r.title);
+                const rDate = new Date(r.createdAt || Date.now()).toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                return `
+                <a href="https://shasnadeshupdates.com/blog/${rSlug}" style="text-decoration: none; color: inherit; display: block; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
+                  ${r.thumbnail ? `<img src="${escapeHtml(r.thumbnail)}" alt="${rTitle}" style="width: 100%; height: 130px; object-fit: cover;" />` : ''}
+                  <div style="padding: 12px;">
+                    <h4 style="font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.4; margin-bottom: 8px;">${rTitle}</h4>
+                    <span style="font-size: 12px; color: #888;">📅 ${rDate}</span>
+                  </div>
+                </a>`;
+              }).join('')}
+            </div>
+          </div>`;
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching related for SSR:', e);
+    }
+
     const jsonLdArticle = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "NewsArticle",
@@ -779,6 +818,7 @@ exports.getBlogOgMeta = async (req, res) => {
 
       ${pdfsHtml}
       ${tagsHtml}
+      ${relatedHtml}
 
       <div class="author-box">
         <div class="author-avatar">श</div>
@@ -805,6 +845,7 @@ exports.getBlogOgMeta = async (req, res) => {
 </html>`;
 
     res.set('Content-Type', 'text/html; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=600, s-maxage=3600, stale-while-revalidate=86400');
     res.send(html);
   } catch (error) {
     console.error('Error in getBlogOgMeta:', error);
