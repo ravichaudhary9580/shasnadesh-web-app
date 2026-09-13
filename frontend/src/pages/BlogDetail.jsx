@@ -115,12 +115,37 @@ export default function BlogDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [blog, setBlog] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  const isMatchingInitialBlog = () => {
+    if (typeof window !== 'undefined' && window.__INITIAL_BLOG__) {
+      const init = window.__INITIAL_BLOG__;
+      const cleanSlug = (slug || '').trim();
+      const initSlug = (init.slug || '').trim();
+      if (initSlug === cleanSlug || decodeURIComponent(initSlug) === decodeURIComponent(cleanSlug)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const [blog, setBlog] = useState(() => {
+    if (isMatchingInitialBlog()) {
+      return window.__INITIAL_BLOG__;
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(() => {
+    return !isMatchingInitialBlog();
+  });
   const [notFound, setNotFound] = useState(false);
   const [shared, setShared] = useState(false);
   const [headings, setHeadings] = useState([]);
-  const [relatedBlogs, setRelatedBlogs] = useState([]);
+  const [relatedBlogs, setRelatedBlogs] = useState(() => {
+    if (isMatchingInitialBlog() && Array.isArray(window.__INITIAL_RELATED__)) {
+      return window.__INITIAL_RELATED__;
+    }
+    return [];
+  });
   const [tagsExpanded, setTagsExpanded] = useState(false);
 
   // Extract headings for Table of Contents after content renders
@@ -149,6 +174,23 @@ export default function BlogDetail() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    // If server-rendered data is available on window for this exact slug, use it without re-fetching or showing spinner
+    if (isMatchingInitialBlog()) {
+      const initBlog = window.__INITIAL_BLOG__;
+      setBlog(initBlog);
+      setLoading(false);
+      setNotFound(false);
+      if (Array.isArray(window.__INITIAL_RELATED__) && window.__INITIAL_RELATED__.length > 0) {
+        setRelatedBlogs(window.__INITIAL_RELATED__);
+      }
+      trackVisit({ blogId: initBlog._id, slug: initBlog.slug, referrer: document.referrer }).catch(() => { });
+      // Reset so subsequent client-side navigation fetches fresh data
+      window.__INITIAL_BLOG__ = null;
+      window.__INITIAL_RELATED__ = null;
+      return;
+    }
+
     setLoading(true);
     setNotFound(false);
     getBlog(slug)
@@ -167,10 +209,12 @@ export default function BlogDetail() {
             .catch(() => { });
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('getBlog failed:', err);
         setNotFound(true);
       })
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   // Inject structured data when blog loads

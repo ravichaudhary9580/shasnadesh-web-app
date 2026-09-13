@@ -114,22 +114,24 @@ exports.getSuggestions = async (req, res) => {
 
 exports.getBlog = async (req, res) => {
   try {
-    const rawSlug = req.params.slug;
-    const decodedSlug = decodeURIComponent(rawSlug);
+    const rawSlug = (req.params.slug || '').trim();
+    let decodedSlug = rawSlug;
+    try {
+      decodedSlug = decodeURIComponent(rawSlug).trim();
+    } catch (e) {}
 
     let blog = await Blog.findOneAndUpdate(
-      { slug: rawSlug, status: 'published' },
+      { 
+        $or: [
+          { slug: rawSlug },
+          { slug: decodedSlug },
+          { slug: encodeURIComponent(decodedSlug) }
+        ],
+        status: 'published' 
+      },
       { $inc: { views: 1 } },
       { returnDocument: 'after' }
     );
-
-    if (!blog && decodedSlug !== rawSlug) {
-      blog = await Blog.findOneAndUpdate(
-        { slug: decodedSlug, status: 'published' },
-        { $inc: { views: 1 } },
-        { returnDocument: 'after' }
-      );
-    }
 
     if (!blog) return res.status(404).json({ message: 'Blog not found' });
     res.json(blog);
@@ -354,7 +356,7 @@ exports.requestInstantIndexing = async (req, res) => {
 // Asset cache for dynamic frontend css and js hashes
 let cachedFrontendAssets = {
   css: '/static/css/main.12661ceb.css',
-  js: '/static/js/main.8fa330d6.js',
+  js: '/static/js/main.51d80d74.js',
   lastFetched: 0
 };
 
@@ -380,11 +382,18 @@ async function getFrontendAssets() {
 // Full Server-Side Rendered (SSR) HTML matching the exact React BlogDetail design
 exports.getBlogOgMeta = async (req, res) => {
   try {
-    const rawSlug = req.params.slug;
-    const decodedSlug = decodeURIComponent(rawSlug);
+    const rawSlug = (req.params.slug || '').trim();
+    let decodedSlug = rawSlug;
+    try {
+      decodedSlug = decodeURIComponent(rawSlug).trim();
+    } catch (e) {}
 
     const blog = await Blog.findOne({
-      $or: [{ slug: rawSlug }, { slug: decodedSlug }],
+      $or: [
+        { slug: rawSlug },
+        { slug: decodedSlug },
+        { slug: encodeURIComponent(decodedSlug) }
+      ],
       status: 'published'
     });
 
@@ -966,13 +975,21 @@ exports.getBlogOgMeta = async (req, res) => {
     </div>
   </div>
 
+  <!-- Server-Rendered Initial State for Instant React Hydration -->
+  <script>
+    window.__INITIAL_BLOG__ = ${JSON.stringify(blog).replace(/</g, '\\u003c')};
+    window.__INITIAL_RELATED__ = ${JSON.stringify(relatedBlogs || []).replace(/</g, '\\u003c')};
+  </script>
+
   <!-- React Client Hydration Script -->
   <script defer="defer" src="https://shasnadeshupdates.com${assets.js}"></script>
 </body>
 </html>`;
 
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('content-security-policy');
     res.set('Content-Type', 'text/html; charset=utf-8');
-    res.set('Cache-Control', 'public, max-age=600, s-maxage=3600, stale-while-revalidate=86400');
+    res.set('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.send(html);
   } catch (error) {
     console.error('Error in getBlogOgMeta:', error);

@@ -14,7 +14,7 @@ const app = express()
 app.set('trust proxy', 1)
 
 app.use(cors())
-app.use(helmet({ crossOriginResourcePolicy: false }))
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false }))
 app.use(morgan('dev'))
 app.use(express.json())
 
