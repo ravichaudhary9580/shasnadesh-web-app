@@ -10,7 +10,6 @@ import Home from "./pages/Home";
 import BlogDetail from "./pages/BlogDetail";
 
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react"
-import { SpeedInsights } from "@vercel/speed-insights/react"
 
 // Lazy-loaded routes to reduce main JS bundle payload
 const About = lazy(() => import("./pages/About"));
@@ -102,7 +101,6 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <VercelAnalytics/>
-        <SpeedInsights/>
         <AppRoutes />
         <PWAInstallPrompt />
         <NotificationPrompt />
