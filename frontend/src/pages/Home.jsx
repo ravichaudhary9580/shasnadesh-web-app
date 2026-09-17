@@ -32,24 +32,13 @@ const MENU_ORDER = [
   "अन्य",
 ];
 
+// Module-level cache for instant SWR hydration across page navigations
+let homeDataCache = null;
+let featuredBlogsCache = null;
+
 export default function Home() {
   const navigate = useNavigate();
-  const [blogs, setBlogs] = useState([]);
-  const [featuredBlogs, setFeaturedBlogs] = useState([]);
-  const [allCategories, setAllCategories] = useState(MENU_ORDER);
-  const [total, setTotal] = useState(0);
-  const [pages, setPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [yearOptions, setYearOptions] = useState(["All"]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const lastPageBeforeSearch = useRef(1);
-
-  const [viewMode, setViewMode] = useState(() => {
-    return localStorage.getItem("shasnadesh_view_mode") || "card";
-  });
-
-  const [filterOpen, setFilterOpen] = useState(false);
-  const filterRef = useRef(null);
 
   const [page, setPage] = useState(() => {
     const p = parseInt(searchParams.get("page")) || 1;
@@ -62,6 +51,23 @@ export default function Home() {
     sort: searchParams.get("sort") || "-createdAt",
     year: searchParams.get("year") || "",
   });
+
+  const isDefaultView = !filters.search && !filters.category && !filters.year && filters.sort === "-createdAt" && page === 1;
+
+  const [blogs, setBlogs] = useState(() => (isDefaultView && homeDataCache ? homeDataCache.blogs : []));
+  const [featuredBlogs, setFeaturedBlogs] = useState(() => featuredBlogsCache || []);
+  const [allCategories, setAllCategories] = useState(MENU_ORDER);
+  const [total, setTotal] = useState(() => (isDefaultView && homeDataCache ? homeDataCache.total : 0));
+  const [pages, setPages] = useState(() => (isDefaultView && homeDataCache ? homeDataCache.pages : 1));
+  const [loading, setLoading] = useState(() => !(isDefaultView && homeDataCache && homeDataCache.blogs?.length > 0));
+  const [yearOptions, setYearOptions] = useState(["All"]);
+  const lastPageBeforeSearch = useRef(1);
+  const [viewMode, setViewMode] = useState(() => {
+    return localStorage.getItem("shasnadesh_view_mode") || "card";
+  });
+
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef(null);
 
   const handleViewModeChange = (mode) => {
     setViewMode(mode);
@@ -178,13 +184,20 @@ export default function Home() {
   }, [filterOpen]);
 
   const fetchBlogs = useCallback(async (f, p, vm) => {
-    setLoading(true);
+    const isDefault = !f.search && !f.category && !f.year && f.sort === "-createdAt" && p === 1;
+    // Only show full skeleton pulse if we do not already have cached data for this view
+    if (!isDefault || !homeDataCache || homeDataCache.vm !== vm) {
+      setLoading(true);
+    }
     try {
       const limit = vm === "table" ? 100 : 12;
       const { data } = await getBlogs({ ...f, page: p, limit });
       setBlogs(data.blogs);
       setTotal(data.total);
       setPages(data.pages);
+      if (isDefault) {
+        homeDataCache = { blogs: data.blogs, total: data.total, pages: data.pages, vm };
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -196,6 +209,7 @@ export default function Home() {
     try {
       const { data } = await getBlogs({ featured: 'true', limit: 10 });
       setFeaturedBlogs(data.blogs);
+      featuredBlogsCache = data.blogs;
     } catch (e) {
       console.error(e);
     }
@@ -538,9 +552,9 @@ export default function Home() {
                   <div
                     key={blog._id}
                     className="animate-slide-up"
-                    style={{ animationDelay: `${i * 60}ms` }}
+                    style={{ animationDelay: i < 4 ? "0ms" : `${Math.min((i - 3) * 30, 150)}ms` }}
                   >
-                    <BlogCard blog={blog} viewMode="card" />
+                    <BlogCard blog={blog} viewMode="card" priority={i < 4} />
                   </div>
                 ))}
               </div>
@@ -550,9 +564,9 @@ export default function Home() {
                   <div
                     key={blog._id}
                     className="animate-slide-up"
-                    style={{ animationDelay: `${i * 40}ms` }}
+                    style={{ animationDelay: i < 4 ? "0ms" : `${Math.min((i - 3) * 20, 150)}ms` }}
                   >
-                    <BlogCard blog={blog} viewMode="list" />
+                    <BlogCard blog={blog} viewMode="list" priority={i < 4} />
                   </div>
                 ))}
               </div>

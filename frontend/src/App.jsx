@@ -8,7 +8,6 @@ import NotificationPrompt from "./components/NotificationPrompt";
 // Synchronous imports for critical public routes (better LCP)
 import Home from "./pages/Home";
 import BlogDetail from "./pages/BlogDetail";
-import AdminLayout from "./components/admin/AdminLayout";
 
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/react"
@@ -23,6 +22,7 @@ const Login = lazy(() => import("./pages/Login"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin pages (contains heavy libs like TipTap, Recharts, JSZip)
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const BlogEditor = lazy(() => import("./pages/admin/BlogEditor"));
 const ManageBlogs = lazy(() => import("./pages/admin/ManageBlogs"));

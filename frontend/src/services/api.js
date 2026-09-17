@@ -23,25 +23,83 @@ api.interceptors.response.use(
   }
 );
 
+// --- In-memory cache & request deduplication ---
+const apiCache = new Map();
+const inFlightRequests = new Map();
+
+export const clearApiCache = () => {
+  apiCache.clear();
+};
+
+export const cachedGet = async (url, params = {}, ttlMs = 60000) => {
+  const sortedParams = params
+    ? Object.keys(params).sort().reduce((acc, key) => {
+        if (params[key] !== undefined && params[key] !== null) acc[key] = params[key];
+        return acc;
+      }, {})
+    : {};
+  const cacheKey = `${url}?${new URLSearchParams(sortedParams).toString()}`;
+  const now = Date.now();
+
+  const cached = apiCache.get(cacheKey);
+  if (cached && now - cached.timestamp < ttlMs) {
+    return cached.data;
+  }
+
+  if (inFlightRequests.has(cacheKey)) {
+    return inFlightRequests.get(cacheKey);
+  }
+
+  const promise = api.get(url, { params })
+    .then((res) => {
+      apiCache.set(cacheKey, { data: res, timestamp: Date.now() });
+      inFlightRequests.delete(cacheKey);
+      return res;
+    })
+    .catch((err) => {
+      inFlightRequests.delete(cacheKey);
+      throw err;
+    });
+
+  inFlightRequests.set(cacheKey, promise);
+  return promise;
+};
+
 // --- Auth ---
 export const login = (data) => api.post("/auth/login", data);
 export const getMe = () => api.get("/auth/me");
 export const updatePassword = (data) => api.put("/auth/update-password", data);
 
 // --- Public Blogs ---
-export const getBlogs = (params) => api.get("/blogs", { params });
+export const getBlogs = (params, options = {}) =>
+  options.skipCache ? api.get("/blogs", { params }) : cachedGet("/blogs", params, 45000);
 export const getBlog = (slug) => api.get(`/blogs/${slug}`);
-export const getCategories = () => api.get("/blogs/categories/list");
-export const getYears = () => api.get("/blogs/years/list");
+export const getCategories = () => cachedGet("/blogs/categories/list", {}, 300000);
+export const getYears = () => cachedGet("/blogs/years/list", {}, 600000);
 export const getSearchSuggestions = (q, limit = 8) => api.get("/blogs/suggestions", { params: { q, limit } });
 
 // --- Admin Blogs ---
 export const adminGetBlogs = (params) => api.get("/admin/blogs", { params });
-export const createBlog = (data) => api.post("/admin/blogs", data);
-export const updateBlog = (id, data) => api.put(`/admin/blogs/${id}`, data);
-export const deleteBlog = (id) => api.delete(`/admin/blogs/${id}`);
-export const toggleStatus = (id) => api.patch(`/admin/blogs/${id}/status`);
-export const toggleFeatured = (id) => api.patch(`/admin/blogs/${id}/featured`);
+export const createBlog = (data) => {
+  clearApiCache();
+  return api.post("/admin/blogs", data);
+};
+export const updateBlog = (id, data) => {
+  clearApiCache();
+  return api.put(`/admin/blogs/${id}`, data);
+};
+export const deleteBlog = (id) => {
+  clearApiCache();
+  return api.delete(`/admin/blogs/${id}`);
+};
+export const toggleStatus = (id) => {
+  clearApiCache();
+  return api.patch(`/admin/blogs/${id}/status`);
+};
+export const toggleFeatured = (id) => {
+  clearApiCache();
+  return api.patch(`/admin/blogs/${id}/featured`);
+};
 export const requestInstantIndexing = (data) => api.post("/admin/indexing/request", data);
 
 // --- Upload ---

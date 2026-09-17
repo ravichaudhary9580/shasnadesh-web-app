@@ -42,6 +42,16 @@ const s3 = new S3Client({
   }
 })
 
+// In-memory cache for metadata (categories & years)
+let categoriesCache = { data: null, expires: 0 };
+let yearsCache = { data: null, expires: 0 };
+
+const invalidateMetaCaches = () => {
+  categoriesCache.expires = 0;
+  yearsCache.expires = 0;
+};
+exports.invalidateMetaCaches = invalidateMetaCaches;
+
 // Public
 exports.getBlogs = async (req, res) => {
   try {
@@ -73,13 +83,17 @@ exports.getBlogs = async (req, res) => {
       query.createdAt = { $gte: startDate, $lte: endDate }
     }
 
-    const total = await Blog.countDocuments(query)
-    const blogs = await Blog.find(query)
-      .sort(sort)
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
-      .select('-content')
+    const [total, blogs] = await Promise.all([
+      Blog.countDocuments(query),
+      Blog.find(query)
+        .sort(sort)
+        .skip((page - 1) * limit)
+        .limit(Number(limit))
+        .select('-content')
+        .lean()
+    ])
 
+    res.set('Cache-Control', 'public, max-age=60, s-maxage=180, stale-while-revalidate=600')
     res.json({ blogs, total, page: Number(page), pages: Math.ceil(total / limit) })
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -166,6 +180,7 @@ exports.createBlog = async (req, res) => {
       ).catch(err => console.error('Push notification failed:', err))
     }
     
+    invalidateMetaCaches()
     res.status(201).json(blog)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -208,6 +223,7 @@ exports.updateBlog = async (req, res) => {
       notifyAllIndexing(blog.slug, 'URL_UPDATED').catch(err => console.error('Indexing failed:', err))
     }
 
+    invalidateMetaCaches()
     res.json(blog)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -272,6 +288,7 @@ exports.deleteBlog = async (req, res) => {
     generateSitemap().then(() => generateSitemapIndex()).catch(err => console.error('Sitemap update failed:', err))
     notifyAllIndexing(blog.slug, 'URL_DELETED').catch(err => console.error('Indexing delete failed:', err))
 
+    invalidateMetaCaches()
     res.json({ message: 'Blog deleted' })
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -1000,9 +1017,15 @@ exports.getBlogOgMeta = async (req, res) => {
 // Get all unique categories
 exports.getCategories = async (req, res) => {
     try {
+        if (categoriesCache.data && Date.now() < categoriesCache.expires) {
+            res.set('Cache-Control', 'public, max-age=300, s-maxage=1800, stale-while-revalidate=3600');
+            return res.json(categoriesCache.data);
+        }
         const categories = await Blog.distinct('category', { status: 'published', category: { $ne: null, $ne: '' } })
-        const cleaned = Array.from(new Set(categories.map(c => (typeof c === 'string' ? c.trim() : c)).filter(Boolean)))
-        res.json(cleaned.sort())
+        const cleaned = Array.from(new Set(categories.map(c => (typeof c === 'string' ? c.trim() : c)).filter(Boolean))).sort()
+        categoriesCache = { data: cleaned, expires: Date.now() + 5 * 60 * 1000 };
+        res.set('Cache-Control', 'public, max-age=300, s-maxage=1800, stale-while-revalidate=3600');
+        res.json(cleaned)
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
@@ -1011,13 +1034,20 @@ exports.getCategories = async (req, res) => {
 // Get all unique years
 exports.getYears = async (req, res) => {
     try {
+        if (yearsCache.data && Date.now() < yearsCache.expires) {
+            res.set('Cache-Control', 'public, max-age=300, s-maxage=1800, stale-while-revalidate=3600');
+            return res.json(yearsCache.data);
+        }
         const years = await Blog.aggregate([
             { $match: { status: 'published' } },
             { $project: { year: { $year: "$createdAt" } } },
             { $group: { _id: "$year" } },
             { $sort: { _id: -1 } }
         ])
-        res.json(years.map(y => y._id.toString()))
+        const result = years.map(y => y._id.toString());
+        yearsCache = { data: result, expires: Date.now() + 10 * 60 * 1000 };
+        res.set('Cache-Control', 'public, max-age=300, s-maxage=1800, stale-while-revalidate=3600');
+        res.json(result)
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
