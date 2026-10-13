@@ -557,7 +557,7 @@ export default function BlogEditor() {
   const categoryOptions = Array.from(new Set([...(categories || []), form.category].filter(Boolean)));
 
   return (
-    <div className="max-w-5xl space-y-4 animate-fade-in">
+    <div className="w-full max-w-5xl mx-auto space-y-4 animate-fade-in">
       {/* Top bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>

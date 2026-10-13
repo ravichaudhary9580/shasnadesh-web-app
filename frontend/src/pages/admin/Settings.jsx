@@ -53,7 +53,7 @@ const Settings = () => {
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="w-full max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-display font-bold text-ink-900 mb-2">Settings</h1>
         <p className="text-ink-600">Manage your account settings</p>

@@ -82,7 +82,7 @@ export default function Analytics() {
   ];
 
   return (
-    <div className="w-full max-w-full space-y-4 sm:space-y-6 animate-fade-in pb-10">
+    <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in pb-10">
       <div>
         <h1 className="font-display text-xl sm:text-2xl font-bold text-ink-900">Analytics Dashboard</h1>
         <p className="font-ui text-sm text-ink-400 mt-0.5">Comprehensive all-time traffic and content performance</p>

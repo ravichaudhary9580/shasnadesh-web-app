@@ -45,7 +45,7 @@ async function generateSitemap() {
     const sitemapPath = path.join(__dirname, '../../frontend/public/sitemap-blogs.xml');
     try {
       // Only write to frontend folder in production to avoid triggering full page reloads in local dev server
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
         fs.writeFileSync(sitemapPath, xml);
       } else {
         console.log(`[Dev Mode] Skipped writing to ${sitemapPath} to prevent React dev server refresh.`);
@@ -96,7 +96,7 @@ function generateSitemapIndex() {
 
   const indexPath = path.join(__dirname, '../../frontend/public/sitemap-index.xml');
   try {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
       fs.writeFileSync(indexPath, xml);
     }
   } catch (e) {

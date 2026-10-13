@@ -97,9 +97,8 @@ export default function Dashboard() {
   ];
 
   return (
-    // ── FIX: w-full + max-w-full ensures no overflow; removed max-w-5xl which caused
-    //         content to sit outside the visible area on narrow mobile screens
-    <div className="w-full max-w-full space-y-4 sm:space-y-6 animate-fade-in">
+    // w-full keeps it fluid on mobile; max-w-7xl + mx-auto centers it on wide monitors
+    <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
 
       {/* Header row */}
       <div className="flex items-center justify-between gap-3 flex-wrap">

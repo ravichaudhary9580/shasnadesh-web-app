@@ -327,8 +327,22 @@ exports.toggleFeatured = async (req, res) => {
 // Admin - get all including drafts
 exports.adminGetBlogs = async (req, res) => {
   try {
-    const { search, status, category, sort = '-createdAt', page = 1, limit = 20 } = req.query
+    const { search, status, category, updatedFrom, updatedMode = 'after', page = 1, limit = 20 } = req.query
+    let { sort = '-createdAt' } = req.query
     const query = {}
+    if (updatedFrom) {
+      const fromDate = new Date(updatedFrom)
+      if (!isNaN(fromDate.getTime())) {
+        if (updatedMode === 'before') {
+          // Posts NOT updated on/after the date (stale posts), oldest first
+          query.updatedAt = { $lt: fromDate }
+          if (!req.query.sort) sort = 'updatedAt'
+        } else {
+          query.updatedAt = { $gte: fromDate }
+          if (!req.query.sort) sort = '-updatedAt'
+        }
+      }
+    }
     if (search) {
       const searchRegexStr = await getSearchRegexString(search)
       query.$or = [

@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 import { Loader2, Eye } from "lucide-react";
 import { getImageUrl } from "../../utils/imageUtils";
+import { formatDateTime, formatDateOnly } from "../../utils/dateUtils";
 
 const CATEGORIES = ["उत्तर प्रदेश शासनादेश", "वैकेंसी अलर्ट", "स्टूडेंट कॉर्नर", "Document", "प्रारूप", "शिक्षा विभाग", "अवकाश कैलेंडर", "छात्रवृत्ति", "मा० न्यायालय के आदेश", "अन्य"];
 
@@ -26,11 +27,19 @@ export default function ManageBlogs() {
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "");
+  const [updatedFrom, setUpdatedFrom] = useState(searchParams.get("updatedFrom") || "");
+  const [updatedMode, setUpdatedMode] = useState(searchParams.get("updatedMode") === "before" ? "before" : "after");
 
   const fetchBlogs = useCallback(async (showSkeleton = true) => {
     if (showSkeleton) setLoading(true);
     try {
-      const { data } = await adminGetBlogs({ search, status: statusFilter, category: categoryFilter, page, limit });
+      const params = { search, status: statusFilter, category: categoryFilter, page, limit };
+      // Send start of the selected day in the admin's local timezone
+      if (updatedFrom) {
+        params.updatedFrom = new Date(`${updatedFrom}T00:00:00`).toISOString();
+        params.updatedMode = updatedMode;
+      }
+      const { data } = await adminGetBlogs(params);
       setBlogs(data.blogs);
       setTotal(data.total);
     } catch {
@@ -38,7 +47,7 @@ export default function ManageBlogs() {
     } finally {
       if (showSkeleton) setLoading(false);
     }
-  }, [search, statusFilter, categoryFilter, page]);
+  }, [search, statusFilter, categoryFilter, updatedFrom, updatedMode, page]);
 
   useEffect(() => { fetchBlogs(); }, [fetchBlogs]);
 
@@ -53,9 +62,11 @@ export default function ManageBlogs() {
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
     if (categoryFilter) params.set("category", categoryFilter);
+    if (updatedFrom) params.set("updatedFrom", updatedFrom);
+    if (updatedFrom && updatedMode === "before") params.set("updatedMode", "before");
     if (page > 1) params.set("page", page);
     setSearchParams(params, { replace: true });
-  }, [search, statusFilter, categoryFilter, page, setSearchParams]);
+  }, [search, statusFilter, categoryFilter, updatedFrom, updatedMode, page, setSearchParams]);
 
   const handleDelete = async (e, id, title) => {
     e.preventDefault();
@@ -118,7 +129,7 @@ export default function ManageBlogs() {
   const pages = Math.ceil(total / limit);
 
   return (
-    <div className="w-full max-w-full space-y-4 animate-fade-in">
+    <div className="w-full max-w-7xl mx-auto space-y-4 animate-fade-in">
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -176,7 +187,47 @@ export default function ManageBlogs() {
           <option value="published">Published</option>
           <option value="draft">Draft</option>
         </select>
+        {/* Updated-from date filter */}
+        <select
+          value={updatedMode}
+          onChange={(e) => { setUpdatedMode(e.target.value); setPage(1); }}
+          className="input text-sm w-full sm:w-44 flex-shrink-0"
+          aria-label="Updated filter mode"
+        >
+          <option value="after">Updated since</option>
+          <option value="before">Not updated since</option>
+        </select>
+        <div className="relative w-full sm:w-44 flex-shrink-0">
+          <input
+            type="date"
+            value={updatedFrom}
+            max={new Date().toLocaleDateString("en-CA")}
+            onChange={(e) => { setUpdatedFrom(e.target.value); setPage(1); }}
+            className="input text-sm w-full"
+            title={updatedMode === "before" ? "Show posts not updated since this date" : "Show posts updated on or after this date"}
+            aria-label="Updated from date"
+          />
+        </div>
       </div>
+
+      {/* Updated-from counter */}
+      {updatedFrom && (
+        <div className="flex items-center justify-between gap-3 flex-wrap px-3 sm:px-4 py-2.5 rounded-xl bg-saffron-50 border border-saffron-200/60">
+          <p className="font-ui text-sm text-ink-700">
+            {updatedMode === "before" ? "⏳" : "✏️"}{" "}
+            <span className="font-bold text-saffron-700">{loading ? "…" : total}</span>{" "}
+            {total === 1 ? "post" : "posts"} {updatedMode === "before" ? "not updated since" : "updated since"}{" "}
+            <span className="font-semibold">{formatDateOnly(`${updatedFrom}T00:00:00`)}</span>
+          </p>
+          <button
+            type="button"
+            onClick={() => { setUpdatedFrom(""); setPage(1); }}
+            className="font-ui text-xs font-medium text-saffron-700 hover:text-saffron-800 underline"
+          >
+            Clear date
+          </button>
+        </div>
+      )}
 
       {/* Blog list */}
       <div className="card overflow-hidden">
@@ -250,6 +301,14 @@ export default function ManageBlogs() {
                           {formatDistanceToNow(new Date(blog.createdAt), { addSuffix: true })}
                         </span>
                         <span className="font-ui text-[11px] sm:text-xs text-ink-400">· 👁 {blog.views || 0}</span>
+                        {blog.updatedAt && (
+                          <span
+                            className="font-ui text-[11px] sm:text-xs text-ink-400"
+                            title={formatDistanceToNow(new Date(blog.updatedAt), { addSuffix: true })}
+                          >
+                            · ✏️ Updated {formatDateTime(blog.updatedAt)}
+                          </span>
+                        )}
                       </div>
                     </div>
 
