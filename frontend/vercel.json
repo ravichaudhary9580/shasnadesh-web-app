@@ -2,7 +2,7 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/:path((?!\\.well-known/assetlinks\\.json$).*)",
       "has": [
         {
           "type": "host",
